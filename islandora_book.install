@@ -1,0 +1,13 @@
+<?php
+// $Id$
+
+/*
+ * @file islandora_book.install
+ */
+
+/**
+ * Implementation of hook_enable()
+ */
+function islandora_book_enable() {
+ 
+}
