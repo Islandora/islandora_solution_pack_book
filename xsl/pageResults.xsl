@@ -118,7 +118,7 @@
         <td valign="top" width="16%">      
           <a>
             <xsl:attribute name="href">
-              <xsl:copy-of select="$OBJECTSPAGE"/>fedora/ilives_book_viewer/<xsl:copy-of select="$PIDVALUE"/>
+              <xsl:copy-of select="$OBJECTSPAGE"/>fedora/book_viewer/<xsl:copy-of select="$PIDVALUE"/>
             </xsl:attribute>
             <img>
               <xsl:attribute name="alt">Thumbnail  <xsl:copy-of select="$PIDVALUE"/></xsl:attribute>
@@ -132,7 +132,7 @@
           <br />
           <a>
             <xsl:attribute name="href">
-              <xsl:copy-of select="$OBJECTSPAGE"/>fedora/ilives_book_viewer/<xsl:value-of select="$PIDVALUE"/>
+              <xsl:copy-of select="$OBJECTSPAGE"/>fedora/book_viewer/<xsl:value-of select="$PIDVALUE"/>
             </xsl:attribute>
             <xsl:value-of select="substring-before($DCTITLE, '-')"/>
             <br />

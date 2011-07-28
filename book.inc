@@ -40,7 +40,7 @@ class IslandoraBook {
       '#value' => t('Retrieve MODS record'),
       '#submit' => array('islandora_book_retrieve_unapi_submit'),
       '#ahah' => array(
-        'path' => 'fedora/ilives/retrieve_unapi/js', // path we defined in hook_menu
+        'path' => 'fedora/ibook/retrieve_unapi/js', // path we defined in hook_menu
         'wrapper' => 'mods-wrapper', // the HTML that wraps the element that needs to be replaced
         'method' => 'replace', // the method we're going to use: a replace operation
       //'effect' => 'fade', // the effect used when replacing the element (try fade!)
@@ -257,7 +257,6 @@ function book_add_pages_form_submit($form, &$form_state) {
   $tmpDir = file_directory_path() . '/' . $dirName . '/';
   mkdir($tmpDir);
   if (!$file = file_save_upload('file_upload', NULL, $tmpDir)) {
-
     drupal_set_message('No file loaded', 'warning');
     return;
   }
@@ -267,29 +266,41 @@ function book_add_pages_form_submit($form, &$form_state) {
     return;
   }
   $fileName = $file->filepath;
+  $file_list = array();
   $cmdString = "unzip -q -o -d $tmpDir \"$fileName\"";
 
   system($cmdString, $retVal);
 
-
-  $file_list = array();
-  if ($tiff_dir = opendir($tmpDir)) {
-    while (FALSE !== ($file_name = readdir($tiff_dir))) {
-      $ext = strrchr($file_name, '.');
-      if ($ext == '.tif' || $ext == '.tiff') {
-        array_push($file_list, $tmpDir . $file_name);
-      }
+  $dirs = array();
+  array_push($dirs, $tmpDir);
+  $files = scandir($tmpDir);
+  foreach ($files as $file) {
+    if (is_dir("$tmpDir/$file") && $file != '.' && $file != '..' && $file != '__MACOSX') {
+      array_push($dirs, $tmpDir . $file);
     }
-    closedir($tiff_dir);
-    sort($file_list);
-    ilives_create_page_objects($pid, $file_list, $form_state['values']['page_cmodel'], $form_state['values']['relation'], $tmpDir);
   }
+
+  foreach ($dirs as $directory) {
+    if ($tiff_dir = opendir($directory)) {
+      while (FALSE !== ($file_name = readdir($tiff_dir))) {
+        $ext = strrchr($file_name, '.');
+        if ($ext == '.tif' || $ext == '.tiff') {
+          array_push($file_list, "$directory/$file_name");
+        }
+      }
+      closedir($tiff_dir);
+    }
+  }
+
+
+  sort($file_list);
+  ibook_create_page_objects($pid, $file_list, $form_state['values']['page_cmodel'], $form_state['values']['relation'], $tmpDir);
 }
 
 /**
  * Create a page object for each element in $image_list as a child object of $pid
  */
-function ilives_create_page_objects($pid, $image_list = array(), $page_cmodel = 'islandora-book:pageCModel', $relation = 'isMemberOfCollection', $tmpDir) {
+function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = 'islandora-book:pageCModel', $relation = 'isMemberOfCollection', $tmpDir) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   module_load_include('inc', 'fedora_repository', 'ObjectHelper');
   $book = new Fedora_Item($pid);
@@ -307,9 +318,10 @@ function ilives_create_page_objects($pid, $image_list = array(), $page_cmodel = 
   $page_num = 1;
   $book_title = $book->objectProfile->objLabel;
   foreach ($image_list as $image_path) {
-    $batch['operations'][] = array('ilives_add_single_page_object', array($pid, $image_path, $page_num, "$book_title - Page " . sprintf("%03d", $page_num), $page_cmodel, $relation));
+    $batch['operations'][] = array('ibook_add_single_page_object', array($pid, $image_path, $page_num, "$book_title - Page " . sprintf("%03d", $page_num), $page_cmodel, $relation));
     $page_num++;
   }
+  $batch['operations'][] = array('makePDF', array($pid, $image_list, $tmpDir));
   $batch['operations'][] = array('deleteDirectory', array($tmpDir));
 
   batch_set($batch);
@@ -325,7 +337,7 @@ function ilives_create_page_objects($pid, $image_list = array(), $page_cmodel = 
   $book->modify_datastream_by_value($xml->saveXML(), 'DC', 'Dublin core', 'text/xml', TRUE, "Added Type of Ingest", FALSE);
 }
 
-function ilives_add_single_page_object($book_pid, $page_file, $page_num = 1, $page_title = NULL, $page_cmodel = 'islandora-book:pageCModel', $relation = 'isMemberOfCollection') {
+function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $page_title = NULL, $page_cmodel = 'islandora-book:pageCModel', $relation = 'isMemberOfCollection') {
   module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   $page_item = Fedora_Item::ingest_new_item("$book_pid-" . sprintf("%03d", $page_num), 'A', $page_title);
@@ -350,6 +362,8 @@ function ilives_add_single_page_object($book_pid, $page_file, $page_num = 1, $pa
     }
   }
 
+
+
   //add jpeg
   exec("convert  -resize 800 \"{$page_file}\"[0]  \"$page_file-med.jpg\"", $output, $returnValue);
   if ($returnValue == '0') {
@@ -359,7 +373,7 @@ function ilives_add_single_page_object($book_pid, $page_file, $page_num = 1, $pa
   //perform OCR using Tesseract, add text datastream
   exec("/usr/local/bin/tesseract $page_file $page_file -l eng", $output, $returnValue);
   if ($returnValue == '0') {
-    $page_item->add_datastream_from_file("$page_file.txt", 'OCR', "Scanned Text", 'text/xml', 'M');
+    $page_item->add_datastream_from_file("$page_file.txt", 'OCR', "Scanned Text", 'text/plain', 'M');
   }
 }
 
@@ -398,3 +412,20 @@ function deleteDirectory($dir) {
   }
   return rmdir($dir);
 }
+
+function makePDF($book_pid, $file_list, $tmpDir) {
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  $book_item = new Fedora_Item($book_pid);
+  $outputFile = "${tmpDir}book.pdf";
+  $tiffs = array();
+  $cmdString = 'convert -compress LZW';
+  foreach ($file_list as $tiff) {
+    $cmdString .= " $tiff";
+  }
+  $cmdString .= " $outputFile";
+  exec($cmdString, $output, $returnValue);
+  if ($returnValue == '0') {
+    $book_item->add_datastream_from_file($outputFile, 'PDF', "PDF of Book", 'application/pdf', 'M');
+  }
+}
+

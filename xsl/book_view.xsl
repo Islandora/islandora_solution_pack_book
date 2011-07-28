@@ -45,7 +45,7 @@
                                </td></tr>
 </table></div></td><td valign="top">
   <xsl:if test="$INGESTED = 'true'">
-<div><a><xsl:attribute name="href"><xsl:copy-of select="$OBJECTSPAGE"/>fedora/ilives_book_viewer/<xsl:value-of select="$PID"/></xsl:attribute>Read</a>
+<div><a><xsl:attribute name="href"><xsl:copy-of select="$OBJECTSPAGE"/>fedora/book_viewer/<xsl:value-of select="$PID"/></xsl:attribute>Read</a>
 </div></xsl:if>
 <div>
 <a><xsl:attribute name="href">http://islandpines.roblib.upei.ca/opac/en-CA/skin/roblib/xml/rdetail.xml?r=<xsl:value-of select="$RECORDID"/></xsl:attribute>
