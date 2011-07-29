@@ -2,11 +2,6 @@
 
 // $Id$
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 function islandora_book_menu() {
   $items = array();
   $items['fedora/book'] = array(
@@ -21,129 +16,24 @@ function islandora_book_menu() {
     'type' => MENU_CALLBACK,
     'access arguments' => array('view fedora collection'),
   );
-  // This block defines the path and the corresponding callback function.
-  $items['fedora/book/retrieve_unapi/js'] = array(
-    'page callback' => 'islandora_book_button_retrieve_unapi_ahah', // the AHAH callback function
-    'access arguments' => array('add fedora datastreams'),
+
+  $items['admin/settings/islandora_book'] = array(
+    'title' => 'Islandora Book Admin',
+    'description' => 'Configuration Islandora Book Module',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('islandora_book_admin_settings'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'islandora_book.admin.inc',
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  $items['islandora/book/ocr'] = array(
+    'page callback' => 'update_ocr_div',
+    'access arguments' => array('view fedora collection'),
+    'file' => 'islandora_book.admin.inc',
     'type' => MENU_CALLBACK,
   );
   return $items;
-}
-
-
-function islandora_book_block($op = 'list', $delta = 0, $edit = array()) {
-  // The $op parameter determines what piece of information is being requested.
-  switch ($op) {
-    case 'list':
-      // If $op is "list", we just need to return a list of block descriptions.
-      // This is used to provide a list of possible blocks to the administrator,
-      // end users will not see these descriptions.
-      $blocks[0] = array(
-        'info' => t('Book search block'),
-      );
-      $blocks[1] = array(
-        'info' => t('Image rotator and tagger'),
-      );
-      $blocks[2] = array(
-        'info' => t('Simple book search block'),
-      );
-
-      return $blocks;
-    case 'configure':
-      // If $op is "configure", we need to provide the administrator with a
-      // configuration form. The $delta parameter tells us which block is being
-      // configured. In this example, we'll allow the administrator to customize
-      // the text of the first block.
-      // If $op is "configure", we need to provide the administrator with a
-      // configuration form. The $delta parameter tells us which block is being
-      // configured. In this example, we'll allow the administrator to customize
-      // the text of the first block.
-      $form = array();
-      switch ($delta) {
-        case 0:
-          // All we need to provide is a text field, Drupal will take care of
-          // the other block configuration options and the save button.
-          $form['islandora_book_book_search_block_repeat'] = array(
-            '#type' => 'textfield',
-            '#title' => t('Number of times to repeat search fields'),
-            '#size' => 5,
-            '#description' => t('The number of times you would like the search blocks to be repeated'),
-            '#default_value' => variable_get('islandora_book_book_search_block_repeat', t('3')),
-          );
-          break;
-        case 1:
-          // This is the image rotator block.
-          $form['islandora_book_image_rotator_block_query'] = array(
-            '#type' => 'textarea',
-            '#title' => t('ITQL Query'),
-            '#description' => t('The ITQL query to return a list of images.'),
-            '#default_value' => variable_get('islandora_book_image_rotator_tagger_block_query', 'select $object $title from <#ri>
-where $object <info:fedora/fedora-system:def/relations-external#isMemberOfCollection> <info:fedora/islandora-book:figures>
-and $object <fedora-model:state> <info:fedora/fedora-system:def/model#Active>
-and $object <dc:title> $title'),
-          );
-          break;
-        case 2:
-          // All we need to provide is a text field, Drupal will take care of
-          // the other block configuration options and the save button.
-          $form['islandora_book_simple_book_search_block_title'] = array(
-            '#type' => 'textfield',
-            '#title' => t('Title'),
-            '#size' => 15,
-            '#description' => t('The title of the block'),
-            '#default_value' => variable_get('islandora_book_simple_book_search_block_title', t('Title')),
-          );
-          break;
-      }
-
-      return $form;
-    case 'save':
-      // If $op is "save", we need to save settings from the configuration form.
-      // Since the first block is the only one that allows configuration, we
-      // need to check $delta to make sure we only save it.
-      switch ($delta) {
-        case 0:
-          // Have Drupal save the string to the database.
-          variable_set('islandora_book_book_search_block_repeat', $edit['islandora_book_book_search_block_repeat']);
-          break;
-        case 1:
-          variable_set('islandora_book_image_rotator_tagger_block_query', $edit['islandora_book_image_rotator_block_query']);
-          break;
-        case 2:
-          // Have Drupal save the string to the database.
-          variable_set('islandora_book_simple_book_search_block_title', $edit['islandora_book_simple_book_search_block_title']);
-          break;
-      }
-      return;
-    case 'view': default:
-      // If $op is "view", then we need to generate the block for display
-      // purposes. The $delta parameter tells us which block is being requested.
-      switch ($delta) {
-        case 0:
-          // The subject is displayed at the top of the block. Note that it
-          // should be passed through t() for translation.
-          $block['subject'] = t('Book advanced search');
-          // The content of the block is typically generated by calling a custom
-          // function.
-          $block['content'] = drupal_get_form('islandora_book_book_search_form');
-          break;
-        case 1:
-          module_load_include('inc', 'islandora_book', 'image_rotator_tagger_block');
-          $block['subject'] = t('Random repository image');
-          $block['content'] = _fedora_image_rotator_tagger_block_content();
-          break;
-        case 2:
-          // The subject is displayed at the top of the block. Note that it
-          // should be passed through t() for translation.
-          $block['subject'] = t('Simple Book Search');
-          // The content of the block is typically generated by calling a custom
-          // function.
-          $block['content'] = drupal_get_form('islandora_book_simple_book_search_form');
-          break;
-      }
-
-      return $block;
-  }
 }
 
 function islandora_book_book_viewer($pid) {
@@ -228,7 +118,7 @@ function islandora_book_create_book_view($pid, $query = NULL) {
     module_load_include('inc', 'fedora_repository', 'SearchClass');
     $searchClass = new SearchClass();
     $pageQuery = convert_query_to_page_query($query, $pid);
-    $output .= '<div>' . $searchClass->custom_search($pageQuery, $startPage, '/ilives/xsl/pageResults.xsl', 500) . '</div>'; //limit results to 500 pages of a book since there is no paging if we enable paging in xslt this can be changed
+    $output .= '<div>' . $searchClass->custom_search($pageQuery, $startPage, '/xsl/pageResults.xsl', 500) . '</div>'; //limit results to 500 pages of a book since there is no paging if we enable paging in xslt this can be changed
     //return $output."<div>used this query to find this page $query and new query = $pageQuery</div>";
 
     return $output;
@@ -280,95 +170,6 @@ function islandora_book_theme() {
   );
 }
 
-
-
-
-
-
-
-function retrieve_unapi_MODS_record($url) {
-  $bib_response = drupal_http_request($url);
-  $bib_html = $bib_response->data;
-  $bib_doc = new DOMDocument;
-  @$bib_doc->loadHTML($bib_html);
-  $links = $bib_doc->getElementsByTagName('link');
-  foreach ($links as $link) {
-    if ($link->getAttribute('rel') == 'unapi-server') {
-      $unapi_server = $link->getAttribute('href');
-      break;
-    }
-  }
-  $attrs = $bib_doc->getElementsByTagName('abbr');
-  foreach ($attrs as $attr) {
-    if ($attr->getAttribute('class') == 'unapi-id') {
-
-      $unapi_id = $attr->getAttribute('title');
-      break;
-    }
-  }
-  $mods_url = "$unapi_server?id=$unapi_id&format=mods3";
-  $mods_resp = drupal_http_request($mods_url);
-  $mods_data = $mods_resp->data;
-  return $mods_data;
-}
-
-/**
- * AHAH callback for the 'match type' select.
- * This function handles the actual replace and sets the $form and $form_state arrays.
- * */
-function islandora_book_button_retrieve_unapi_ahah() {
-
-  // this part is used to set up $form_state.
-  // In Drupal 7, these next 11 lines will be put in a core utility function.
-  // Just remember you'll need them in D6 when you do AHAH.
-  $form_state = array('storage' => NULL, 'submitted' => FALSE);
-  $form_build_id = $_POST['form_build_id'];
-  $form = form_get_cache($form_build_id, $form_state);
-  $args = $form['#parameters'];
-  $form_id = array_shift($args);
-  $form['#post'] = $_POST;
-  $form['#redirect'] = FALSE;
-  $form['#programmed'] = FALSE;
-
-  $form_state['post'] = $_POST;
-  drupal_process_form($form_id, $form, $form_state);
-  $form_state['storage']['step'] = 2;
-  $form = drupal_rebuild_form($form_id, $form_state, $args, $form_build_id);
-  // From here on, we'll add our own code.
-  // We just get the element of $form that needs to be refreshed, and just resubmit that
-  // part through the json call. In this case we want to rebuild the 'kind' <div> wrapper and the
-  // select box it contains
-  $changed_elements = $form['mods']['mods_record'];
-
-
-  unset($changed_elements['#prefix'], $changed_elements['suffix']); // we'll unset the div to make sure it won't be repeated!
-  // the actual JSON call
-  $javascript = drupal_add_js(NULL, NULL, 'header');
-  drupal_json(array(
-    'status' => TRUE,
-    'data' => theme('status_messages') . drupal_render($changed_elements), // rebuild just the part that needs to be changed
-    'settings' => call_user_func_array('array_merge_recursive', $javascript['setting']),
-  ));
-}
-
-/**
- * This is the handler for the 'type' box: pressing this will refresh the <div> kind wrapper.
- * */
-function islandora_book_retrieve_unapi_submit($form, &$form_state) {
-
-  unset($form_state['submit_handlers']); // unset all the submit handlers in the form
-  form_execute_handlers('submit', $form, $form_state); // execute submit handler
-  $url = $form_state['values']['unapi_url'];
-  $mods = retrieve_unapi_MODS_record($url);
-  $form_state['values']['mods']['mods_record'] = $mods;
-  $mods_save = $form_state['values']; // store all the submitted values in the form
-  $form_state['mods_save'] = $mods_save; // put the values in a new form
-
-  $form_state['rebuild'] = TRUE; // set to true to make sure the form gets rebuild
-  return $mods_save;
-}
-
-
 /**
  * Implementation of hook_requirements().
  *
@@ -418,12 +219,59 @@ function _islandora_book_viewer_available() {
 }
 
 function islandora_book_required_fedora_objects() {
-  // array( 'path-to-foxml-file', 'pid', 'dsid', 'path-to-datastream-file', int dsversion, boolean required)
+
+
   $module_path = drupal_get_path('module', 'islandora_book');
+  //add default mods form to formbuilder table
+  $result = db_result(db_query('Select name from {xml_forms} where name = "%s"', 'Islandora MODS Form'));
+  if (!$result) {
+    $filename = "$module_path/xml/islandora_book_default_mods.xml";
+    $form_as_string = file_get_contents($filename);
+    $object = new stdClass();
+    $object->name = 'Islandora MODS Form';
+    $object->form = $form_as_string;
+    $result = drupal_write_record('xml_forms', $object);
+  }
+
+  $result = db_result(db_query('Select name from {xml_forms} where name = "%s"', 'Upload Existing Mods'));
+  if (!$result) {
+    $filename = "$module_path/xml/mods_upload.xml";
+    $form_as_string = file_get_contents($filename);
+    $object = new stdClass();
+    $object->name = 'Upload Existing Mods';
+    $object->form = $form_as_string;
+    $result = drupal_write_record('xml_forms', $object);
+  }
+
+  $result = db_result(db_query('Select content_model from {islandora_content_model_forms} where  content_model = "%s" and form_name = "%s"', 'islandora-book:bookCModel', 'Islandora MODS Form'));
+  if (!$result) {
+    $object = new stdClass();
+    $object->content_model = 'islandora-book:bookCModel';
+    $object->form_name = 'Islandora MODS Form';
+    $object->dsid = 'MODS';
+    $object->title_field = "['titleInfo']['title']";
+    $object->transform = 'mods_to_dc.xsl';
+    $result = drupal_write_record('islandora_content_model_forms', $object);
+  }
+
+  $result = db_result(db_query('Select content_model from {islandora_content_model_forms} where  content_model = "%s" and form_name = "%s"', 'islandora-book:bookCModel', 'Upload Existing Mods'));
+  if (!$result) {
+    $object = new stdClass();
+    $object->content_model = 'islandora-book:bookCModel';
+    $object->form_name = 'Upload Existing Mods';
+    $object->dsid = 'MODS';
+    $object->title_field = "['title']";
+    $object->transform = 'mods_to_dc.xsl';
+    $result = drupal_write_record('islandora_content_model_forms', $object);
+  }
+  // array( 'path-to-foxml-file', 'pid', 'dsid', 'path-to-datastream-file', int dsversion, boolean required)
+  // make database insertions here.
+
+
   return array(
     'islandora_book' => array(
       'module' => 'islandora_book',
-      'title' => 'Island Lives Books',
+      'title' => 'Islandora Books',
       'objects' => array(
         array(
           'foxml_file' => "$module_path/xml/islandora_book_pageCModel.xml",
@@ -484,6 +332,13 @@ function islandora_book_required_fedora_objects() {
         array(
           'foxml_file' => "$module_path/xml/islandora_book_collection.xml",
           'pid' => 'islandora-book:collection',
+          'dsid' => NULL,
+          'datastream_file' => NULL,
+          'dsversion' => NULL,
+        ),
+        array(
+          'foxml_file' => "$module_path/xml/islandora_book_jp2Sdep-pageCModel.xml",
+          'pid' => 'islandora-book:jp2Sdep-pageCModel',
           'dsid' => NULL,
           'datastream_file' => NULL,
           'dsversion' => NULL,
@@ -616,5 +471,33 @@ XML;
     else {
       $form_state['redirect'] = 'fedora/repository/';
     }
+  }
+}
+
+function islandora_book_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#islandora_book':
+      return t(
+          '<p>
+         The Islandora Book Module allows users to create digital representations of books within the Fedora Repository.
+         A book object is created using !mods data. A collection of associated page objects may then be created created. Page objects
+         are created by ingesting a zipped folder of TIFF images, each representing a distinct page.
+         Page TIFFs are used to create a series of Fedora datastreams on ingestion.  These streams include derivative images
+         for display - JPEGS, Thumbnails, and JP2s, and one ore more OCR streams for text display and analysis.
+         </p>
+         <p>
+         <h3>Configuration</h3>
+         The page datatreams may be created on this server, or on an external processing server with !microservices.<br/>
+         To process images from TIFFS on this server check <strong>Create derivative images locally?</strong> on the admin page. (Link at the bottom of this page).<br />
+         TO create OCR streams on this server check <strong>Perform OCR on incoming TIFF images?</strong>. <br /><br />
+
+
+         
+        ',
+          array(
+            '!microservices' => l("Fedora Microservices", 'https://github.com/Islandora/fedora_microservices'),
+            '!mods' => l('MODS', 'http://www.loc.gov/standards/mods/'),
+          )
+      );
   }
 }
