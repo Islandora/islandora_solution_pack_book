@@ -98,21 +98,35 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora-book:
   return $form;
 }
 
+function book_add_pages_form_validate($form, &$form_state) {
+
+  $fieldName = 'file_upload';
+  if (isset($_FILES['files']) && is_uploaded_file($_FILES['files']['tmp_name'][$fieldName])) {
+    $file = file_save_upload($fieldName);
+    if ($file->filemime != 'application/zip') {
+      form_set_error($fieldName,'Input file must be a .zip file');
+      return;
+    }
+    if (!$file) {
+      form_set_error($fieldName, 'Error uploading file.');
+      return;
+    }
+    $form_state['values']['file'] = $file;
+  }
+  else {
+    // set error
+    form_set_error($fieldName, 'Error uploading file.');
+    return;
+  }
+}
 
 function book_add_pages_form_submit($form, &$form_state) {
   $pid = $form_state['values']['pid'];
   $dirName = str_replace(':', '_', $pid);
   $tmpDir = file_directory_path() . '/' . $dirName . '/';
   mkdir($tmpDir);
-  if (!$file = file_save_upload('file_upload', NULL, $tmpDir)) {
-    drupal_set_message('No file loaded', 'warning');
-    return;
-  }
-  if ($file->filemime != 'application/zip') {
-    drupal_set_message('Input file must be a .zip file', 'warning');
-    file_delete($file->filepath);
-    return;
-  }
+  $file = $form_state['values']['file'];
+
   $fileName = $file->filepath;
   $file_list = array();
   $cmdString = "unzip -q -o -d $tmpDir \"$fileName\"";
@@ -219,13 +233,12 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
 
   if (variable_get('islandora_book_do_ocr', TRUE)) {
     $executable = variable_get('islandora_ocr_path', '/usr/bin/tesseract');
-    exec("/usr/local/bin/tesseract $page_file $page_file -l eng", $output, $returnValue);
+    exec("$executable $page_file $page_file -l eng", $output, $returnValue);
     if ($returnValue == '0') {
       $page_item->add_datastream_from_file("$page_file.txt", 'OCR', "Scanned Text", 'text/plain', 'M');
     }
   }
 }
-
 
 function deleteDirectory($dir) {
   if (!file_exists($dir))
