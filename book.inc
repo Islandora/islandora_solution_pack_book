@@ -220,7 +220,7 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
     if ($returnValue == '0') {
       $page_item->add_datastream_from_file("$page_file-tn.jpg", 'TN', 'Thumbnail', 'image/jpeg', 'M');
       $book_item = new Fedora_Item($book_pid);
-      $DSIDS = $item->get_datastreams_list_as_array();
+      $DSIDS = $book_item->get_datastreams_list_as_array();
       if (!array_key_exists("TN", $DSIDS)) {
         $book_item->add_datastream_from_file("$page_file-tn.jpg", 'TN', 'Thumbnail', 'image/jpeg', 'M');
       }
