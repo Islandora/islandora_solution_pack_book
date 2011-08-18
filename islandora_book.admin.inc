@@ -11,7 +11,7 @@ function islandora_book_admin_settings(&$form_state) {
           . t('Unable to locate executable at !ocr_path</p>', array('!ocr_path' => $ocr_path)));
 
   $ocr = isset($form_state['values']['islandora_book_do_ocr']) ? $form_state['values']['islandora_book_do_ocr'] : variable_get('islandora_book_do_ocr', TRUE);
- $help_page = l('Help','admin/help/islandora_book');
+  $help_page = l('Help', 'admin/help/islandora_book');
 
   $form = array();
 

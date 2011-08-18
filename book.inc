@@ -104,7 +104,7 @@ function book_add_pages_form_validate($form, &$form_state) {
   if (isset($_FILES['files']) && is_uploaded_file($_FILES['files']['tmp_name'][$fieldName])) {
     $file = file_save_upload($fieldName);
     if ($file->filemime != 'application/zip') {
-      form_set_error($fieldName,'Input file must be a .zip file');
+      form_set_error($fieldName, 'Input file must be a .zip file');
       return;
     }
     if (!$file) {
@@ -188,13 +188,15 @@ function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = '
 
   $objectHelper = new ObjectHelper;
   $dc_xml = $objectHelper->getStream($pid, 'DC');
-  $xml = new DOMDocument();
-  $xml->loadXML($dc_xml);
-  $root = $xml->documentElement;
-  $typeNode = $xml->createElement('dc:type', 'ingested');
-  $typeNode = $xml->createElementNS("http://purl.org/dc/elements/1.1/", 'dc:type', 'ingested');
-  $root->appendChild($typeNode);
-  $book->modify_datastream_by_value($xml->saveXML(), 'DC', 'Dublin core', 'text/xml', TRUE, "Added Type of Ingest", FALSE);
+  if (!preg_match('/<dc:type>ingested<\/dc:type>/', $dc_xml)) {
+    $xml = new DOMDocument();
+    $xml->loadXML($dc_xml);
+    $root = $xml->documentElement;
+    $typeNode = $xml->createElement('dc:type', 'ingested');
+    $typeNode = $xml->createElementNS("http://purl.org/dc/elements/1.1/", 'dc:type', 'ingested');
+    $root->appendChild($typeNode);
+    $book->modify_datastream_by_value($xml->saveXML(), 'DC', 'Dublin core', 'text/xml', TRUE, "Added Type of Ingest", FALSE);
+  }
 }
 
 function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $page_title = NULL, $page_cmodel = 'islandora-book:pageCModel', $relation = 'isMemberOfCollection') {
@@ -217,8 +219,9 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
     exec("convert {$page_file}[0] -thumbnail x2000 -thumbnail x450  -resize '450x<' -resize 50% -fuzz 1% -trim +repage -gravity center -crop 200x200+0+0 +repage -format jpg -quality 100  $page_file-tn.jpg", $output, $returnValue);
     if ($returnValue == '0') {
       $page_item->add_datastream_from_file("$page_file-tn.jpg", 'TN', 'Thumbnail', 'image/jpeg', 'M');
-      if (preg_match('/frontcover/', $page_file)) {
-        $book_item = new Fedora_Item($book_pid);
+      $book_item = new Fedora_Item($book_pid);
+      $DSIDS = $item->get_datastreams_list_as_array();
+      if (!array_key_exists("TN", $DSIDS)) {
         $book_item->add_datastream_from_file("$page_file-tn.jpg", 'TN', 'Thumbnail', 'image/jpeg', 'M');
       }
     }
