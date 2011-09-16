@@ -28,7 +28,7 @@ class IslandoraBook {
       $qs = '?uid=' . base64_encode($user->name . ':' . $user->pass);
     }
 
-    $viewer_url = variable_get('fedora_base_url', '') . '/get/' . $this->pid . '/islandora-book:viewerSdef/getViewer' . $qs;
+    $viewer_url = variable_get('fedora_base_url', '') . '/get/' . $this->pid . '/islandora:viewerSdef/getViewer' . $qs;
     $html = '<iframe src="' . $viewer_url . '" scrolling="0" frameborder="0" style="width: 100%; height: 800px;">Errors: unable to load viewer</iframe>';
 
     $tabset['first_tab'] = array(
@@ -67,7 +67,7 @@ class IslandoraBook {
 
 }
 
-function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora-book:pageCModel', $relation = 'isMemberOf') {
+function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageCModel', $relation = 'isMemberOf') {
   $file = (isset($form_state['values']['ingest-file-location']) ? $form_state['values']['ingest-file-location'] : '');
   $form['#attributes']['enctype'] = 'multipart/form-data';
   $form['pid'] = array(
@@ -160,7 +160,7 @@ function book_add_pages_form_submit($form, &$form_state) {
 /**
  * Create a page object for each element in $image_list as a child object of $pid
  */
-function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = 'islandora-book:pageCModel', $relation = 'isMemberOfCollection', $tmpDir) {
+function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = 'islandora:pageCModel', $relation = 'isMemberOfCollection', $tmpDir) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   module_load_include('inc', 'fedora_repository', 'ObjectHelper');
   $book = new Fedora_Item($pid);
@@ -199,7 +199,7 @@ function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = '
   }
 }
 
-function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $page_title = NULL, $page_cmodel = 'islandora-book:pageCModel', $relation = 'isMemberOfCollection') {
+function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $page_title = NULL, $page_cmodel = 'islandora:pageCModel', $relation = 'isMemberOfCollection') {
   module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   $page_item = Fedora_Item::ingest_new_item("$book_pid-" . sprintf("%03d", $page_num), 'A', $page_title);

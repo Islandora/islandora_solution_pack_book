@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<foxml:digitalObject VERSION="1.1" PID="islandora-book:bookCModel"
+<foxml:digitalObject VERSION="1.1" PID="islandora:bookCModel"
 xmlns:foxml="info:fedora/fedora-system:def/foxml#"
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="info:fedora/fedora-system:def/foxml# http://www.fedora.info/definitions/1/0/foxml1-1.xsd">
@@ -28,7 +28,7 @@ xsi:schemaLocation="info:fedora/fedora-system:def/foxml# http://www.fedora.info/
             <audit:componentID></audit:componentID>
             <audit:responsibility>fedoraAdmin</audit:responsibility>
             <audit:date>2010-05-31T19:56:44.131Z</audit:date>
-            <audit:justification>Ingested from source repository with pid islandora-book:bookCModel</audit:justification>
+            <audit:justification>Ingested from source repository with pid islandora:bookCModel</audit:justification>
           </audit:record>
           <audit:record ID="AUDREC3">
             <audit:process type="Fedora API-M"/>
@@ -158,9 +158,9 @@ xsi:schemaLocation="info:fedora/fedora-system:def/foxml# http://www.fedora.info/
     <foxml:datastreamVersion ID="RELS-EXT.5" LABEL="RDF Statements about this object" CREATED="2009-05-18T19:58:26.781Z" MIMETYPE="application/rdf+xml" FORMAT_URI="info:fedora/fedora-system:FedoraRELSExt-1.0" SIZE="450">
       <foxml:xmlContent>
         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-          <rdf:Description rdf:about="info:fedora/islandora-book:bookCModel">
+          <rdf:Description rdf:about="info:fedora/islandora:bookCModel">
             <hasModel xmlns="info:fedora/fedora-system:def/model#" rdf:resource="info:fedora/fedora-system:ContentModel-3.0"></hasModel>
-            <hasService xmlns="info:fedora/fedora-system:def/model#" rdf:resource="info:fedora/islandora-book:viewerSdef"></hasService>
+            <hasService xmlns="info:fedora/fedora-system:def/model#" rdf:resource="info:fedora/islandora:viewerSdef"></hasService>
           </rdf:Description>
         </rdf:RDF>
       </foxml:xmlContent>
@@ -226,7 +226,7 @@ xsi:schemaLocation="info:fedora/fedora-system:def/foxml# http://www.fedora.info/
       <foxml:xmlContent>
         <oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
           <dc:title>Book Content Model</dc:title>
-          <dc:identifier>islandora-book:bookCModel</dc:identifier>
+          <dc:identifier>islandora:bookCModel</dc:identifier>
         </oai_dc:dc>
       </foxml:xmlContent>
     </foxml:datastreamVersion>

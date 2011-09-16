@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<foxml:digitalObject PID="islandora-book:viewerSdep-bookCModel" VERSION="1.1" xmlns:foxml="info:fedora/fedora-system:def/foxml#"
+<foxml:digitalObject PID="islandora:viewerSdep-bookCModel" VERSION="1.1" xmlns:foxml="info:fedora/fedora-system:def/foxml#"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="info:fedora/fedora-system:def/foxml# http://www.fedora.info/definitions/1/0/foxml1-1.xsd">
   <foxml:objectProperties>
     <foxml:property NAME="info:fedora/fedora-system:def/model#state" VALUE="Active"/>
-    <foxml:property NAME="info:fedora/fedora-system:def/model#label" VALUE="islandora-book:viewerSdep-bookCModel"/>
+    <foxml:property NAME="info:fedora/fedora-system:def/model#label" VALUE="islandora:viewerSdep-bookCModel"/>
     <foxml:property NAME="info:fedora/fedora-system:def/model#ownerId" VALUE="fedoraAdmin"/>
     <foxml:property NAME="info:fedora/fedora-system:def/model#createdDate" VALUE="2009-05-18T19:50:00.488Z"/>
     <foxml:property NAME="info:fedora/fedora-system:def/view#lastModifiedDate" VALUE="2009-11-12T17:09:41.797Z"/>
@@ -32,8 +32,8 @@
         <oai_dc:dc xmlns:dc="http://purl.org/dc/elements/1.1/"
           xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
-          <dc:title>islandora-book:viewerSdep-bookCModel</dc:title>
-          <dc:identifier>islandora-book:viewerSdep-bookCModel</dc:identifier>
+          <dc:title>islandora:viewerSdep-bookCModel</dc:title>
+          <dc:identifier>islandora:viewerSdep-bookCModel</dc:identifier>
         </oai_dc:dc>
       </foxml:xmlContent>
     </foxml:datastreamVersion>
@@ -43,10 +43,10 @@
       ID="RELS-EXT.1" LABEL="RDF Statements about this object" MIMETYPE="application/rdf+xml" SIZE="610">
       <foxml:xmlContent>
         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-          <rdf:Description rdf:about="info:fedora/islandora-book:viewerSdep-bookCModel">
+          <rdf:Description rdf:about="info:fedora/islandora:viewerSdep-bookCModel">
             <hasModel rdf:resource="info:fedora/fedora-system:ServiceDeployment-3.0" xmlns="info:fedora/fedora-system:def/model#"/>
-            <isDeploymentOf rdf:resource="info:fedora/islandora-book:viewerSdef" xmlns="info:fedora/fedora-system:def/model#"/>
-            <isContractorOf rdf:resource="info:fedora/islandora-book:bookCModel" xmlns="info:fedora/fedora-system:def/model#"/>
+            <isDeploymentOf rdf:resource="info:fedora/islandora:viewerSdef" xmlns="info:fedora/fedora-system:def/model#"/>
+            <isContractorOf rdf:resource="info:fedora/islandora:bookCModel" xmlns="info:fedora/fedora-system:def/model#"/>
           </rdf:Description>
         </rdf:RDF>
       </foxml:xmlContent>
@@ -75,7 +75,7 @@
         <fmm:MethodMap name="methodmap" xmlns:fmm="http://fedora.comm.nsdlib.org/service/methodmap">
           <fmm:Method operationName="getViewer" wsdlMsgName="getViewerRequestMsg" wsdlMsgOutput="getViewerResponseMsg">
             <fmm:DefaultInputParm defaultValue="$PID" label="fedora object pid" parmName="PID" passBy="VALUE" required="true"/>
-            <fmm:DefaultInputParm defaultValue="islandora-book:bookCModel" label="content model" parmName="CMODEL"
+            <fmm:DefaultInputParm defaultValue="islandora:bookCModel" label="content model" parmName="CMODEL"
               passBy="VALUE" required="true"/>
             <fmm:DefaultInputParm defaultValue="JP2" label="content model" parmName="DSID" passBy="VALUE" required="true"/>
             <fmm:UserInputParm defaultValue="" parmName="uid" passBy="VALUE" required="false"/>

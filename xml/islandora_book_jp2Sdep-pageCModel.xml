@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<foxml:digitalObject PID="islandora-book:jp2Sdep-pageCModel" VERSION="1.1" xmlns:foxml="info:fedora/fedora-system:def/foxml#"
+<foxml:digitalObject PID="islandora:jp2Sdep-pageCModel" VERSION="1.1" xmlns:foxml="info:fedora/fedora-system:def/foxml#"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="info:fedora/fedora-system:def/foxml# http://www.fedora.info/definitions/1/0/foxml1-1.xsd">
   <foxml:objectProperties>
     <foxml:property NAME="info:fedora/fedora-system:def/model#state" VALUE="Active"/>
-    <foxml:property NAME="info:fedora/fedora-system:def/model#label" VALUE="islandora-book:jp2Sdep-pageCModel"/>
+    <foxml:property NAME="info:fedora/fedora-system:def/model#label" VALUE="islandora:jp2Sdep-pageCModel"/>
     <foxml:property NAME="info:fedora/fedora-system:def/model#ownerId" VALUE="fedoraAdmin"/>
     <foxml:property NAME="info:fedora/fedora-system:def/model#createdDate" VALUE="2009-05-21T03:24:05.906Z"/>
     <foxml:property NAME="info:fedora/fedora-system:def/view#lastModifiedDate" VALUE="2010-06-01T00:48:39.302Z"/>
@@ -48,8 +48,8 @@
         <oai_dc:dc xmlns:dc="http://purl.org/dc/elements/1.1/"
           xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
-          <dc:title>islandora-book:jp2Sdep-pageCModel</dc:title>
-          <dc:identifier>islandora-book:jp2Sdep-pageCModel</dc:identifier>
+          <dc:title>islandora:jp2Sdep-pageCModel</dc:title>
+          <dc:identifier>islandora:jp2Sdep-pageCModel</dc:identifier>
         </oai_dc:dc>
       </foxml:xmlContent>
     </foxml:datastreamVersion>
@@ -166,10 +166,10 @@
       ID="RELS-EXT.2" LABEL="RDF Statements about this object" MIMETYPE="application/rdf+xml" SIZE="688">
       <foxml:xmlContent>
         <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-          <rdf:Description rdf:about="info:fedora/islandora-book:jp2Sdep-pageCModel">
+          <rdf:Description rdf:about="info:fedora/islandora:jp2Sdep-pageCModel">
             <hasModel rdf:resource="info:fedora/fedora-system:ServiceDeployment-3.0" xmlns="info:fedora/fedora-system:def/model#"/>
-            <isDeploymentOf rdf:resource="info:fedora/islandora-book:jp2Sdef" xmlns="info:fedora/fedora-system:def/model#"/>
-            <isContractorOf rdf:resource="info:fedora/islandora-book:pageCModel" xmlns="info:fedora/fedora-system:def/model#"/>
+            <isDeploymentOf rdf:resource="info:fedora/islandora:jp2Sdef" xmlns="info:fedora/fedora-system:def/model#"/>
+            <isContractorOf rdf:resource="info:fedora/islandora:pageCModel" xmlns="info:fedora/fedora-system:def/model#"/>
             <isContractorOf rdf:resource="info:fedora/newspapers:pageCModel" xmlns="info:fedora/fedora-system:def/model#"/>
           </rdf:Description>
         </rdf:RDF>

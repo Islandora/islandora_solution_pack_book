@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<foxml:digitalObject VERSION="1.1" PID="islandora-book:CollectionModel"
+<foxml:digitalObject VERSION="1.1" PID="islandora:CollectionModel"
 xmlns:foxml="info:fedora/fedora-system:def/foxml#"
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="info:fedora/fedora-system:def/foxml# http://www.fedora.info/definitions/1/0/foxml1-1.xsd">
@@ -70,7 +70,7 @@ xsi:schemaLocation="info:fedora/fedora-system:def/foxml# http://www.fedora.info/
 <foxml:datastreamVersion ID="RELS-EXT1.0" LABEL="RDF Statements about this object" CREATED="2009-01-23T20:43:44.131Z" MIMETYPE="application/rdf+xml" FORMAT_URI="info:fedora/fedora-system:FedoraRELSExt-1.0" SIZE="366">
 <foxml:xmlContent>
 <rdf:RDF xmlns:fedora-model="info:fedora/fedora-system:def/model#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-          <rdf:Description rdf:about="info:fedora/islandora-book:CollectionModel">
+          <rdf:Description rdf:about="info:fedora/islandora:CollectionModel">
             <fedora-model:hasModel rdf:resource="info:fedora/fedora-system:ContentModel-3.0"></fedora-model:hasModel>
           </rdf:Description>
         </rdf:RDF>
@@ -79,9 +79,9 @@ xsi:schemaLocation="info:fedora/fedora-system:def/foxml# http://www.fedora.info/
 <foxml:datastreamVersion ID="RELS-EXT.1" LABEL="RDF Statements about this object" CREATED="2009-01-23T20:45:33.190Z" MIMETYPE="application/rdf+xml" FORMAT_URI="info:fedora/fedora-system:FedoraRELSExt-1.0" SIZE="457">
 <foxml:xmlContent>
 <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-          <rdf:Description rdf:about="info:fedora/islandora-book:CollectionModel">
+          <rdf:Description rdf:about="info:fedora/islandora:CollectionModel">
             <hasModel xmlns="info:fedora/fedora-system:def/model#" rdf:resource="info:fedora/fedora-system:ContentModel-3.0"></hasModel>
-            <hasMember xmlns="info:fedora/fedora-system:def/relations-external#" rdf:resource="islandora-book:lowerfreetown"></hasMember>
+            <hasMember xmlns="info:fedora/fedora-system:def/relations-external#" rdf:resource="islandora:lowerfreetown"></hasMember>
           </rdf:Description>
         </rdf:RDF>
 </foxml:xmlContent>
@@ -117,7 +117,7 @@ xsi:schemaLocation="info:fedora/fedora-system:def/foxml# http://www.fedora.info/
 <foxml:xmlContent>
 <oai_dc:dc xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
           <dc:title>IslandLives Collection Model</dc:title>
-          <dc:identifier>islandora-book:CollectionModel</dc:identifier>
+          <dc:identifier>islandora:CollectionModel</dc:identifier>
         </oai_dc:dc>
 </foxml:xmlContent>
 </foxml:datastreamVersion>
@@ -130,7 +130,7 @@ Utilizing the library’s “Prince Edward Island Collection” and the latest i
 IslandLives will provide a variety of search interfaces that will allow users to browse and search the content by name, community, time period, and keyword. The Island community will have a whole new way to rediscover, search and share their stories.  
 This project will engage and build community – recruiting interested individuals from the cultural heritage community and everyday Islanders. Project staff will travel to communities and host ‘digitization days’, introducing community members to the project and its goals, providing them with an opportunity to digitize their own content, and to contribute their content to the IslandLives collection.</dc:description>
   <dc:contributor>Robertson Library, University of Prince Edward Island</dc:contributor>
-  <dc:identifier>islandora-book:CollectionModel</dc:identifier>
+  <dc:identifier>islandora:CollectionModel</dc:identifier>
 </oai_dc:dc>
 </foxml:xmlContent>
 </foxml:datastreamVersion>

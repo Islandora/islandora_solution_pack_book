@@ -43,7 +43,7 @@ function islandora_book_book_viewer($pid) {
     $qs = '?uid=' . base64_encode($user->name . ':' . $user->pass);
   }
 
-  $viewer_url = variable_get('fedora_base_url', '') . '/get/' . $pid . '/islandora-book:viewerSdef/getViewer' . $qs;
+  $viewer_url = variable_get('fedora_base_url', '') . '/get/' . $pid . '/islandora:viewerSdef/getViewer' . $qs;
   $html = '<iframe src="' . $viewer_url . '" frameborder="0" scrolling="no" style="width: 100%; height: 800px;">Errors: unable to load viewer</iframe>';
   $fieldset = array(
     '#title' => t('Viewer - ') . $pid,
@@ -243,10 +243,10 @@ function islandora_book_required_fedora_objects() {
     $result = drupal_write_record('xml_forms', $object);
   }
 
-  $result = db_result(db_query('Select content_model from {islandora_content_model_forms} where  content_model = "%s" and form_name = "%s"', 'islandora-book:bookCModel', 'Islandora MODS Form'));
+  $result = db_result(db_query('Select content_model from {islandora_content_model_forms} where  content_model = "%s" and form_name = "%s"', 'islandora:bookCModel', 'Islandora MODS Form'));
   if (!$result) {
     $object = new stdClass();
-    $object->content_model = 'islandora-book:bookCModel';
+    $object->content_model = 'islandora:bookCModel';
     $object->form_name = 'Islandora MODS Form';
     $object->dsid = 'MODS';
     $object->title_field = "['titleInfo']['title']";
@@ -254,10 +254,10 @@ function islandora_book_required_fedora_objects() {
     $result = drupal_write_record('islandora_content_model_forms', $object);
   }
 
-  $result = db_result(db_query('Select content_model from {islandora_content_model_forms} where  content_model = "%s" and form_name = "%s"', 'islandora-book:bookCModel', 'Upload Existing Mods'));
+  $result = db_result(db_query('Select content_model from {islandora_content_model_forms} where  content_model = "%s" and form_name = "%s"', 'islandora:bookCModel', 'Upload Existing Mods'));
   if (!$result) {
     $object = new stdClass();
-    $object->content_model = 'islandora-book:bookCModel';
+    $object->content_model = 'islandora:bookCModel';
     $object->form_name = 'Upload Existing Mods';
     $object->dsid = 'MODS';
     $object->title_field = "['title']";
@@ -275,77 +275,77 @@ function islandora_book_required_fedora_objects() {
       'objects' => array(
         array(
           'foxml_file' => "$module_path/xml/islandora_book_pageCModel.xml",
-          'pid' => 'islandora-book:pageCModel',
+          'pid' => 'islandora:pageCModel',
           'dsid' => NULL,
           'datastream_file' => NULL,
           'dsversion' => NULL,
         ),
         array(
           'foxml_file' => "$module_path/xml/islandora_book_bookCModel.xml",
-          'pid' => 'islandora-book:bookCModel',
+          'pid' => 'islandora:bookCModel',
           'dsid' => NULL,
           'datastream_file' => NULL,
           'dsversion' => NULL,
         ),
         array(
           'foxml_file' => "$module_path/xml/islandora_book_jp2Sdef.xml",
-          'pid' => 'islandora-book:jp2Sdef',
+          'pid' => 'islandora:jp2Sdef',
           'dsid' => NULL,
           'datastream_file' => NULL,
           'dsversion' => NULL,
         ),
         array(
           'foxml_file' => "$module_path/xml/islandora_book_viewerSdef.xml",
-          'pid' => 'islandora-book:viewerSdef',
+          'pid' => 'islandora:viewerSdef',
           'dsid' => NULL,
           'datastream_file' => NULL,
           'dsversion' => NULL,
         ),
         array(
           'foxml_file' => "$module_path/xml/islandora_book_viewerSdep-bookCModel.xml",
-          'pid' => 'islandora-book:viewerSdep-bookCModel',
+          'pid' => 'islandora:viewerSdep-bookCModel',
           'dsid' => NULL,
           'datastream_file' => NULL,
           'dsversion' => NULL,
         ),
         array(
           'foxml_file' => "$module_path/xml/islandora_book_viewerSdep-pageCModel.xml",
-          'pid' => 'islandora-book:viewerSdep-pageCModel',
+          'pid' => 'islandora:viewerSdep-pageCModel',
           'dsid' => NULL,
           'datastream_file' => NULL,
           'dsversion' => NULL,
         ),
         array(
           'foxml_file' => "$module_path/xml/islandora_book_tei2htmlSdef.xml",
-          'pid' => 'islandora-book:tei2htmlSdef',
+          'pid' => 'islandora:tei2htmlSdef',
           'dsid' => NULL,
           'datastream_file' => NULL,
           'dsversion' => NULL,
         ),
         array(
           'foxml_file' => "$module_path/xml/islandora_book_tei2htmlSdep-pageCModel.xml",
-          'pid' => 'islandora-book:tei2htmlSdep-pageCModel',
+          'pid' => 'islandora:tei2htmlSdep-pageCModel',
           'dsid' => NULL,
           'datastream_file' => NULL,
           'dsversion' => NULL,
         ),
         array(
           'foxml_file' => "$module_path/xml/islandora_book_collection.xml",
-          'pid' => 'islandora-book:collection',
+          'pid' => 'islandora:collection',
           'dsid' => NULL,
           'datastream_file' => NULL,
           'dsversion' => NULL,
         ),
         array(
           'foxml_file' => "$module_path/xml/islandora_book_jp2Sdep-pageCModel.xml",
-          'pid' => 'islandora-book:jp2Sdep-pageCModel',
+          'pid' => 'islandora:jp2Sdep-pageCModel',
           'dsid' => NULL,
           'datastream_file' => NULL,
           'dsversion' => NULL,
         ),
         array(
           'foxml_file' => "$module_path/xml/islandora_book_CollectionModel.xml",
-          'pid' => 'islandora-book:CollectionModel',
+          'pid' => 'islandora:CollectionModel',
           'dsid' => NULL,
           'datastream_file' => NULL,
           'dsversion' => NULL,
