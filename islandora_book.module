@@ -223,22 +223,22 @@ function islandora_book_required_fedora_objects() {
 
   $module_path = drupal_get_path('module', 'islandora_book');
   //add default mods form to formbuilder table
-  $result = db_result(db_query('Select name from {xml_forms} where name = "%s"', 'Islandora MODS Form'));
+  $result = db_result(db_query('Select name from {xml_forms} where name = "%s"', 'Islandora Books MODS Form'));
   if (!$result) {
     $filename = "$module_path/xml/islandora_book_default_mods.xml";
     $form_as_string = file_get_contents($filename);
     $object = new stdClass();
-    $object->name = 'Islandora MODS Form';
+    $object->name = 'Islandora Books MODS Form';
     $object->form = $form_as_string;
     $result = drupal_write_record('xml_forms', $object);
   }
 
-  $result = db_result(db_query('Select name from {xml_forms} where name = "%s"', 'Upload Existing Mods'));
+  $result = db_result(db_query('Select name from {xml_forms} where name = "%s"', 'Upload Existing Books Mods'));
   if (!$result) {
     $filename = "$module_path/xml/mods_upload.xml";
     $form_as_string = file_get_contents($filename);
     $object = new stdClass();
-    $object->name = 'Upload Existing Mods';
+    $object->name = 'Upload Existing Books Mods';
     $object->form = $form_as_string;
     $result = drupal_write_record('xml_forms', $object);
   }
