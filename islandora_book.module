@@ -243,22 +243,22 @@ function islandora_book_required_fedora_objects() {
     $result = drupal_write_record('xml_forms', $object);
   }
 
-  $result = db_result(db_query('Select content_model from {islandora_content_model_forms} where  content_model = "%s" and form_name = "%s"', 'islandora:bookCModel', 'Islandora MODS Form'));
+  $result = db_result(db_query('Select content_model from {islandora_content_model_forms} where  content_model = "%s" and form_name = "%s"', 'islandora:bookCModel', 'Islandora Books MODS Form'));
   if (!$result) {
     $object = new stdClass();
     $object->content_model = 'islandora:bookCModel';
-    $object->form_name = 'Islandora MODS Form';
+    $object->form_name = 'Islandora Books MODS Form';
     $object->dsid = 'MODS';
     $object->title_field = "['titleInfo']['title']";
     $object->transform = 'mods_to_dc.xsl';
     $result = drupal_write_record('islandora_content_model_forms', $object);
   }
 
-  $result = db_result(db_query('Select content_model from {islandora_content_model_forms} where  content_model = "%s" and form_name = "%s"', 'islandora:bookCModel', 'Upload Existing Mods'));
+  $result = db_result(db_query('Select content_model from {islandora_content_model_forms} where  content_model = "%s" and form_name = "%s"', 'islandora:bookCModel', 'Upload Existing Books Mods'));
   if (!$result) {
     $object = new stdClass();
     $object->content_model = 'islandora:bookCModel';
-    $object->form_name = 'Upload Existing Mods';
+    $object->form_name = 'Upload Existing Books Mods';
     $object->dsid = 'MODS';
     $object->title_field = "['title']";
     $object->transform = 'mods_to_dc.xsl';
