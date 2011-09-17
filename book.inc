@@ -67,7 +67,7 @@ class IslandoraBook {
 
 }
 
-function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageCModel', $relation = 'isMemberOf') {
+function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora-book:pageCModel', $relation = 'isMemberOf') {
   $file = (isset($form_state['values']['ingest-file-location']) ? $form_state['values']['ingest-file-location'] : '');
   $form['#attributes']['enctype'] = 'multipart/form-data';
   $form['pid'] = array(
