@@ -160,7 +160,7 @@ function book_add_pages_form_submit($form, &$form_state) {
 /**
  * Create a page object for each element in $image_list as a child object of $pid
  */
-function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = 'islandora:pageCModel', $relation = 'isMemberOfCollection', $tmpDir) {
+function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = 'islandora-book:pageCModel', $relation = 'isMemberOfCollection', $tmpDir) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   module_load_include('inc', 'fedora_repository', 'ObjectHelper');
   $book = new Fedora_Item($pid);
@@ -199,7 +199,7 @@ function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = '
   }
 }
 
-function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $page_title = NULL, $page_cmodel = 'islandora:pageCModel', $relation = 'isMemberOfCollection') {
+function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $page_title = NULL, $page_cmodel = 'islandora-book:pageCModel', $relation = 'isMemberOfCollection') {
   module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   $page_item = Fedora_Item::ingest_new_item("$book_pid-" . sprintf("%03d", $page_num), 'A', $page_title);
