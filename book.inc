@@ -159,6 +159,7 @@ function book_add_pages_form_submit($form, &$form_state) {
 
 /**
  * Create a page object for each element in $image_list as a child object of $pid
+ok
  */
 function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = 'islandora-book:pageCModel', $relation = 'isMemberOfCollection', $tmpDir) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
