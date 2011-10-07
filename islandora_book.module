@@ -288,7 +288,7 @@ function islandora_book_required_fedora_objects() {
           'dsversion' => NULL,
         ),
         array(
-          'foxml_file' => "$module_path/xml/islandora_book_jp2sdef.xml",
+          'foxml_file' => "$module_path/xml/islandora_book_jp2Sdef.xml",
           'pid' => 'islandora:jp2Sdef',
           'dsid' => NULL,
           'datastream_file' => NULL,
