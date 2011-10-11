@@ -16,9 +16,9 @@ class FedoraBookTestCase extends DrupalWebTestCase {
  }
 
  function setUp() {
-   parent::setUp('islandora_repository', 'fedora_ilives', 'tabs');
+   parent::setUp('fedora_repository', 'fedora_ilives', 'tabs');
 
-   module_load_include('inc', 'islandora_repository', 'api/fedora_item');
+   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
 
    // Create and login user.
    $repository_user = $this->drupalCreateFedoraUser(array('add fedora datastreams',

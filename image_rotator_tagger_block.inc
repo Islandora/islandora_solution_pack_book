@@ -7,8 +7,8 @@
 
 
 function get_random_image() {
-  module_load_include('inc', 'islandora_repository', 'CollectionClass');
-  module_load_include('inc', 'islandora_repository', 'ObjectHelper');
+  module_load_include('inc', 'fedora_repository', 'CollectionClass');
+  module_load_include('inc', 'fedora_repository', 'ObjectHelper');
   $itqlquery = 'select $object $title from <#ri>
 where $object <info:fedora/fedora-system:def/relations-external#isMemberOfCollection> <info:fedora/ilives:figures>
 and $object <fedora-model:state> <info:fedora/fedora-system:def/model#Active>
@@ -47,8 +47,8 @@ and $object <dc:title> $title';
 
 
 function _fedora_image_rotator_tagger_block_content() {
-  module_load_include('inc', 'islandora_repository', 'api/fedora_item');
-  module_load_include('inc', 'islandora_repository', 'plugins/tagging_form');
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  module_load_include('inc', 'fedora_repository', 'plugins/tagging_form');
 
   global $base_url;
   if (!empty($_POST['pid'])) {
@@ -71,7 +71,7 @@ function _fedora_image_rotator_tagger_block_content() {
     return '<p>'
      . l( '<img src="'. $base_url . '/fedora/imageapi/'. $result['pid'] .  '/JPG?op=scale&height=500&width=300" />', 'fedora/repository/'. $result['pid'], array('html' => TRUE, 'alias' => TRUE))
      .'<p>This image is from '. l($result['title'], 'fedora/ilives_book_viewer/'. substr($image_item->pid, 0, strrpos($image_item->pid, '-')), array('html' => TRUE, 'alias' => TRUE)) . '.'
-     . drupal_get_form('islandora_repository_image_tagging_form', $result['pid']) . '</p>';
+     . drupal_get_form('fedora_repository_image_tagging_form', $result['pid']) . '</p>';
   } 
   else {
     return '';
@@ -95,13 +95,13 @@ class ShowILivesStreamsInFieldSets {
   }
   
   function showJPG() {
-    module_load_include('inc', 'islandora_repository', 'plugins/tagging_form');
+    module_load_include('inc', 'fedora_repository', 'plugins/tagging_form');
     global $base_url;
     $collection_fieldset = array(
       '#collapsible' => FALSE,
       '#value' => '<a href="' . $base_url . '/fedora/repository/' . $this->pid . '/JPG/"><img src="' . $base_url . '/fedora/repository/' . $this->pid . '/JPG/JPG.jpg' . '" /></a>',
     );
     return theme('fieldset', $collection_fieldset)
-      . drupal_get_form('islandora_repository_image_tagging_form', $this->pid);
+      . drupal_get_form('fedora_repository_image_tagging_form', $this->pid);
   } 
 }

@@ -5,7 +5,7 @@
 class IslandoraBook {
 
   function __construct($pid = '') {
-    module_load_include('inc', 'islandora_repository', 'api/fedora_item');
+    module_load_include('inc', 'fedora_repository', 'api/fedora_item');
     if (!empty($pid)) {
       $this->pid = $pid;
       $this->item = new Fedora_Item($pid);
@@ -13,8 +13,8 @@ class IslandoraBook {
   }
 
   public function showFieldSets() {
-    module_load_include('inc', 'islandora_repository', 'plugins/tagging_form');
-    module_load_include('inc', 'islandora_repository', 'plugins/DarwinCore');
+    module_load_include('inc', 'fedora_repository', 'plugins/tagging_form');
+    module_load_include('inc', 'fedora_repository', 'plugins/DarwinCore');
     module_load_include('module', 'islandora_book');
     global $base_url;
     $show_purge_tab = (!empty($_POST['form_id']) && ($_POST['form_id'] == 'islandora_book_purge_pages_form'));
@@ -162,8 +162,8 @@ function book_add_pages_form_submit($form, &$form_state) {
 ok
  */
 function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = 'islandora-book:pageCModel', $relation = 'isMemberOfCollection', $tmpDir) {
-  module_load_include('inc', 'islandora_repository', 'api/fedora_item');
-  module_load_include('inc', 'islandora_repository', 'ObjectHelper');
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  module_load_include('inc', 'fedora_repository', 'ObjectHelper');
   $book = new Fedora_Item($pid);
   if (!$book->exists()) {
     return FALSE;
@@ -201,8 +201,8 @@ function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = '
 }
 
 function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $page_title = NULL, $page_cmodel = 'islandora-book:pageCModel', $relation = 'isMemberOfCollection') {
-  module_load_include('inc', 'islandora_repository', 'api/fedora_utils');
-  module_load_include('inc', 'islandora_repository', 'api/fedora_item');
+  module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   $page_item = Fedora_Item::ingest_new_item("$book_pid-" . sprintf("%03d", $page_num), 'A', $page_title);
   $page_item->add_relationship('hasModel', $page_cmodel, FEDORA_MODEL_URI);
   $page_item->add_relationship($relation, $book_pid);
@@ -259,7 +259,7 @@ function deleteDirectory($dir) {
 }
 
 function makePDF($book_pid, $file_list, $tmpDir) {
-  module_load_include('inc', 'islandora_repository', 'api/fedora_item');
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   $book_item = new Fedora_Item($book_pid);
   $outputFile = "${tmpDir}book.pdf";
   $tiffs = array();

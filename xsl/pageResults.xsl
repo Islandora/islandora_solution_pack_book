@@ -110,7 +110,7 @@
     </xsl:variable>
 
    <!-- <xsl:variable name="CLEANTITLE">
-      <xsl:value-of select="php:functionString('islandora_repository_urlencode_string', $DCTITLE)"/>
+      <xsl:value-of select="php:functionString('fedora_repository_urlencode_string', $DCTITLE)"/>
     </xsl:variable>-->
     <xsl:variable name="recordNo">
       <xsl:value-of select="position()"/>

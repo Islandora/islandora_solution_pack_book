@@ -58,7 +58,7 @@ function islandora_book_book_viewer($pid) {
 // it will execute it against the book.
 function islandora_book_create_book_view($pid, $query = NULL) {
   global $user;
-  module_load_include('inc', 'islandora_repository', 'ObjectHelper');
+  module_load_include('inc', 'fedora_repository', 'ObjectHelper');
   $path = drupal_get_path('module', 'islandora_book');
   $objectHelper = new ObjectHelper;
   $xml = $objectHelper->getStream($pid, 'MODS');
@@ -115,7 +115,7 @@ function islandora_book_create_book_view($pid, $query = NULL) {
     $output .= $newdom->saveXML();
   }
   if (isset($query)) {
-    module_load_include('inc', 'islandora_repository', 'SearchClass');
+    module_load_include('inc', 'fedora_repository', 'SearchClass');
     $searchClass = new SearchClass();
     $pageQuery = convert_query_to_page_query($query, $pid);
     $output .= '<div>' . $searchClass->custom_search($pageQuery, $startPage, '/xsl/pageResults.xsl', 500) . '</div>'; //limit results to 500 pages of a book since there is no paging if we enable paging in xslt this can be changed
@@ -194,7 +194,7 @@ function islandora_book_theme() {
 function islandora_book_requirements($phase) {
   global $base_url;
   if ($phase == 'runtime') {
-    module_load_include('inc', 'islandora_repository', 'api/fedora_utils');
+    module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
     $requirements['iiv-war'] = array();
     $requirements['iiv-war']['title'] = t("Islandora OpenLayers image viewer web app");
     if (!_islandora_book_viewer_available()) {
@@ -396,7 +396,7 @@ function islandora_book_purge_pages_form(&$form_state, $pid, $referrer = NULL) {
 
     $form['submit'] = array(
       '#type' => 'image_button',
-      '#src' => drupal_get_path('module', 'islandora_repository') . '/images/purge_big.png',
+      '#src' => drupal_get_path('module', 'fedora_repository') . '/images/purge_big.png',
       '#value' => t('Purge'),
       '#suffix' => 'Purge all pages associated with this book',
     );
@@ -412,7 +412,7 @@ function islandora_book_purge_pages_form(&$form_state, $pid, $referrer = NULL) {
 }
 
 function islandora_book_purge_pages_form_submit($form, &$form_state) {
-  module_load_include('inc', 'islandora_repository', 'ConnectionHelper');
+  module_load_include('inc', 'fedora_repository', 'ConnectionHelper');
   $pid = $form_state['values']['pid'];
   if (!isset($form_state['storage']['confirm'])) {
     $form_state['storage']['confirm'] = TRUE; // this will cause the form to be rebuilt, entering the confirm part of the form
