@@ -43,7 +43,7 @@ class FedoraBookTestCase extends DrupalWebTestCase {
    $ingest_form = array();
    $ingest_form['models'] = 'islandora:collectionCModel/ISLANDORACM';
 
-   $this->drupalPost('fedora/ingestObject/islandora:top/Islandora%20Top-Level%20Collection', $ingest_form, 'Next');
+   $this->drupalPost('fedora/ingestObject/islandora:root/Islandora%20Top-Level%20Collection', $ingest_form, 'Next');
    
    $ingest_title = $this->randomName(32);
    $ingest_form_step_2['dc:title'] = $ingest_title;
