@@ -35,7 +35,7 @@
             <audit:componentID/>
             <audit:responsibility>fedoraAdmin</audit:responsibility>
             <audit:date>2010-06-01T01:40:47.337Z</audit:date>
-            <audit:justification>Ingested from local file /Users/al/fedora_repository/content_models/ilives_jp2Sdef.xml</audit:justification>
+            <audit:justification>Ingested from local file /Users/al/islandora_repository/content_models/ilives_jp2Sdef.xml</audit:justification>
           </audit:record>
         </audit:auditTrail>
       </foxml:xmlContent>
