@@ -1,7 +1,14 @@
 <?php
 
-// $Id$
+/**
+ * @file 
+ * Islandora book solution pack module
+ */
 
+/**
+ * Islandora book menu
+ * @return string 
+ */
 function islandora_book_menu() {
   $items = array();
   $items['fedora/book'] = array(
@@ -36,6 +43,12 @@ function islandora_book_menu() {
   return $items;
 }
 
+/**
+ * Islandora book book viewer ?? WTF
+ * @global type $user
+ * @param type $pid
+ * @return type 
+ */
 function islandora_book_book_viewer($pid) {
   global $user;
   $qs = '';
@@ -54,8 +67,13 @@ function islandora_book_book_viewer($pid) {
   return theme('fieldset', $fieldset);
 }
 
-//loads an xslt for the main book page uses mods for most of the display.  if there is a $query parameter
-// it will execute it against the book.
+/**
+ * Load an xslt from the main book page uses mods for most of the display.
+ * @global type $user
+ * @param type $pid
+ * @param type $query Default null but if supplied then it will execute the query against the book
+ * @return string 
+ */
 function islandora_book_create_book_view($pid, $query = NULL) {
   global $user;
   module_load_include('inc', 'fedora_repository', 'ObjectHelper');
@@ -69,11 +87,11 @@ function islandora_book_create_book_view($pid, $query = NULL) {
   }
   $simpleDCxml = simplexml_load_string($dc_xml);
   $types = $simpleDCxml->xpath('//dc:type');
-  $ingested = 'false';
+  $ingested = 'FALSE';
   if (!empty($types)) {
     foreach ($types as $type) {
       if ($type == 'ingested') {
-        $ingested = 'true';
+        $ingested = 'TRUE';
       }
     }
   }
@@ -128,6 +146,12 @@ function islandora_book_create_book_view($pid, $query = NULL) {
   }
 }
 
+/**
+ * convert query to a page query?
+ * @param type $query
+ * @param type $pid
+ * @return string 
+ */
 function convert_query_to_page_query($query, $pid) {
   $newQuery = substr($query, 0, strlen($query) - 23);
   $pid = str_replace(':', '?', $pid);
@@ -137,6 +161,7 @@ function convert_query_to_page_query($query, $pid) {
 
 /**
  * Custom form element to do our nice images.
+ * @return boolean 
  */
 function islandora_book_elements() {  // Change this line
   $type['imagebutton'] = array(
@@ -149,12 +174,19 @@ function islandora_book_elements() {  // Change this line
   return $type;
 }
 
+/**
+ * theme imagebutton
+ * @param type $element
+ * @return type 
+ */
 function theme_imagebutton($element) {
   return '<input  style="background:url(\'\'); border:0px; width:10px; padding:0px,0px,0px,0px;" type="image" class="form-' . $element['#button_type'] . '" name="' . $element['#name'] . '" id="' . $element['#id'] . '" value="' . check_plain($element['#default_value']) . '" ' . drupal_attributes($element['#attributes']) . ' src="' . $element['#image'] . '" alt="' . $element['#title'] . '" title="' . $element['#title'] . "\" />\n";
 }
 
 /**
  * Implementation of hook_theme() to register how to theme image buttons.
+ * 
+ * @return type 
  */
 function islandora_book_theme() {
   return array(
@@ -200,8 +232,7 @@ function islandora_book_requirements($phase) {
     if (!_islandora_book_viewer_available()) {
       $requirements['iiv-war']['value'] = ("Not available");
       $requirements['iiv-war']['severity'] = REQUIREMENT_ERROR;
-      $requirements['iiv-war']['description'] = t('Ensure that Fedora is running and that the <a href="@iiv-home">IIV</a> app is deployed.',
-              array('@iiv-home' => 'http://github.com/islandora/iiv'));
+      $requirements['iiv-war']['description'] = t('Ensure that Fedora is running and that the <a href="@iiv-home">IIV</a> app is deployed.', array('@iiv-home' => 'http://github.com/islandora/iiv'));
     }
     else {
       $requirements['iiv-war']['value'] = ("Available");
@@ -211,6 +242,10 @@ function islandora_book_requirements($phase) {
   return $requirements;
 }
 
+/**
+ * _islandora_book_viewer_available ???
+ * @return type 
+ */
 function _islandora_book_viewer_available() {
   $url = parse_url(variable_get('fedora_base_url', 'http://localhost:8080/fedora'));
   $fedora_host = ("{$url['scheme']}://{$url['host']}" . (!empty($url['port']) ? ":{$url['port']}/" : '/'));
@@ -218,55 +253,18 @@ function _islandora_book_viewer_available() {
   return empty($response->error);
 }
 
+/**
+ * islandora book required fedora objects
+ * @return type 
+ */
 function islandora_book_required_fedora_objects() {
 
-
+  // Add the form and associate it to the content model
   $module_path = drupal_get_path('module', 'islandora_book');
-  //add default mods form to formbuilder table
-  $result = db_result(db_query('Select name from {xml_forms} where name = "%s"', 'Islandora Books MODS Form'));
-  if (!$result) {
-    $filename = "$module_path/xml/islandora_book_default_mods.xml";
-    $form_as_string = file_get_contents($filename);
-    $object = new stdClass();
-    $object->name = 'Islandora Books MODS Form';
-    $object->form = $form_as_string;
-    $result = drupal_write_record('xml_forms', $object);
-  }
-
-  $result = db_result(db_query('Select name from {xml_forms} where name = "%s"', 'Upload Existing Books Mods'));
-  if (!$result) {
-    $filename = "$module_path/xml/mods_upload.xml";
-    $form_as_string = file_get_contents($filename);
-    $object = new stdClass();
-    $object->name = 'Upload Existing Books Mods';
-    $object->form = $form_as_string;
-    $result = drupal_write_record('xml_forms', $object);
-  }
-
-  $result = db_result(db_query('Select content_model from {islandora_content_model_forms} where  content_model = "%s" and form_name = "%s"', 'islandora:bookCModel', 'Islandora Books MODS Form'));
-  if (!$result) {
-    $object = new stdClass();
-    $object->content_model = 'islandora:bookCModel';
-    $object->form_name = 'Islandora Books MODS Form';
-    $object->dsid = 'MODS';
-    $object->title_field = "['titleInfo']['title']";
-    $object->transform = 'mods_to_dc.xsl';
-    $result = drupal_write_record('islandora_content_model_forms', $object);
-  }
-
-  $result = db_result(db_query('Select content_model from {islandora_content_model_forms} where  content_model = "%s" and form_name = "%s"', 'islandora:bookCModel', 'Upload Existing Books Mods'));
-  if (!$result) {
-    $object = new stdClass();
-    $object->content_model = 'islandora:bookCModel';
-    $object->form_name = 'Upload Existing Books Mods';
-    $object->dsid = 'MODS';
-    $object->title_field = "['title']";
-    $object->transform = 'mods_to_dc.xsl';
-    $result = drupal_write_record('islandora_content_model_forms', $object);
-  }
-  // array( 'path-to-foxml-file', 'pid', 'dsid', 'path-to-datastream-file', int dsversion, boolean required)
-  // make database insertions here.
-
+  $form_name = 'Islandora Books MODS Form';
+  $form_xml = file_get_contents("$module_path/xml/mods_book.xml");
+  solution_pack_add_form($form_name, $form_xml);
+  solution_pack_add_form_association('islandora:bookCModel', $form_name);
 
   return array(
     'islandora_book' => array(
@@ -372,6 +370,14 @@ function islandora_book_required_fedora_objects() {
   );
 }
 
+/**
+ * islandora book purge pages form
+ * @global type $base_url
+ * @param type $form_state
+ * @param type $pid
+ * @param type $referrer
+ * @return string 
+ */
 function islandora_book_purge_pages_form(&$form_state, $pid, $referrer = NULL) {
   global $base_url;
   if (!user_access('purge objects and datastreams')) {
@@ -411,6 +417,12 @@ function islandora_book_purge_pages_form(&$form_state, $pid, $referrer = NULL) {
   return $form;
 }
 
+/**
+ * islandora book purge pages form submit
+ * @param type $form
+ * @param type $form_state
+ * @return type 
+ */
 function islandora_book_purge_pages_form_submit($form, &$form_state) {
   module_load_include('inc', 'fedora_repository', 'ConnectionHelper');
   $pid = $form_state['values']['pid'];
@@ -455,7 +467,7 @@ XML;
           drupal_set_message(t('Error:  Insufficient permissions to purge object.'), 'error');
         }
         else {
-          drupal_set_message(t($e->getMessage()), 'error');
+          drupal_set_message(t("@message", check_plain($e->getMessage())), 'error');
         }
         return;
       }
@@ -474,6 +486,12 @@ XML;
   }
 }
 
+/**
+ * islandora book help ??
+ * @param type $path
+ * @param type $arg
+ * @return type 
+ */
 function islandora_book_help($path, $arg) {
   switch ($path) {
     case 'admin/help#islandora_book':
@@ -493,10 +511,9 @@ function islandora_book_help($path, $arg) {
 
 
          
-        ',
-          array(
-            '!microservices' => l("Fedora Microservices", 'https://github.com/Islandora/fedora_microservices'),
-            '!mods' => l('MODS', 'http://www.loc.gov/standards/mods/'),
+        ', array(
+        '!microservices' => l("Fedora Microservices", 'https://github.com/Islandora/fedora_microservices'),
+        '!mods' => l('MODS', 'http://www.loc.gov/standards/mods/'),
           )
       );
   }
