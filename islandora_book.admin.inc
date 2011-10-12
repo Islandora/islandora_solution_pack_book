@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * @file 
+ * Islandora book admin 
+ */
+
+/**
+ * islandora book admin settings
+ * @param type $form_state
+ * @return type 
+ */
 function islandora_book_admin_settings(&$form_state) {
 
 
@@ -75,6 +85,9 @@ function islandora_book_admin_settings(&$form_state) {
   return ($form);
 }
 
+/**
+ * update ocr div ??
+ */
 function update_ocr_div() {
 
   $form = book_callback_prep();
@@ -87,6 +100,10 @@ function update_ocr_div() {
   ));
 }
 
+/**
+ * book callback prep??
+ * @return type 
+ */
 function book_callback_prep() {
   $form_state = array('storage' => NULL, 'submitted' => FALSE);
   $form_build_id = $_POST['form_build_id'];
@@ -102,6 +119,12 @@ function book_callback_prep() {
   return $form;
 }
 
+/**
+ * book settings form submit ??
+ * @param type $form
+ * @param type $form_state
+ * @return type 
+ */
 function book_settings_form_submit($form, &$form_state) {
 
   $op = isset($form_state['values']['op']) ? $form_state['values']['op'] : '';
@@ -140,6 +163,11 @@ function book_settings_form_submit($form, &$form_state) {
   drupal_rebuild_theme_registry();
 }
 
+/**
+ * book admin refresh
+ * @param type $form
+ * @param array $form_state 
+ */
 function book_admin_refresh($form, &$form_state) {
   $values = $form_state['values'];
   unset($form_state['submit_handlers']);

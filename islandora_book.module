@@ -87,11 +87,11 @@ function islandora_book_create_book_view($pid, $query = NULL) {
   }
   $simpleDCxml = simplexml_load_string($dc_xml);
   $types = $simpleDCxml->xpath('//dc:type');
-  $ingested = 'false';
+  $ingested = 'FALSE';
   if (!empty($types)) {
     foreach ($types as $type) {
       if ($type == 'ingested') {
-        $ingested = 'true';
+        $ingested = 'TRUE';
       }
     }
   }
