@@ -354,7 +354,7 @@ function islandora_book_required_fedora_objects() {
           'pid' => 'books:collection',
           'label' => 'Book Collection',
           'cmodel' => 'islandora:collectionCModel',
-          'parent' => 'islandora:demos',
+          'parent' => 'islandora:root',
           'datastreams' => array(
             array(
               'dsid' => 'COLLECTION_POLICY',
