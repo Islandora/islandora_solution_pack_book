@@ -71,7 +71,7 @@ function islandora_book_book_viewer($pid) {
  * Load an xslt from the main book page uses mods for most of the display.
  * @global type $user
  * @param type $pid
- * @param type $query Default null but if supplied then it will execute the query against the book
+ * @param type $query Default NULL but if supplied then it will execute the query against the book
  * @return string 
  */
 function islandora_book_create_book_view($pid, $query = NULL) {
