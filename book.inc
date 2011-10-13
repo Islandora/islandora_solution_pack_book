@@ -24,8 +24,8 @@ class IslandoraBook {
 
   /**
    * Show field sets
-   * @global type $base_url
-   * @global type $user
+   * @global string $base_url
+   * @global user $user
    * @return string 
    */
   public function showFieldSets() {
@@ -85,11 +85,11 @@ class IslandoraBook {
 
 /**
  * book add pages form
- * @param type $form_state
- * @param type $pid
- * @param type $page_cmodel
- * @param type $relation
- * @return int 
+ * @param array $form_state
+ * @param string $pid
+ * @param string $page_cmodel
+ * @param string $relation
+ * @return array
  */
 function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageCModel', $relation = 'isMemberOf') {
   $file = (isset($form_state['values']['ingest-file-location']) ? $form_state['values']['ingest-file-location'] : '');
@@ -124,9 +124,8 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
 
 /**
  * book add pages form validate
- * @param type $form
- * @param type $form_state
- * @return type 
+ * @param array $form
+ * @param array $form_state
  */
 function book_add_pages_form_validate($form, &$form_state) {
 
@@ -152,8 +151,8 @@ function book_add_pages_form_validate($form, &$form_state) {
 
 /**
  * book add pages form submit
- * @param type $form
- * @param type $form_state 
+ * @param array $form
+ * @param array $form_state
  */
 function book_add_pages_form_submit($form, &$form_state) {
   $pid = $form_state['values']['pid'];
@@ -180,9 +179,14 @@ function book_add_pages_form_submit($form, &$form_state) {
   foreach ($dirs as $directory) {
     if ($tiff_dir = opendir($directory)) {
       while (FALSE !== ($file_name = readdir($tiff_dir))) {
+        $new_file_name = preg_replace("/[^a-z\.\d]/i", "", $file_name);
+        if ($new_file_name != $file_name){
+          rename($directory . $file_name, $directory . $new_file_name);
+          $file_name = $new_file_name;
+        }
         $ext = strrchr($file_name, '.');
         if ($ext == '.tif' || $ext == '.tiff') {
-          array_push($file_list, "$directory/$file_name");
+          array_push($file_list, "$directory" . "$file_name");
         }
       }
       closedir($tiff_dir);
@@ -194,12 +198,12 @@ function book_add_pages_form_submit($form, &$form_state) {
 
 /**
  * Create a page object for each element in $image_list as a child object of $pid
- * @param type $pid
- * @param type $image_list
- * @param type $page_cmodel
- * @param type $relation
- * @param type $tmpDir
- * @return type 
+ * @param string $pid
+ * @param array $image_list
+ * @param string $page_cmodel
+ * @param string $relation
+ * @param string $tmpDir
+ * @return boolean
  */
 function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = 'islandora:pageCModel', $relation = 'isMemberOfCollection', $tmpDir) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
@@ -242,12 +246,12 @@ function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = '
 
 /**
  * ibook add single page object
- * @param type $book_pid
- * @param type $page_file
- * @param type $page_num
- * @param type $page_title
- * @param type $page_cmodel
- * @param type $relation 
+ * @param string $book_pid
+ * @param string $page_file
+ * @param int $page_num
+ * @param string $page_title
+ * @param string $page_cmodel
+ * @param string $relation
  */
 function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $page_title = NULL, $page_cmodel = 'islandora:pageCModel', $relation = 'isMemberOf') {
   module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
@@ -295,8 +299,8 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
 
 /**
  * delete directory
- * @param type $dir
- * @return type 
+ * @param string $dir
+ * @return boolen
  */
 function deleteDirectory($dir) {
   if (!file_exists($dir))
@@ -314,10 +318,9 @@ function deleteDirectory($dir) {
 
 /**
  * make PDF
- * @param type $book_pid
- * @param type $file_list
- * @param type $tmpDir
- * @param type tmpDir 
+ * @param string $book_pid
+ * @param array $file_list
+ * @param string $tmpDir
  */
 function makePDF($book_pid, $file_list, $tmpDir) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
