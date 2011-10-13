@@ -7,7 +7,7 @@
 
 /**
  * Islandora book menu
- * @return string 
+ * @return array
  */
 function islandora_book_menu() {
   $items = array();
@@ -44,10 +44,11 @@ function islandora_book_menu() {
 }
 
 /**
- * Islandora book book viewer ?? WTF
- * @global type $user
- * @param type $pid
- * @return type 
+ * Islandora book book viewer
+ * Allows viweing of book object thorugh embedded player
+ * @global user $user
+ * @param string $pid
+ * @return html
  */
 function islandora_book_book_viewer($pid) {
   global $user;
@@ -69,10 +70,9 @@ function islandora_book_book_viewer($pid) {
 
 /**
  * Load an xslt from the main book page uses mods for most of the display.
- * @global type $user
- * @param type $pid
- * @param type $query Default NULL but if supplied then it will execute the query against the book
- * @return string 
+ * @global user $user
+ * @param string $pid
+ * @param string $query Default NULL but if supplied then it will execute the query against the book
  */
 function islandora_book_create_book_view($pid, $query = NULL) {
   global $user;
@@ -147,7 +147,7 @@ function islandora_book_create_book_view($pid, $query = NULL) {
 }
 
 /**
- * convert query to a page query?
+ * convert query to a page query
  * @param type $query
  * @param type $pid
  * @return string 
@@ -163,7 +163,7 @@ function convert_query_to_page_query($query, $pid) {
  * Custom form element to do our nice images.
  * @return boolean 
  */
-function islandora_book_elements() {  // Change this line
+function islandora_book_elements() {  
   $type['imagebutton'] = array(
     '#input' => TRUE,
     '#button_type' => 'submit',
@@ -243,8 +243,8 @@ function islandora_book_requirements($phase) {
 }
 
 /**
- * _islandora_book_viewer_available ???
- * @return type 
+ * _islandora_book_viewer_available 
+ * @return boolean
  */
 function _islandora_book_viewer_available() {
   $url = parse_url(variable_get('fedora_base_url', 'http://localhost:8080/fedora'));
@@ -255,7 +255,7 @@ function _islandora_book_viewer_available() {
 
 /**
  * islandora book required fedora objects
- * @return type 
+ * @return array
  */
 function islandora_book_required_fedora_objects() {
 
@@ -372,11 +372,11 @@ function islandora_book_required_fedora_objects() {
 
 /**
  * islandora book purge pages form
- * @global type $base_url
- * @param type $form_state
- * @param type $pid
- * @param type $referrer
- * @return string 
+ * @global string $base_url
+ * @param array $form_state
+ * @param string $pid
+ * @param string $referrer
+ * @return array
  */
 function islandora_book_purge_pages_form(&$form_state, $pid, $referrer = NULL) {
   global $base_url;
@@ -419,9 +419,8 @@ function islandora_book_purge_pages_form(&$form_state, $pid, $referrer = NULL) {
 
 /**
  * islandora book purge pages form submit
- * @param type $form
- * @param type $form_state
- * @return type 
+ * @param array $form
+ * @param array $form_state
  */
 function islandora_book_purge_pages_form_submit($form, &$form_state) {
   module_load_include('inc', 'fedora_repository', 'ConnectionHelper');
@@ -487,7 +486,8 @@ XML;
 }
 
 /**
- * islandora book help ??
+ * islandora book help
+ * implementaion of hook_help()
  * @param type $path
  * @param type $arg
  * @return type 
