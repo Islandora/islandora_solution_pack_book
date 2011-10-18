@@ -47,11 +47,7 @@
   <xsl:if test="$INGESTED = 'true'">
 <div><a><xsl:attribute name="href"><xsl:copy-of select="$OBJECTSPAGE"/>fedora/book_viewer/<xsl:value-of select="$PID"/></xsl:attribute>Read</a>
 </div></xsl:if>
-<div>
-<a><xsl:attribute name="href">http://islandpines.roblib.upei.ca/opac/en-CA/skin/roblib/xml/rdetail.xml?r=<xsl:value-of select="$RECORDID"/></xsl:attribute>
-Checkout
-</a>
-</div> <xsl:if test="$INGESTED = 'true'"><div>
+ <xsl:if test="$INGESTED = 'true'"><div>
 <a><xsl:attribute name="href"><xsl:copy-of select="$OBJECTSPAGE"/>fedora/repository/<xsl:value-of select="$PID"/>/PDF/<xsl:value-of select="$PID"/>.pdf</xsl:attribute>Download</a>
 </div></xsl:if>
 <xsl:if test="($USER > 0) and ($INGESTED = 'true')">
