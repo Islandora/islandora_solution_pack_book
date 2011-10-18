@@ -161,15 +161,16 @@ function book_add_pages_form_submit($form, &$form_state) {
   mkdir($tmpDir);
   $file = $form_state['values']['file'];
 
-  $fileName = $file->filepath;
+  $zip_file = $file->filepath;
   $file_list = array();
-  $cmdString = "unzip -q -o -d $tmpDir \"$fileName\"";
+  $cmdString = "unzip -q -o -d $tmpDir \"$zip_file\"";
 
   system($cmdString, $retVal);
 
   $dirs = array();
   array_push($dirs, $tmpDir);
   $files = scandir($tmpDir);
+
   foreach ($files as $file) {
     if (is_dir("$tmpDir/$file") && $file != '.' && $file != '..' && $file != '__MACOSX') {
       array_push($dirs, $tmpDir . $file);
@@ -179,14 +180,17 @@ function book_add_pages_form_submit($form, &$form_state) {
   foreach ($dirs as $directory) {
     if ($tiff_dir = opendir($directory)) {
       while (FALSE !== ($file_name = readdir($tiff_dir))) {
-        $new_file_name = preg_replace("/[^a-z\.\d]/i", "", $file_name);
-        if ($new_file_name != $file_name) {
-          rename($directory . $file_name, $directory . $new_file_name);
-          $file_name = $new_file_name;
+        $fullfile = $directory . $file_name;
+        if (!is_dir($fullfile)) {
+          $new_file_name = preg_replace("/[^a-z\.\d]/i", "", $file_name);
+          if ($new_file_name != $file_name) {
+            rename($directory . "/" . $file_name, $directory . "/$new_file_name");
+            $file_name = $new_file_name;
+          }
         }
         $ext = strrchr($file_name, '.');
         if ($ext == '.tif' || $ext == '.tiff') {
-          array_push($file_list, "$directory" . "$file_name");
+          array_push($file_list, "$directory" . "/$file_name");
         }
       }
       closedir($tiff_dir);
