@@ -112,7 +112,7 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
     '#type' => 'file',
     '#title' => t('Upload Zipped TIFFs'),
     '#size' => 48,
-    '#description' => t('Upload a zip file containing a tiff for each page of this book'), );
+    '#description' => t('Upload a zip file containing a tiff for each page of this book'),);
 
   $form['submit'] = array(
     '#type' => 'submit',
@@ -180,7 +180,7 @@ function book_add_pages_form_submit($form, &$form_state) {
     if ($tiff_dir = opendir($directory)) {
       while (FALSE !== ($file_name = readdir($tiff_dir))) {
         $new_file_name = preg_replace("/[^a-z\.\d]/i", "", $file_name);
-        if ($new_file_name != $file_name){
+        if ($new_file_name != $file_name) {
           rename($directory . $file_name, $directory . $new_file_name);
           $file_name = $new_file_name;
         }
@@ -273,13 +273,15 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
     exec("convert {$page_file}[0] -thumbnail x2000 -thumbnail x450  -resize '450x<' -resize 50% -fuzz 1% -trim +repage -gravity center -crop 200x200+0+0 +repage -format jpg -quality 100  $page_file-tn.jpg", $output, $returnValue);
     if ($returnValue == '0') {
       $page_item->add_datastream_from_file("$page_file-tn.jpg", 'TN', 'Thumbnail', 'image/jpeg', 'M');
-      $book_item = new Fedora_Item($book_pid);
-      $DSIDS = $book_item->get_datastreams_list_as_array();
-      if (!array_key_exists("TN", $DSIDS)) {
+      if ($page_num == 1) {
+        $book_item = new Fedora_Item($book_pid);
+        $DSIDS = $book_item->get_datastreams_list_as_array();
+        if (array_key_exists("TN", $DSIDS)) {
+          $book_item->purge_datastream('TN');
+        }
         $book_item->add_datastream_from_file("$page_file-tn.jpg", 'TN', 'Thumbnail', 'image/jpeg', 'M');
       }
     }
-
     //add jpeg
     exec("convert  -resize 800 \"{$page_file}\"[0]  \"$page_file-med.jpg\"", $output, $returnValue);
     if ($returnValue == '0') {
