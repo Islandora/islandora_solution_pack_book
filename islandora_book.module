@@ -76,7 +76,7 @@ function islandora_book_book_viewer($pid) {
  */
 function islandora_book_create_book_view($pid, $query = NULL) {
   global $user;
-  module_load_include('inc', 'fedora_repository', 'ObjectHelper');
+  module_load_include('inc', 'fedora_repository', 'api/ObjectHelper');
   $path = drupal_get_path('module', 'islandora_book');
   $objectHelper = new ObjectHelper;
   $xml = $objectHelper->getStream($pid, 'MODS');
@@ -423,7 +423,7 @@ function islandora_book_purge_pages_form(&$form_state, $pid, $referrer = NULL) {
  * @param array $form_state
  */
 function islandora_book_purge_pages_form_submit($form, &$form_state) {
-  module_load_include('inc', 'fedora_repository', 'ConnectionHelper');
+  module_load_include('inc', 'fedora_repository', 'api/ConnectionHelper');
   $pid = $form_state['values']['pid'];
   if (!isset($form_state['storage']['confirm'])) {
     $form_state['storage']['confirm'] = TRUE; // this will cause the form to be rebuilt, entering the confirm part of the form
