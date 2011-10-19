@@ -133,7 +133,7 @@ function islandora_book_create_book_view($pid, $query = NULL) {
     $output .= $newdom->saveXML();
   }
   if (isset($query)) {
-    module_load_include('inc', 'fedora_repository', 'SearchClass');
+    module_load_include('inc', 'fedora_repository', 'core/SearchClass');
     $searchClass = new SearchClass();
     $pageQuery = convert_query_to_page_query($query, $pid);
     $output .= '<div>' . $searchClass->custom_search($pageQuery, $startPage, '/xsl/pageResults.xsl', 500) . '</div>'; //limit results to 500 pages of a book since there is no paging if we enable paging in xslt this can be changed
