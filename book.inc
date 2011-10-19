@@ -211,7 +211,7 @@ function book_add_pages_form_submit($form, &$form_state) {
  */
 function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = 'islandora:pageCModel', $relation = 'isMemberOfCollection', $tmpDir) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
-  module_load_include('inc', 'fedora_repository', 'ObjectHelper');
+  module_load_include('inc', 'fedora_repository', 'api/ObjectHelper');
   $book = new Fedora_Item($pid);
   if (!$book->exists()) {
     return FALSE;
