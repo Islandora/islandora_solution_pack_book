@@ -29,12 +29,14 @@ class IslandoraBook {
    * @return string 
    */
   public function showFieldSets() {
-    module_load_include('inc', 'fedora_repository', 'plugins/tagging_form');
-    module_load_include('inc', 'fedora_repository', 'plugins/DarwinCore');
     module_load_include('module', 'islandora_book');
+    module_load_include('inc', 'fedora_repository','CollectionClass');
     global $base_url;
     $show_purge_tab = (!empty($_POST['form_id']) && ($_POST['form_id'] == 'islandora_book_purge_pages_form'));
     $first_page = new Fedora_Item($this->pid . '-001');
+    $class = new CollectionClass();
+    $results = $class->getRelatedItems($this->pid);
+    $page_items = $class->renderCollection($results, $this->pid, NULL, NULL, $page_number);
     $hasPage = $first_page->exists();
     $tabset = array();
 
@@ -46,6 +48,13 @@ class IslandoraBook {
 
     $viewer_url = variable_get('fedora_base_url', '') . '/get/' . $this->pid . '/islandora:viewerSdef/getViewer' . $qs;
     $html = '<iframe src="' . $viewer_url . '" scrolling="0" frameborder="0" style="width: 100%; height: 800px;">Errors: unable to load viewer</iframe>';
+    $tabset['pages_tab'] = array(
+      // #type and #title are the minimum requirements.
+      '#type' => 'tabpage',
+      '#title' => t('Pages'),
+      // This will be the content of the tab.
+      '#content' => $page_items,
+    );
 
     $tabset['first_tab'] = array(
       // #type and #title are the minimum requirements.
@@ -108,11 +117,23 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
   );
 
   $form['#attributes'] = array('enctype' => 'multipart/form-data');
-  $form['file_upload'] = array(
+  $form['upload_options'] = array(
+    '#type' => 'fieldset',
+    '#title' => "<strong>Access zipped page images</strong>",
+    '#description' => t('Select either ftp file location on the server, or upload zipped page images, but not both.'),
+  );
+
+  $form['upload_options']['file_upload'] = array(
     '#type' => 'file',
     '#title' => t('Upload Zipped TIFFs'),
     '#size' => 48,
-    '#description' => t('Upload a zip file containing a tiff for each page of this book'),);
+    '#description' => t('Upload a zip file containing a tiff for each page of this book'),
+  );
+  $form['upload_options']['upload_from_server'] = array(
+    '#type' => 'textfield',
+    '#description' => 'Server location of previously uploaded file',
+    '#title' => 'FTP file location',
+  );
 
   $form['submit'] = array(
     '#type' => 'submit',
@@ -140,11 +161,21 @@ function book_add_pages_form_validate($form, &$form_state) {
       form_set_error($fieldName, 'Error uploading file.');
       return;
     }
-    $form_state['values']['file'] = $file;
+    $form_state['values']['file'] = $file->filepath;
   }
-  else {
-    // set error
-    form_set_error($fieldName, 'Error uploading file.');
+
+  if ($form_state['values']['upload_from_server']) {
+    if (is_file($form_state['values']['upload_from_server'])) {
+      $form_state['values']['file'] = $form_state['values']['upload_from_server'];
+    }
+    else {
+      form_set_error('upload_from_server', 'File not found.');
+      return;
+    }
+  }
+
+  if (!isset($form_state['values']['file'])) {
+    form_set_error($fieldName, 'Exactly one of these fields must be populated.');
     return;
   }
 }
@@ -157,15 +188,25 @@ function book_add_pages_form_validate($form, &$form_state) {
 function book_add_pages_form_submit($form, &$form_state) {
   $pid = $form_state['values']['pid'];
   $dirName = str_replace(':', '_', $pid);
+  $current_files = scandir(file_directory_path());
+  foreach ($current_files as $current_file) {
+    if ($current_file != '.' && $current_file != '..' && is_dir($current_file)) {
+      $fileage = time() - filectime(file_directory_path() . "/$current_file");
+      if ($fileage > 60 * 60) {
+        deleteDirectory(file_directory_path() . "/$current_file");
+      }
+    }
+  }
   $tmpDir = file_directory_path() . '/' . $dirName . '/';
   mkdir($tmpDir);
-  $file = $form_state['values']['file'];
+  $zip_file = $form_state['values']['file'];
 
-  $zip_file = $file->filepath;
+  // $zip_file = $file->filepath;
   $file_list = array();
   $cmdString = "unzip -q -o -d $tmpDir \"$zip_file\"";
 
   system($cmdString, $retVal);
+  file_delete("$tmpDir \"$zip_file\"");
 
   $dirs = array();
   array_push($dirs, $tmpDir);
@@ -217,10 +258,10 @@ function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = '
     return FALSE;
   }
   $dirName = str_replace(':', '_', $pid);
-
   $page_pids = array();
+  $image_count = count($image_list);
   $batch = array(
-    'title' => 'Creating page objects',
+    'title' => "Creating $image_count page objects",
     'operations' => array(),
     'file' => drupal_get_path('module', 'islandora_book') . '/book.inc',
   );
@@ -232,9 +273,7 @@ function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = '
   }
   $batch['operations'][] = array('makePDF', array($pid, $image_list, $tmpDir));
   $batch['operations'][] = array('deleteDirectory', array($tmpDir));
-
   batch_set($batch);
-
   $objectHelper = new ObjectHelper;
   $dc_xml = $objectHelper->getStream($pid, 'DC');
   if (!preg_match('/<dc:type>ingested<\/dc:type>/', $dc_xml)) {
@@ -244,7 +283,7 @@ function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = '
     $typeNode = $xml->createElement('dc:type', 'ingested');
     $typeNode = $xml->createElementNS("http://purl.org/dc/elements/1.1/", 'dc:type', 'ingested');
     $root->appendChild($typeNode);
-    $book->modify_datastream_by_value($xml->saveXML(), 'DC', 'Dublin core', 'text/xml', TRUE, "Added Type of Ingest", FALSE);
+    $book->modify_datastream_by_value($xml->saveXML(), 'DC', 'Dublin core', 'text/xml', TRUE, "Added Type of Ingested", FALSE);
   }
 }
 
@@ -265,6 +304,7 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
   $page_item->add_relationship($relation, $book_pid);
   // add original tiff
   $page_item->add_datastream_from_file($page_file, 'TIFF', 'Archival TIFF', 'image/tiff', 'M');
+  $page_file = preg_replace('/\/\//', '/', $page_file);
 
   //add compresed jp2 for viewer
   if (variable_get('islandora_book_create_images', TRUE)) {
@@ -274,7 +314,7 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
     }
 
     //add thumbnail image
-    exec("convert {$page_file}[0] -thumbnail x2000 -thumbnail x450  -resize '450x<' -resize 50% -fuzz 1% -trim +repage -gravity center -crop 200x200+0+0 +repage -format jpg -quality 100  $page_file-tn.jpg", $output, $returnValue);
+    exec("convert {$page_file}[0] -colorspace RGB -thumbnail 120x $page_file-tn.jpg", $output, $returnValue);
     if ($returnValue == '0') {
       $page_item->add_datastream_from_file("$page_file-tn.jpg", 'TN', 'Thumbnail', 'image/jpeg', 'M');
       if ($page_num == 1) {
@@ -296,6 +336,8 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
 
   if (variable_get('islandora_book_do_ocr', TRUE)) {
     $executable = variable_get('islandora_ocr_path', '/usr/bin/tesseract');
+    $returnValue = "";
+    $output = "";
     exec("$executable $page_file $page_file -l eng", $output, $returnValue);
     if ($returnValue == '0') {
       $page_item->add_datastream_from_file("$page_file.txt", 'OCR', "Scanned Text", 'text/plain', 'M');
@@ -339,7 +381,11 @@ function makePDF($book_pid, $file_list, $tmpDir) {
   }
   $cmdString .= " $outputFile";
   exec($cmdString, $output, $returnValue);
+   $datastreams = $book_item->get_datastreams_list_as_array();
   if ($returnValue == '0') {
+        if (array_key_exists('PDF', $datastreams)) {
+      $book_item->purge_datastream('PDF');
+    }
     $book_item->add_datastream_from_file($outputFile, 'PDF', "PDF of Book", 'application/pdf', 'M');
   }
 }

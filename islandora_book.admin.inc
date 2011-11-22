@@ -45,7 +45,7 @@ function islandora_book_admin_settings(&$form_state) {
   $form['book_ahah_wrapper']['islandora_book_do_ocr'] = array(
     '#type' => 'checkbox',
     '#title' => t('Perform OCR on incoming TIFF images?'),
-    '#description' => t('Do not check this box if OCR is performed on an exernal server, such as ABBYY'),
+    '#description' => t('Do not check this box if OCR is performed on an external server, such as ABBYY'),
     '#default_value' => $ocr,
     '#ahah' => array(
       'path' => 'islandora/book/ocr',

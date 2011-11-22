@@ -38,7 +38,7 @@
     <tr><td align="right" valign="top"><b>ISBN 10: </b></td><td valign="top"><xsl:value-of select="//mods:identifier[@type='isbn']"/></td></tr>
     <tr><td align="right" valign="top"><b>Subjects: </b></td><td valign="top"><xsl:for-each select="//mods:subject">
                                 <xsl:for-each select="*"> 
-                                <a><xsl:attribute name="href"><xsl:copy-of select="$OBJECTSPAGE"/>fedora/ilives_book_search/mods.subject:"<xsl:value-of select="normalize-space(.)"/>"%20AND%20dc.type:collection%20AND%20dc.type:ingested
+                                <a><xsl:attribute name="href"><xsl:copy-of select="$OBJECTSPAGE"/>islandora/solr/search/mods.subject:"<xsl:value-of select="normalize-space(.)"/>"%20AND%20dc.type:collection%20AND%20dc.type:ingested
 				</xsl:attribute>
                                     
                                     <xsl:value-of select="."/></a><xsl:text> </xsl:text></xsl:for-each><br /></xsl:for-each>

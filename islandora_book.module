@@ -40,7 +40,41 @@ function islandora_book_menu() {
     'file' => 'islandora_book.admin.inc',
     'type' => MENU_CALLBACK,
   );
+
+  $items['islandora/book/updatepage'] = array(
+    'page callback' => 'page_management_wrapper',
+    'access arguments' => array('view fedora collection'),
+    'file' => 'ObjectManager.inc',
+    'type' => MENU_CALLBACK,
+  );
   return $items;
+}
+
+function islandora_book_islandora_tabs($content_models, $pid) {
+  module_load_include('inc', 'islandora_book', 'PageObjectManager');
+  if (!variable_get('islandora_add_collection_tabs', TRUE)) {
+    return;
+  }
+
+  $content_model_pids = array();
+  $tabset = array();
+  $query = "select \$object from <#ri>
+            where (<info:fedora/$pid> <fedora-model:hasModel> \$object
+            and \$object <fedora-model:state> <info:fedora/fedora-system:def/model#Active>)
+           minus \$object <mulgara:is> <info:fedora/fedora-system:FedoraObject-3.0>";
+
+  $query = htmlentities(urlencode($query));
+  $content_model = '';
+  $url = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
+  $url .= "?type=tuples&flush=TRUE&format=csv&limit=$limit&offset=$offset&lang=itql&stream=on&query=" . $query;
+  $content .= do_curl($url);
+  $cm_parts = explode('/', $content);
+  $content_model = trim($cm_parts[1]);
+  if ($content_model == 'islandora:pageCModel') {
+    $return_tabs = get_page_model_management_content($pid);
+    $return_tabs['fedora_object_details'] = null;
+    return $return_tabs;
+  }
 }
 
 /**
@@ -163,7 +197,7 @@ function convert_query_to_page_query($query, $pid) {
  * Custom form element to do our nice images.
  * @return boolean 
  */
-function islandora_book_elements() {  
+function islandora_book_elements() {
   $type['imagebutton'] = array(
     '#input' => TRUE,
     '#button_type' => 'submit',
@@ -272,56 +306,56 @@ function islandora_book_required_fedora_objects() {
       'title' => 'Islandora Books',
       'objects' => array(
         array(
-          'foxml_file' => "$module_path/xml/islandora_book_pageCModel.xml",
+          'foxml_file' => "$module_path/xml/islandora_pageCModel.xml",
           'pid' => 'islandora:pageCModel',
           'dsid' => NULL,
           'datastream_file' => NULL,
           'dsversion' => NULL,
         ),
         array(
-          'foxml_file' => "$module_path/xml/islandora_book_bookCModel.xml",
+          'foxml_file' => "$module_path/xml/islandora_bookCModel.xml",
           'pid' => 'islandora:bookCModel',
           'dsid' => NULL,
           'datastream_file' => NULL,
           'dsversion' => NULL,
         ),
         array(
-          'foxml_file' => "$module_path/xml/islandora_book_jp2Sdef.xml",
+          'foxml_file' => "$module_path/xml/islandora_jp2Sdef.xml",
           'pid' => 'islandora:jp2Sdef',
           'dsid' => NULL,
           'datastream_file' => NULL,
           'dsversion' => NULL,
         ),
         array(
-          'foxml_file' => "$module_path/xml/islandora_book_viewerSdef.xml",
+          'foxml_file' => "$module_path/xml/islandora_viewerSdef.xml",
           'pid' => 'islandora:viewerSdef',
           'dsid' => NULL,
           'datastream_file' => NULL,
           'dsversion' => NULL,
         ),
         array(
-          'foxml_file' => "$module_path/xml/islandora_book_viewerSdep-bookCModel.xml",
+          'foxml_file' => "$module_path/xml/islandora_viewerSdep-bookCModel.xml",
           'pid' => 'islandora:viewerSdep-bookCModel',
           'dsid' => NULL,
           'datastream_file' => NULL,
           'dsversion' => NULL,
         ),
         array(
-          'foxml_file' => "$module_path/xml/islandora_book_viewerSdep-pageCModel.xml",
+          'foxml_file' => "$module_path/xml/islandora_viewerSdep-pageCModel.xml",
           'pid' => 'islandora:viewerSdep-pageCModel',
           'dsid' => NULL,
           'datastream_file' => NULL,
           'dsversion' => NULL,
         ),
         array(
-          'foxml_file' => "$module_path/xml/islandora_book_tei2htmlSdef.xml",
+          'foxml_file' => "$module_path/xml/islandora_tei2htmlSdef.xml",
           'pid' => 'islandora:tei2htmlSdef',
           'dsid' => NULL,
           'datastream_file' => NULL,
           'dsversion' => NULL,
         ),
         array(
-          'foxml_file' => "$module_path/xml/islandora_book_tei2htmlSdep-pageCModel.xml",
+          'foxml_file' => "$module_path/xml/islandora_tei2htmlSdep-pageCModel.xml",
           'pid' => 'islandora:tei2htmlSdep-pageCModel',
           'dsid' => NULL,
           'datastream_file' => NULL,
@@ -335,19 +369,13 @@ function islandora_book_required_fedora_objects() {
           'dsversion' => NULL,
         ),
         array(
-          'foxml_file' => "$module_path/xml/islandora_book_jp2Sdep-pageCModel.xml",
+          'foxml_file' => "$module_path/xml/islandora_jp2Sdep-pageCModel.xml",
           'pid' => 'islandora:jp2Sdep-pageCModel',
           'dsid' => NULL,
           'datastream_file' => NULL,
           'dsversion' => NULL,
         ),
-        array(
-          'foxml_file' => "$module_path/xml/islandora_book_CollectionModel.xml",
-          'pid' => 'islandora:CollectionModel',
-          'dsid' => NULL,
-          'datastream_file' => NULL,
-          'dsversion' => NULL,
-        ),
+
         array(
           'pid' => 'books:collection',
           'label' => 'Book Collection',
@@ -471,17 +499,8 @@ XML;
         return;
       }
     }
-    if (!empty($form_state['values']['referrer'])) {
-      $form_state['redirect'] = $form_state['values']['referrer'];
-    }
-    elseif (empty($collectionPid) && !empty($_SESSION['fedora_collection']) && $_SESSION['fedora_collection'] != $pid) {
-      $collectionPid = $_SESSION['fedora_collection'];
 
-      $form_state['redirect'] = "fedora/repository/$collectionPid/";
-    }
-    else {
-      $form_state['redirect'] = 'fedora/repository/';
-    }
+    $form_state['redirect'] = "fedora/repository/$pid";
   }
 }
 
@@ -517,4 +536,14 @@ function islandora_book_help($path, $arg) {
           )
       );
   }
+}
+
+function islandora_book_form_alter(&$form, $form_state, $form_id) {
+  if ($form_id == 'content_model_viewer_ingest_metadata_form') {
+    array_unshift($form['#validate'], 'add_book_thumbnail');
+  }
+}
+
+function add_book_thumbnail($form, $form_state) {
+  drupal_set_message("Validation added");
 }
