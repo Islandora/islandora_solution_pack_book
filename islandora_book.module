@@ -377,7 +377,7 @@ function islandora_book_required_fedora_objects() {
         ),
 
         array(
-          'pid' => 'books:collection',
+          'pid' => 'islandora:bookCollection',
           'label' => 'Book Collection',
           'cmodel' => 'islandora:collectionCModel',
           'parent' => 'islandora:root',
@@ -388,7 +388,7 @@ function islandora_book_required_fedora_objects() {
             ),
             array(
               'dsid' => 'TN',
-              'datastream_file' => "$module_path/images/Crystal_Clear_mimetype_man.png",
+              'datastream_file' => "$module_path/images/Crystal_Clear_filesystem_folder.png",
               'mimetype' => 'image/png',
             ),
           ),
