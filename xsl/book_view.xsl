@@ -15,7 +15,7 @@
  <xsl:template match="/">
 
  <h1 ><xsl:value-of select="//mods:titleInfo/mods:nonSort"/><xsl:text> </xsl:text><xsl:value-of select="//mods:titleInfo/mods:title"/>  <xsl:for-each select="//mods:titleInfo/mods:subTitle">
-                               : <xsl:value-of select="."/></xsl:for-each></h1>
+                                <xsl:value-of select="."/></xsl:for-each></h1>
  <xsl:for-each select="//mods:titleInfo[@type='alternative']/mods.title"><h3>
                                <!-- <xsl:value-of select="substring-before(text(),'/')"/>-->
                                 <xsl:value-of select="."/><xsl:text> </xsl:text> </h3>
