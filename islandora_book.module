@@ -388,7 +388,7 @@ function islandora_book_required_fedora_objects() {
             ),
             array(
               'dsid' => 'TN',
-              'datastream_file' => "$module_path/images/Crystal_Clear_filesystem_folder.png",
+              'datastream_file' => "$module_path/images/Crystal_Clear_filesystem_folder_grey.png",
               'mimetype' => 'image/png',
             ),
           ),
