@@ -30,10 +30,19 @@ class IslandoraBook {
    */
   public function showFieldSets() {
     module_load_include('module', 'islandora_book');
-    module_load_include('inc', 'fedora_repository','CollectionClass');
+    module_load_include('inc', 'fedora_repository', 'CollectionClass');
     global $base_url;
     $show_purge_tab = (!empty($_POST['form_id']) && ($_POST['form_id'] == 'islandora_book_purge_pages_form'));
     $first_page = new Fedora_Item($this->pid . '-001');
+    $page_number = 1;
+    $pages_selected = FALSE;
+    $qstring = $_GET['q'];
+    $qparts = explode('/', $qstring);
+    $tail = end($qparts);
+    if (is_numeric($tail)) {
+      $pages_selected = TRUE;
+      $page_number = $tail;
+    }
     $class = new CollectionClass();
     $results = $class->getRelatedItems($this->pid);
     $page_items = $class->renderCollection($results, $this->pid, NULL, NULL, $page_number);
@@ -52,7 +61,7 @@ class IslandoraBook {
       // #type and #title are the minimum requirements.
       '#type' => 'tabpage',
       '#title' => t('Pages'),
-      // This will be the content of the tab.
+      '#selected' => $pages_selected,
       '#content' => $page_items,
     );
 
@@ -381,9 +390,9 @@ function makePDF($book_pid, $file_list, $tmpDir) {
   }
   $cmdString .= " $outputFile";
   exec($cmdString, $output, $returnValue);
-   $datastreams = $book_item->get_datastreams_list_as_array();
+  $datastreams = $book_item->get_datastreams_list_as_array();
   if ($returnValue == '0') {
-        if (array_key_exists('PDF', $datastreams)) {
+    if (array_key_exists('PDF', $datastreams)) {
       $book_item->purge_datastream('PDF');
     }
     $book_item->add_datastream_from_file($outputFile, 'PDF', "PDF of Book", 'application/pdf', 'M');
