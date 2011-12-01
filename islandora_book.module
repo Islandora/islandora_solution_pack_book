@@ -110,7 +110,7 @@ function islandora_book_book_viewer($pid) {
  */
 function islandora_book_create_book_view($pid, $query = NULL) {
   global $user;
-  module_load_include('inc', 'fedora_repository', 'ObjectHelper');
+  module_load_include('inc', 'fedora_repository', 'api/ObjectHelper');
   $path = drupal_get_path('module', 'islandora_book');
   $objectHelper = new ObjectHelper;
   $xml = $objectHelper->getStream($pid, 'MODS');
@@ -138,7 +138,7 @@ function islandora_book_create_book_view($pid, $query = NULL) {
   try {
     $proc = new XsltProcessor();
   } catch (Exception $e) {
-    drupal_set_message(t('Error loading Book View XSLT: $e', array('!e' => $e->getMessage())));
+    drupal_set_message(t('Error loading Book View XSLT: $e', array('@e' => check_plain($e->getMessage()))));
     return;
   }
 
@@ -167,7 +167,7 @@ function islandora_book_create_book_view($pid, $query = NULL) {
     $output .= $newdom->saveXML();
   }
   if (isset($query)) {
-    module_load_include('inc', 'fedora_repository', 'SearchClass');
+    module_load_include('inc', 'fedora_repository', 'core/SearchClass');
     $searchClass = new SearchClass();
     $pageQuery = convert_query_to_page_query($query, $pid);
     $output .= '<div>' . $searchClass->custom_search($pageQuery, $startPage, '/xsl/pageResults.xsl', 500) . '</div>'; //limit results to 500 pages of a book since there is no paging if we enable paging in xslt this can be changed
@@ -451,7 +451,7 @@ function islandora_book_purge_pages_form(&$form_state, $pid, $referrer = NULL) {
  * @param array $form_state
  */
 function islandora_book_purge_pages_form_submit($form, &$form_state) {
-  module_load_include('inc', 'fedora_repository', 'ConnectionHelper');
+  module_load_include('inc', 'fedora_repository', 'api/ConnectionHelper');
   $pid = $form_state['values']['pid'];
   if (!isset($form_state['storage']['confirm'])) {
     $form_state['storage']['confirm'] = TRUE; // this will cause the form to be rebuilt, entering the confirm part of the form
