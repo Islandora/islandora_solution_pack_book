@@ -469,7 +469,7 @@ select \$object \$title from <#ri>
 XML;
 
     // this is where you do your processing after they have pressed the confirm button
-    module_load_include('inc', 'fedora_repoitory', 'CollectionClass');
+    module_load_include('inc', 'fedora_repository', 'CollectionClass');
     $collection = new CollectionClass($pid);
     $contents = $collection->getRelatedItems($pid, $query);
     $results_xml = simplexml_load_string($contents);

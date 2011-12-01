@@ -29,6 +29,7 @@ class IslandoraBook {
    * @return string 
    */
   public function showFieldSets() {
+    drupal_set_title($this->item->objectProfile->objLabel);
     module_load_include('module', 'islandora_book');
     module_load_include('inc', 'fedora_repository', 'CollectionClass');
     global $base_url;
@@ -233,6 +234,7 @@ function book_add_pages_form_submit($form, &$form_state) {
         $fullfile = $directory . $file_name;
         if (!is_dir($fullfile)) {
           $new_file_name = preg_replace("/[^a-z\.\d]/i", "", $file_name);
+          $new_file_name = preg_replace("/\.tiff$/", ".tif", $new_file_name);
           if ($new_file_name != $file_name) {
             rename($directory . "/" . $file_name, $directory . "/$new_file_name");
             $file_name = $new_file_name;
