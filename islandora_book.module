@@ -51,7 +51,8 @@ function islandora_book_menu() {
 }
 
 function islandora_book_islandora_tabs($content_models, $pid) {
-  module_load_include('inc', 'islandora_book', 'PageObjectManager');
+  module_load_include('inc', 'islandora_book', 'page_object_manager');
+  module_load_include('inc', 'islandora_book', 'book_object_manager');
   if (!variable_get('islandora_add_collection_tabs', TRUE)) {
     return;
   }
@@ -72,6 +73,11 @@ function islandora_book_islandora_tabs($content_models, $pid) {
   $content_model = trim($cm_parts[1]);
   if ($content_model == 'islandora:pageCModel') {
     $return_tabs = get_page_model_management_content($pid);
+    $return_tabs['fedora_object_details'] = null;
+    return $return_tabs;
+  }
+  if ($content_model == 'islandora:bookCModel') {
+    $return_tabs = get_book_model_management_content($pid);
     $return_tabs['fedora_object_details'] = null;
     return $return_tabs;
   }
@@ -375,7 +381,6 @@ function islandora_book_required_fedora_objects() {
           'datastream_file' => NULL,
           'dsversion' => NULL,
         ),
-
         array(
           'pid' => 'islandora:bookCollection',
           'label' => 'Book Collection',
@@ -452,6 +457,7 @@ function islandora_book_purge_pages_form(&$form_state, $pid, $referrer = NULL) {
  */
 function islandora_book_purge_pages_form_submit($form, &$form_state) {
   module_load_include('inc', 'fedora_repository', 'api/ConnectionHelper');
+  module_load_include('inc', 'islandora_book', 'book_pack_utils');
   $pid = $form_state['values']['pid'];
   if (!isset($form_state['storage']['confirm'])) {
     $form_state['storage']['confirm'] = TRUE; // this will cause the form to be rebuilt, entering the confirm part of the form
@@ -474,11 +480,8 @@ XML;
     $contents = $collection->getRelatedItems($pid, $query);
     $results_xml = simplexml_load_string($contents);
     $resultsarray = array();
-    foreach ($results_xml->results->result as $result) {
-      $pid_to_delete = str_replace('info:fedora/', '', $result->object->attributes()->uri);
-
-      //parse contents
-
+    $pids_to_delete = get_page_pids($pid);
+    foreach ($pids_to_delete as $pid_to_delete) {
       $params = array(
         "pid" => $pid_to_delete,
         "logMessage" => "Purged",
@@ -538,12 +541,4 @@ function islandora_book_help($path, $arg) {
   }
 }
 
-function islandora_book_form_alter(&$form, $form_state, $form_id) {
-  if ($form_id == 'content_model_viewer_ingest_metadata_form') {
-    array_unshift($form['#validate'], 'add_book_thumbnail');
-  }
-}
 
-function add_book_thumbnail($form, $form_state) {
-  drupal_set_message("Validation added");
-}

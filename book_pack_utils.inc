@@ -1,139 +1,25 @@
 <?php
 
-function page_management_wrapper($pid) {
-  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
-  return drupal_render(get_page_model_management_content($pid));
-}
+function get_page_pids($book_pid) {
+  $query = <<<XML
+select \$object \$title from <#ri>
+	where (\$object <dc:title> \$title
+		and \$object <fedora-rels-ext:isMemberOf> <info:fedora/$book_pid>
+		and \$object <fedora-model:state> <info:fedora/fedora-system:def/model#Active>)
+	order by \$title
 
-function get_page_model_management_content($pid) {
-  $form['manage_page_tab'] = array(
-    '#type' => 'tabpage',
-    '#title' => t('Manage This Page Object'),
-    '#content' => drupal_get_form('page_management_form', $pid),
-    '#selected' => FALSE,
-  );
-  return $form;
-}
+XML;
 
-function page_management_form(&$form_state, $pid) {
-  module_load_include('inc', 'fedora_repository', 'plugins/FedoraObjectDetailedContent');
-  $content_helper = new FedoraObjectDetailedContent($pid);
-  $objectHelper = new ObjectHelper();
-  $ds_list = display_builder($content_helper->pid, $content_helper->item);
-  $add_datastreams_details = get_add_datastream_data($content_helper->pid);
-  $dc_html = $objectHelper->getFormattedDC($content_helper->item);
-  $purge_form = drupal_get_form('fedora_repository_purge_object_form', $content_helper->pid, check_plain(substr(request_uri(), strlen(base_path()))));
-  $form = array();
-  $form['pid'] = array(
-    '#type' => 'hidden',
-    '#value' => $pid,
-  );
-
-
-  $form['view_dc'] = array(
-    '#type' => 'fieldset',
-    '#collapsed' => true,
-    '#collapsible' => true,
-    '#title' => t('View Metadata'),
-  );
-
-  $form['view_dc']['dublin_core'] = array(
-    '#type' => 'tabpage',
-    '#title' => t('View'),
-    '#content' => $dc_html,
-  );
-  $form['page_manage'] = array(
-    '#type' => 'fieldset',
-    '#collapsed' => true,
-    '#collapsible' => true,
-    '#title' => t('Update Derived Datastreams'),
-    '#description' => t('Update datastreams for this page object.  The orginal stored tiff will be used to create all derived datastreams.'),
-  );
-  $form['page_manage']['do_ocr'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Refresh OCR for this page')
-  );
-  $form['page_manage']['recreate_derivatives'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Refresh all derived images')
-  );
-
-  $form['page_manage']['submit'] = array(
-    '#type' => 'submit',
-    '#id' => 'refresh_datastreams',
-    '#value' => t('Update Page Datastreams'),
-  );
-  $form['current_datastreams'] = array(
-    '#type' => 'fieldset',
-    '#collapsed' => true,
-    '#collapsible' => true,
-    '#title' => t('Manage Current Datastreams'),
-  );
-
-  $form['current_datastreams']['current_object_details'] = array(
-    '#type' => 'tabpage',
-    '#title' => t('View'),
-    '#content' => $ds_list,
-  );
-  $form['add_datastreams'] = array(
-    '#type' => 'fieldset',
-    '#collapsed' => true,
-    '#collapsible' => true,
-    '#title' => t('Add Additional Datastreams'),
-  );
-
-  $form['add_datastreams']['datastream_candidates'] = array(
-    '#type' => 'tabpage',
-    '#title' => t('View'),
-    '#content' => $add_datastreams_details,
-  );
-  if (user_access('delete pages')) {
-    $form['delete_page'] = array(
-      '#title' => "Permanently Delete this page",
-      '#type' => 'fieldset',
-      '#description' => t("Clicking this button will delete this page. <br /> <strong>This action cannot be undone.</strong>"),
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
-    );
-    $form['delete_page']['confirm'] = array(
-      '#title' => "Are you sure?",
-      '#type' => 'fieldset',
-      '#description' => t('<strong>Clicking the delete button will permanantly remove this page. <br />  <strong>This action cannot be undone.</strong> '),
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
-    );
-
-    $form['delete_page']['confirm']['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Delete this page'),
-      '#id' => 'delete_page',
-    );
+  module_load_include('inc', 'fedora_repository', 'CollectionClass');
+  $collection = new CollectionClass($book_pid);
+  $contents = $collection->getRelatedItems($book_pid, $query);
+  $results_xml = simplexml_load_string($contents);
+  $resultsarray = array();
+  $book_pids = array();
+  foreach ($results_xml->results->result as $result) {
+    $book_pids[] = str_replace('info:fedora/', '', $result->object->attributes()->uri);
   }
-
-  return $form;
-}
-
-function page_management_form_submit($form, &$form_state) {
-  global $user;
-  $pid = $form_state['values']['pid'];
-  $tmp_filename = preg_replace("/:/", '_', $pid) . 'tif';
-  $item = new Fedora_Item($pid);
-  if ($form_state['clicked_button']['#id'] == 'refresh_datastreams') {
-    $tiff = do_curl("http://localhost:8080/fedora/objects/$pid/datastreams/TIFF/content");
-    $tiff_file_path = file_directory_path() . "/" . $tmp_filename;
-    file_put_contents($tiff_file_path, $tiff);
-    $item = new Fedora_Item($pid);
-    if ($form_state['values']['do_ocr']) {
-      refresh_ocr($tiff_file_path, $item);
-    }
-    if ($form_state['values']['recreate_derivatives']) {
-      refresh_images($tiff_file_path, $item);
-    }
-    file_delete($tiff_file_path);
-  }
-  if ($form_state['clicked_button']['#id'] == 'delete_page') {
-    $item->purge($pid . ' deleted by user identified as ' . $user->name);
-  }
+  return $book_pids;
 }
 
 function refresh_ocr($tiff, &$item) {
@@ -142,6 +28,7 @@ function refresh_ocr($tiff, &$item) {
   $executable = variable_get('islandora_ocr_path', '/usr/bin/tesseract');
   $returnValue = "";
   $output = "";
+  $success = FALSE;
   exec("$executable $tiff $tiff -l eng", $output, $returnValue);
   if ($returnValue == '0') {
     if (array_key_exists('OCR', $datastreams)) {
@@ -149,15 +36,17 @@ function refresh_ocr($tiff, &$item) {
     }
     $item->add_datastream_from_file("$tiff.txt", 'OCR', "Scanned Text", 'text/plain', 'M');
     file_delete("$tiff.txt");
+    $success = TRUE;
   }
 
-  drupal_set_message("Updated OCR for $label");
+  return $success;
 }
 
 function refresh_images($tiff, &$item) {
   $label = $item->objectProfile->objLabel;
   $datastreams = $item->get_datastreams_list_as_array();
   $returnValue = "";
+  $success = 0;
   exec('kdu_compress -i "' . $tiff . '" -o "' . $tiff . '.jp2' . '" -rate 0.5 Clayers=1 Clevels=7 "Cprecincts={256,256},{256,256},{256,256},{128,128},{128,128},{64,64},{64,64},{32,32},{16,16}" "Corder=RPCL" "ORGgen_plt=yes" "ORGtparts=R" "Cblk={32,32}" Cuse_sop=yes', $output, $returnValue);
   if ($returnValue == '0') {
     if (array_key_exists('JP2', $datastreams)) {
@@ -165,6 +54,7 @@ function refresh_images($tiff, &$item) {
     }
     $item->add_datastream_from_file("$tiff.jp2", 'JP2', "Compressed JP2", 'image/jp2', 'M');
     file_delete("$tiff.jp2");
+    $success++;
   }
 
   exec("convert {$tiff}[0] -colorspace RGB -thumbnail 120x $tiff-tn.jpg", $output, $returnValue);
@@ -175,6 +65,7 @@ function refresh_images($tiff, &$item) {
     }
     $item->add_datastream_from_file("$tiff-tn.jpg", 'TN', 'Thumbnail', 'image/jpeg', 'M');
     file_delete("$tiff-tn.jpg");
+    $success++;
   }
   file_delete("$tiff-tn.jpg");
   exec("convert  -resize 800 \"{$tiff}\"[0]  \"$tiff-med.jpg\"", $output, $returnValue);
@@ -184,11 +75,22 @@ function refresh_images($tiff, &$item) {
     }
     $item->add_datastream_from_file("$tiff-med.jpg", 'JPEG', "JPEG image", 'image/jpeg', 'M');
     file_delete("$tiff-med.jpg");
+    $success++;
   }
-  drupal_set_message("Updated Derivative Images for $label");
+  return $success;
 }
 
-function display_builder($object_pid, &$fedoraItem) {
+function save_datastream_as_tempfile($pid, $dsid) {
+  $tmp_filename = preg_replace("/:|-/", '_', $pid) . '.tif';
+  $item = new Fedora_Item($pid);
+  $url = variable_get('fedora_base_url', 'http://localhost:8080/fedora') . "/objects/$pid/datastreams/$dsid/content";
+  $file_contents = do_curl($url);
+  $file_path = file_directory_path() . "/" . $tmp_filename;
+  file_put_contents($file_path, $file_contents);
+  return $file_path;
+}
+
+function datastream_display_builder($object_pid, &$fedoraItem) {
   global $fedoraUser, $fedoraPass, $base_url, $user;
   module_load_include('inc', 'fedora_repository', 'ConnectionHelper');
   module_load_include('inc', 'fedora_repository', 'ObjectHelper');
@@ -270,8 +172,30 @@ function get_add_datastream_data($object_pid) {
       $allow = fedora_fesl_check_roles($object_pid, 'write');
     }
     if ($allow) {
-      $dataStreamBody .= drupal_get_form('add_stream_form', $object_pid);
+      $dataStreamBody = drupal_get_form('add_stream_form', $object_pid);
     }
   }
   return $dataStreamBody;
 }
+
+
+function get_collection_from_pid($pid){
+
+  module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
+  $query_string = 'select  $parent  from <#ri>
+		where ($object <fedora-rels-ext:isMemberOf> $parent
+    or $object <fedora-rels-ext:isMemberOfCollection> $parent)
+		and $object <dc:identifier> \''.$pid.'\'
+		order by $object';
+
+  $query_string = htmlentities(urlencode($query_string));
+  $url = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
+  $url .= '?type=tuples&flush=true&format=csv&limit=13000&lang=itql&stream=on&query=' . $query_string;
+  $content = do_curl($url, TRUE);
+  $results = explode("\n", $content);
+  $object_pids = preg_replace('/^info:fedora\/|"parent"| /', '', $results);
+  $object_pids = array_values(array_filter($object_pids));
+  return $object_pids;
+
+}
+
