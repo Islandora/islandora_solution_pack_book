@@ -178,14 +178,13 @@ function get_add_datastream_data($object_pid) {
   return $dataStreamBody;
 }
 
-
-function get_collection_from_pid($pid){
+function get_collection_from_pid($pid) {
 
   module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
   $query_string = 'select  $parent  from <#ri>
 		where ($object <fedora-rels-ext:isMemberOf> $parent
     or $object <fedora-rels-ext:isMemberOfCollection> $parent)
-		and $object <dc:identifier> \''.$pid.'\'
+		and $object <dc:identifier> \'' . $pid . '\'
 		order by $object';
 
   $query_string = htmlentities(urlencode($query_string));
@@ -196,6 +195,16 @@ function get_collection_from_pid($pid){
   $object_pids = preg_replace('/^info:fedora\/|"parent"| /', '', $results);
   $object_pids = array_values(array_filter($object_pids));
   return $object_pids;
-
 }
 
+function get_collection_relationships($pid) {
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  $current_relationships = array();
+  $item = new fedora_item($pid);
+  $collections = $item->get_relationships('isMemberOfCollection');
+  foreach ($collections as $collection) {
+    $collection_item = new fedora_item($collection['object']);
+    $current_relationships[$collection['object']] = $collection_item->objectProfile->objLabel . ' (' . $collection['object'] .  ')';
+  }
+  return $current_relationships;
+}

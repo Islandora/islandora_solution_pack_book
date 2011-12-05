@@ -25,10 +25,50 @@ function book_management_form(&$form_state, $pid) {
   $add_datastreams_details = get_add_datastream_data($content_helper->pid);
   $dc_html = $objectHelper->getFormattedDC($content_helper->item);
   $purge_form = drupal_get_form('fedora_repository_purge_object_form', $content_helper->pid, check_plain(substr(request_uri(), strlen(base_path()))));
+  $potential_collections = get_collections_as_option_array();
+  $current_collections = get_collection_relationships($pid);
+
+  $values = array_values($current_collections);
+  $collection_value = $values[0];
+  $keys = array_keys($current_collections);
+  $collection_key = $keys[0];
+
+  unset($potential_collections[$collection_key]);
+  $values = array_values($current_collections);
   $form = array();
   $form['pid'] = array(
     '#type' => 'hidden',
     '#value' => $pid,
+  );
+  $form['current_collection'] = array(
+    '#type' => 'hidden',
+    '#value' => $collection_key,
+  );
+  $form['collections'] = array(
+    '#type' => 'fieldset',
+    '#collapsed' => true,
+    '#collapsible' => true,
+    '#title' => t('Collection Membership'),
+  );
+
+
+  $form['collections']['current'] = array(
+    '#title' => 'Currently Member of',
+    '#type' => 'item',
+    '#value' => $collection_value,
+  );
+
+  $form['collections']['new_collection'] = array(
+    '#title' => 'New Collection',
+    '#description' => t("Move book object to new collection"),
+    '#type' => 'select',
+    '#options' => $potential_collections,
+  );
+
+  $form['collections']['submit'] = array(
+    '#type' => 'submit',
+    '#id' => 'update_collection',
+    '#value' => t('Move Book to New Collection'),
   );
 
 
@@ -115,7 +155,15 @@ function book_management_form_submit($form, &$form_state) {
   global $user;
   $book_pid = $form_state['values']['pid'];
   $collection_pids = get_collection_from_pid($book_pid);
-  $item = new Fedora_Item($pid);
+  $item = new Fedora_Item($book_pid);
+  if ($form_state['clicked_button']['#id'] == 'update_collection') {
+    $current_collection = $form_state['values']['current_collection'];
+    $item->purge_relationship('isMemberOfCollection', $current_collection);
+    $new_collection = $form_state['values']['new_collection'];
+    $item->add_relationship('isMemberOfCollection', $new_collection, RELS_EXT_URI);
+    drupal_goto("fedora/repository/$new_collection");
+  }
+
   if ($form_state['clicked_button']['#id'] == 'refresh_datastreams') {
     if ($form_state['values']['do_ocr']) {
       $do_ocr = TRUE;
