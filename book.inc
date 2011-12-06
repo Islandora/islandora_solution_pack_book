@@ -29,12 +29,12 @@ class IslandoraBook {
    * @return string 
    */
   public function showFieldSets() {
+    module_load_include('inc', 'islandora_book', 'book_pack_utils');
     drupal_set_title($this->item->objectProfile->objLabel);
     module_load_include('module', 'islandora_book');
     module_load_include('inc', 'fedora_repository', 'CollectionClass');
     global $base_url;
     $show_purge_tab = (!empty($_POST['form_id']) && ($_POST['form_id'] == 'islandora_book_purge_pages_form'));
-    $first_page = new Fedora_Item($this->pid . '-001');
     $page_number = 1;
     $pages_selected = FALSE;
     $qstring = $_GET['q'];
@@ -47,7 +47,11 @@ class IslandoraBook {
     $class = new CollectionClass();
     $results = $class->getRelatedItems($this->pid);
     $page_items = $class->renderCollection($results, $this->pid, NULL, NULL, $page_number);
-    $hasPage = $first_page->exists();
+    $page_pids = get_page_pids($this->pid);
+ 
+    if (count($page_pids)>0) {
+      $hasPage = TRUE;
+    }
     $tabset = array();
 
     global $user;
@@ -208,7 +212,9 @@ function book_add_pages_form_submit($form, &$form_state) {
     }
   }
   $tmpDir = file_directory_path() . '/' . $dirName . '/';
-  mkdir($tmpDir);
+  if (!is_dir($tmpDir)) {
+    mkdir($tmpDir, 0755);
+  }
   $zip_file = $form_state['values']['file'];
 
   // $zip_file = $file->filepath;
