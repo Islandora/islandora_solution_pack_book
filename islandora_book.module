@@ -465,21 +465,6 @@ function islandora_book_purge_pages_form_submit($form, &$form_state) {
   }
   else {
 
-    $query = <<<XML
-select \$object \$title from <#ri>
-	where (\$object <dc:title> \$title
-		and \$object <fedora-rels-ext:isMemberOf> <info:fedora/$pid>
-		and \$object <fedora-model:state> <info:fedora/fedora-system:def/model#Active>)
-	order by \$title
-
-XML;
-
-    // this is where you do your processing after they have pressed the confirm button
-    module_load_include('inc', 'fedora_repository', 'CollectionClass');
-    $collection = new CollectionClass($pid);
-    $contents = $collection->getRelatedItems($pid, $query);
-    $results_xml = simplexml_load_string($contents);
-    $resultsarray = array();
     $pids_to_delete = get_page_pids($pid);
     foreach ($pids_to_delete as $pid_to_delete) {
       $params = array(
