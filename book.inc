@@ -213,7 +213,7 @@ function book_add_pages_form_submit($form, &$form_state) {
   }
   $tmpDir = file_directory_path() . '/' . $dirName . '/';
   if (!is_dir($tmpDir)) {
-    mkdir($tmpDir, 0755);
+    mkdir($tmpDir, 0766);
   }
   $zip_file = $form_state['values']['file'];
 
