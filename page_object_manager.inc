@@ -82,13 +82,13 @@ function page_management_form(&$form_state, $pid) {
     '#collapsible' => true,
     '#title' => t('Add Additional Datastreams'),
   );
-if (count($add_datastreams_details)>0){
-  $form['add_datastreams']['datastream_candidates'] = array(
-    '#type' => 'tabpage',
-    '#title' => t('View'),
-    '#content' => $add_datastreams_details,
-  );
-}
+  if (count($add_datastreams_details) > 0) {
+    $form['add_datastreams']['datastream_candidates'] = array(
+      '#type' => 'tabpage',
+      '#title' => t('View'),
+      '#content' => $add_datastreams_details,
+    );
+  }
   if (user_access('delete pages')) {
     $form['delete_page'] = array(
       '#title' => "Permanently Delete this page",
@@ -116,7 +116,7 @@ if (count($add_datastreams_details)>0){
 }
 
 function page_management_form_submit($form, &$form_state) {
-
+  module_load_include('inc', 'islandora_book', 'book_pack_utils');
   global $user;
   $pid = $form_state['values']['pid'];
   $item = new Fedora_Item($pid);
@@ -135,7 +135,10 @@ function page_management_form_submit($form, &$form_state) {
     file_delete($tiff_file_path);
   }
   if ($form_state['clicked_button']['#id'] == 'delete_page') {
+    $book_pids = get_collection_from_pid($pid);
     $item->purge($pid . ' deleted by user identified as ' . $user->name);
+    $book = $book_pids[0];
+    drupal_goto("fedora/repository/$book");
   }
 }
 

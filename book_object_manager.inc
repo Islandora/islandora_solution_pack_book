@@ -100,6 +100,11 @@ function book_management_form(&$form_state, $pid) {
     '#title' => t('Refresh all derived images')
   );
 
+  $form['page_manage']['make_pdf'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Recreate PDF from scanned text')
+  );
+
   $form['page_manage']['submit'] = array(
     '#type' => 'submit',
     '#id' => 'refresh_datastreams',
@@ -171,7 +176,10 @@ function book_management_form_submit($form, &$form_state) {
     if ($form_state['values']['recreate_derivatives']) {
       $refresh_images = TRUE;
     }
-    book_batch_update_pages($book_pid, $do_ocr, $refresh_images);
+    if ($form_state['values']['make_pdf']) {
+      $make_pdf = TRUE;
+    }
+    book_batch_update_pages($book_pid, $do_ocr, $refresh_images, $make_pdf);
   }
   if ($form_state['clicked_button']['#id'] == 'delete_page') {
     $page_pids = get_page_pids($book_pid);
@@ -185,7 +193,7 @@ function book_management_form_submit($form, &$form_state) {
   drupal_goto('fedora/repository/' . $collection_pids[0]);
 }
 
-function book_batch_update_pages($book_pid, $do_ocr, $refresh_images) {
+function book_batch_update_pages($book_pid, $do_ocr, $refresh_images, $make_pdf) {
   $page_pids = get_page_pids($book_pid);
   $count = count($page_pids);
   $batch = array(

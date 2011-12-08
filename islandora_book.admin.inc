@@ -85,6 +85,8 @@ function islandora_book_admin_settings(&$form_state) {
   return ($form);
 }
 
+
+
 /**
  * update ocr div ??
  */
@@ -105,7 +107,7 @@ function update_ocr_div() {
  * @return type 
  */
 function book_callback_prep() {
-  $form_state = array('storage' => NULL, 'submitted' => FALSE);
+  $form_state = array('storage' => NULL, 'submitted' => FALSE, 'rebuild' => TRUE);
   $form_build_id = $_POST['form_build_id'];
   $form = form_get_cache($form_build_id, $form_state);
   $args = $form['#parameters'];

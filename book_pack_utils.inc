@@ -90,6 +90,22 @@ function save_datastream_as_tempfile($pid, $dsid) {
   return $file_path;
 }
 
+function save_all_tiffs_in_tempdir($pid, $dsid) {
+  $tmp_dirname = file_directory_path() . "/" . preg_replace("/:|-/", '_', $pid);
+  mkdir($tmp_dirname);
+  $member_pids = get_page_pids($pids);
+  foreach ($member_pids as $member_pid) {
+    $item = new Fedora_Item($member_pid);
+    $tmp_filename = preg_replace("/:|-/", '_', $member_pid) . '.tif';
+    $url = variable_get('fedora_base_url', 'http://localhost:8080/fedora') . "/objects/$member_pid/datastreams/$dsid/content";
+    $file_contents = do_curl($url);
+    $file_path = $tmp_dirname . "/" . $tmp_filename;
+    file_put_contents($file_path, $file_contents);
+  }
+
+  return $tmp_dirname;
+}
+
 function datastream_display_builder($object_pid, &$fedoraItem) {
   global $fedoraUser, $fedoraPass, $base_url, $user;
   module_load_include('inc', 'fedora_repository', 'ConnectionHelper');
@@ -204,7 +220,7 @@ function get_collection_relationships($pid) {
   $collections = $item->get_relationships('isMemberOfCollection');
   foreach ($collections as $collection) {
     $collection_item = new fedora_item($collection['object']);
-    $current_relationships[$collection['object']] = $collection_item->objectProfile->objLabel . ' (' . $collection['object'] .  ')';
+    $current_relationships[$collection['object']] = $collection_item->objectProfile->objLabel . ' (' . $collection['object'] . ')';
   }
   return $current_relationships;
 }

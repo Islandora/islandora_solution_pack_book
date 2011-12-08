@@ -50,6 +50,16 @@ function islandora_book_menu() {
   return $items;
 }
 
+
+function islandora_book_perm(){
+  return array('delete pages');
+}
+
+function islandora_book_solution_pack_form(){
+  module_load_include('inc', 'islandora_book', 'islandora_book.admin');
+  return islandora_book_admin_settings(&$form_state);
+}
+
 function islandora_book_islandora_tabs($content_models, $pid) {
   module_load_include('inc', 'islandora_book', 'page_object_manager');
   module_load_include('inc', 'islandora_book', 'book_object_manager');
