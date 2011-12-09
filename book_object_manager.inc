@@ -1,9 +1,23 @@
 <?php
 
+
+/**
+ * wrapper function to allow tab callback detail to be called from url
+ * @param string pid
+ * @return boolean
+ */
+
 function book_management_wrapper($pid) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   return drupal_render(get_page_model_management_content($pid));
 }
+
+/**
+ * Supplies tab contents to callback
+ * @param string pid
+ * @return array
+ */
+
 
 function get_book_model_management_content($pid) {
   $form['manage_book_tab'] = array(
@@ -14,6 +28,14 @@ function get_book_model_management_content($pid) {
   );
   return $form;
 }
+
+/**
+ * builds form
+ * @param array form_state
+ * @param string pid
+ * @return array
+ */
+
 
 function book_management_form(&$form_state, $pid) {
 
@@ -32,7 +54,7 @@ function book_management_form(&$form_state, $pid) {
   $collection_value = $values[0];
   $keys = array_keys($current_collections);
   $collection_key = $keys[0];
-  
+
 
   unset($potential_collections[$collection_key]);
   $values = array_values($current_collections);
@@ -158,6 +180,14 @@ function book_management_form(&$form_state, $pid) {
   return $form;
 }
 
+/**
+ * book book management form submit
+ * @param array $form
+ * @param array $form_state
+ */
+
+
+
 function book_management_form_submit($form, &$form_state) {
   global $user;
   $book_pid = $form_state['values']['pid'];
@@ -195,6 +225,7 @@ function book_management_form_submit($form, &$form_state) {
   drupal_goto('fedora/repository/' . $collection_pids[0]);
 }
 
+
 function book_batch_update_pages($book_pid, $do_ocr, $refresh_images, $make_pdf) {
   $page_pids = get_page_pids($book_pid);
   $count = count($page_pids);
@@ -203,13 +234,18 @@ function book_batch_update_pages($book_pid, $do_ocr, $refresh_images, $make_pdf)
     'operations' => array(),
     'file' => drupal_get_path('module', 'islandora_book') . '/book_object_manager.inc',
   );
+  if ($do_ocr || $refresh_images) {
+    foreach ($page_pids as $page_pid) {
+      $batch['operations'][] = array('update_individual_pages', array($page_pid, $do_ocr, $refresh_images));
+    }
+    if ($refresh_images) {
+      $batch['operations'][] = array('replace_cover_thumbnail', array($book_pid, reset($page_pids)));
+    }
+  }
+  if ($make_pdf) {
+    $batch['operations'][] = array('recreate_pdf', array($book_pid));
+  }
 
-  foreach ($page_pids as $page_pid) {
-    $batch['operations'][] = array('update_individual_pages', array($page_pid, $do_ocr, $refresh_images));
-  }
-  if ($refresh_images) {
-    $batch['operations'][] = array('replace_cover_thumbnail', array($book_pid, reset($page_pids)));
-  }
   batch_set($batch);
   batch_process("fedora/repository/$book_pid");
 }
@@ -239,4 +275,31 @@ function replace_cover_thumbnail($book_pid, $page_pid) {
   }
   $item->add_datastream_from_file("$file", 'TN', 'Thumbnail', 'image/jpeg', 'M');
   file_delete($file);
+}
+
+
+function recreate_pdf($book_pid) {
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  module_load_include('inc', 'islandora_book', 'book_pack_utils');
+  $file_dir = save_all_tiffs_in_tempdir($book_pid, 'TIFF');
+  $file_names = scandir($file_dir);
+  $file_names = preg_replace('/^\.*/', '', $file_names);
+  $file_names = array_values(array_filter($file_names));
+  $book_item = new Fedora_Item($book_pid);
+  $outputFile = "$file_dir/book.pdf";
+  $tiffs = array();
+  $cmdString = 'convert -compress LZW';
+  foreach ($file_names as $tiff) {
+    $cmdString .= " $file_dir/$tiff";
+  }
+  $cmdString .= " $outputFile";
+  exec($cmdString, $output, $returnValue);
+  $datastreams = $book_item->get_datastreams_list_as_array();
+  if ($returnValue == '0') {
+    if (array_key_exists('PDF', $datastreams)) {
+      $book_item->purge_datastream('PDF');
+    }
+    $book_item->add_datastream_from_file($outputFile, 'PDF', "PDF of Book", 'application/pdf', 'M');
+  }
+  islandora_recursive_directory_delete($file_dir);
 }
