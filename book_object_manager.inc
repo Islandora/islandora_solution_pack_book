@@ -27,11 +27,12 @@ function book_management_form(&$form_state, $pid) {
   $purge_form = drupal_get_form('fedora_repository_purge_object_form', $content_helper->pid, check_plain(substr(request_uri(), strlen(base_path()))));
   $potential_collections = get_collections_as_option_array();
   $current_collections = get_collection_relationships($pid);
-
+  $editform = drupal_get_form('fedora_repository_edit_qdc_form', $pid, 'DC');
   $values = array_values($current_collections);
   $collection_value = $values[0];
   $keys = array_keys($current_collections);
   $collection_key = $keys[0];
+  
 
   unset($potential_collections[$collection_key]);
   $values = array_values($current_collections);
@@ -79,11 +80,12 @@ function book_management_form(&$form_state, $pid) {
     '#title' => t('View Metadata'),
   );
 
-  $form['view_dc']['dublin_core'] = array(
+  $form['view_dc']['tabset']['dublin_core'] = array(
     '#type' => 'tabpage',
     '#title' => t('View'),
     '#content' => $dc_html,
   );
+
   $form['page_manage'] = array(
     '#type' => 'fieldset',
     '#collapsed' => true,

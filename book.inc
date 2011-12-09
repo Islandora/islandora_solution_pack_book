@@ -12,7 +12,7 @@ class IslandoraBook {
 
   /**
    * Constructor
-   * @param type $pid 
+   * @param string $pid
    */
   function __construct($pid = '') {
     module_load_include('inc', 'fedora_repository', 'api/fedora_item');
@@ -29,6 +29,8 @@ class IslandoraBook {
    * @return string 
    */
   public function showFieldSets() {
+    $css = '#fedora_detailed_list{visibility:none}';
+    drupal_add_css($css, 'inline');
     module_load_include('inc', 'islandora_book', 'book_pack_utils');
     drupal_set_title($this->item->objectProfile->objLabel);
     module_load_include('module', 'islandora_book');
@@ -48,8 +50,8 @@ class IslandoraBook {
     $results = $class->getRelatedItems($this->pid);
     $page_items = $class->renderCollection($results, $this->pid, NULL, NULL, $page_number);
     $page_pids = get_page_pids($this->pid);
- 
-    if (count($page_pids)>0) {
+
+    if (count($page_pids) > 0) {
       $hasPage = TRUE;
     }
     $tabset = array();
