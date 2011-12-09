@@ -194,8 +194,6 @@ function book_management_form_submit($form, &$form_state) {
   $collection_pids = get_collection_from_pid($book_pid);
   $item = new Fedora_Item($book_pid);
   if ($form_state['clicked_button']['#id'] == 'update_collection') {
-    $current_collection = $form_state['values']['current_collection'];
-    $item->purge_relationship('isMemberOfCollection', $current_collection);
     $new_collection = $form_state['values']['new_collection'];
     $item->add_relationship('isMemberOfCollection', $new_collection, RELS_EXT_URI);
     drupal_goto("fedora/repository/$new_collection");
