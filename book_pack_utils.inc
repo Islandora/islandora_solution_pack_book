@@ -1,5 +1,13 @@
 <?php
 
+/**
+ *
+ * Returns the pids of all pages associated with a book object
+ * @param  string $book_pid
+ * @return string
+ */
+
+
 function get_page_pids($book_pid) {
   $query = <<<XML
 select \$object \$title from <#ri>
@@ -22,6 +30,17 @@ XML;
   return $book_pids;
 }
 
+
+/**
+ *
+ * Replaces OCR scan in page object
+ *
+ * @param string $tiff
+ * @param fedora item $item
+ * @return boolean
+ */
+
+
 function refresh_ocr($tiff, &$item) {
   $label = $item->objectProfile->objLabel;
   $datastreams = $item->get_datastreams_list_as_array();
@@ -41,6 +60,15 @@ function refresh_ocr($tiff, &$item) {
 
   return $success;
 }
+
+/**
+ *
+ * Replaces derivative images in page object
+ *
+ * @param string $tiff
+ * @param fedora item $item
+ * @return boolean
+ */
 
 function refresh_images($tiff, &$item) {
   $label = $item->objectProfile->objLabel;
@@ -80,6 +108,16 @@ function refresh_images($tiff, &$item) {
   return $success;
 }
 
+/**
+ *
+ * Copies file identified by datastream ID to tempfile
+ * and returns full directory path
+ *
+ * @param string $pid
+ * @param string $dsid
+ * @return string
+ */
+
 function save_datastream_as_tempfile($pid, $dsid) {
   $tmp_filename = preg_replace("/:|-/", '_', $pid) . '.tif';
   $item = new Fedora_Item($pid);
@@ -89,6 +127,47 @@ function save_datastream_as_tempfile($pid, $dsid) {
   file_put_contents($file_path, $file_contents);
   return $file_path;
 }
+
+/**
+ *
+ * Moves tiffs for all pages associated with a book to a tempdir
+ * and returns the full directory path
+ *
+ * @param string $pid
+ * @param string $dsid
+ * @return string
+ */
+
+function save_all_tiffs_in_tempdir($pid, $dsid) {
+  $tmp_dirname = file_directory_path() . "/" . preg_replace("/:|-/", '_', $pid);
+  mkdir($tmp_dirname);
+  $member_pids = get_page_pids($pid);
+  foreach ($member_pids as $member_pid) {
+    $item = new Fedora_Item($member_pid);
+    $tmp_filename = preg_replace("/:|-/", '_', $member_pid) . '.tif';
+    $url = variable_get('fedora_base_url', 'http://localhost:8080/fedora') . "/objects/$member_pid/datastreams/$dsid/content";
+    $file_contents = do_curl($url);
+    $file_path = $tmp_dirname . "/" . $tmp_filename;
+    file_put_contents($file_path, $file_contents);
+  }
+
+  return $tmp_dirname;
+}
+
+/**
+ *
+ * Returns tabular display of current datastreams
+ *
+ * @global string $fedoraUser
+ * @global string $fedoraPass
+ * @global url $base_url
+ * @global user $user
+ * @param  string $object_pid
+ * @param Fedora_Item $fedoraItem
+ * @return string
+ */
+
+
 
 function datastream_display_builder($object_pid, &$fedoraItem) {
   global $fedoraUser, $fedoraPass, $base_url, $user;
@@ -165,6 +244,14 @@ function datastream_display_builder($object_pid, &$fedoraItem) {
   return '';
 }
 
+/**
+ * returns form allowing the ingestion of additional datastreams
+ *
+ * @param string $object_pid
+ * @return array
+ */
+
+
 function get_add_datastream_data($object_pid) {
   if (user_access(ObjectHelper :: $ADD_FEDORA_STREAMS)) {
     $allow = TRUE;
@@ -177,6 +264,21 @@ function get_add_datastream_data($object_pid) {
   }
   return $dataStreamBody;
 }
+
+
+/**
+ * Returns all pids this pid has an isMemberOfCollection relationship with
+ * @param string $pid
+ * @return array
+ */
+
+
+/**
+ * Returns an array of collection pids for each collection
+ * with which this pid has an isMember or isMemberOfCollection relationship
+ * @param string $pid
+ * @return array
+ */
 
 function get_collection_from_pid($pid) {
 
@@ -197,6 +299,14 @@ function get_collection_from_pid($pid) {
   return $object_pids;
 }
 
+
+/**
+ * Returns an associative array of collection pids and labels for each collection
+ * with which this pid has an isMember or isMemberOfCollection relationship
+ * @param string $pid
+ * @return array
+ */
+
 function get_collection_relationships($pid) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   $current_relationships = array();
@@ -204,7 +314,26 @@ function get_collection_relationships($pid) {
   $collections = $item->get_relationships('isMemberOfCollection');
   foreach ($collections as $collection) {
     $collection_item = new fedora_item($collection['object']);
-    $current_relationships[$collection['object']] = $collection_item->objectProfile->objLabel . ' (' . $collection['object'] .  ')';
+    $current_relationships[$collection['object']] = $collection_item->objectProfile->objLabel . ' (' . $collection['object'] . ')';
   }
   return $current_relationships;
+}
+
+/**
+ * delete directory
+ * @param string $dir
+ * @return boolen
+ */
+function islandora_recursive_directory_delete($dir) {
+  if (!file_exists($dir))
+    return TRUE;
+  if (!is_dir($dir))
+    return unlink($dir);
+  foreach (scandir($dir) as $item) {
+    if ($item == '.' || $item == '..')
+      continue;
+    if (!islandora_recursive_directory_delete($dir . DIRECTORY_SEPARATOR . $item))
+      return FALSE;
+  }
+  return rmdir($dir);
 }

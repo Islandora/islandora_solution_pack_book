@@ -50,9 +50,19 @@ function islandora_book_menu() {
   return $items;
 }
 
+function islandora_book_perm() {
+  return array('delete pages');
+}
+
+function islandora_book_solution_pack_form() {
+  module_load_include('inc', 'islandora_book', 'islandora_book.admin');
+  return islandora_book_admin_settings(&$form_state);
+}
+
 function islandora_book_islandora_tabs($content_models, $pid) {
   module_load_include('inc', 'islandora_book', 'page_object_manager');
   module_load_include('inc', 'islandora_book', 'book_object_manager');
+  module_load_include('inc', 'fedora_repository', 'plugins/FedoraObjectDetailedContent');
   if (!variable_get('islandora_add_collection_tabs', TRUE)) {
     return;
   }
@@ -76,11 +86,23 @@ function islandora_book_islandora_tabs($content_models, $pid) {
     $return_tabs['fedora_object_details'] = null;
     return $return_tabs;
   }
+
   if ($content_model == 'islandora:bookCModel') {
     $return_tabs = get_book_model_management_content($pid);
-    $return_tabs['fedora_object_details'] = null;
+    //$return_tabs['fedora_object_details'] = null;
     return $return_tabs;
   }
+}
+
+
+/**
+ * Implementation of hook_init
+ */
+
+function islandora_book_init() {
+
+    drupal_add_css(drupal_get_path('module', 'islandora_book') . '/css/islandora_book.css');
+   
 }
 
 /**
