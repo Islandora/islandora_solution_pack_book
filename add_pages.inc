@@ -174,7 +174,7 @@ function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = '
   $batch = array(
     'title' => "Creating $image_count page objects",
     'operations' => array(),
-    'file' => drupal_get_path('module', 'islandora_book') . '/add_pages_form.inc',
+    'file' => drupal_get_path('module', 'islandora_book') . '/add_pages.inc',
   );
   $page_num = 1;
   $book_title = $book->objectProfile->objLabel;
