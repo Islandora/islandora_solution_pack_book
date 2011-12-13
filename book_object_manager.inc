@@ -1,12 +1,10 @@
 <?php
 
-
 /**
  * wrapper function to allow tab callback detail to be called from url
  * @param string pid
  * @return boolean
  */
-
 function book_management_wrapper($pid) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   return drupal_render(get_page_model_management_content($pid));
@@ -17,8 +15,6 @@ function book_management_wrapper($pid) {
  * @param string pid
  * @return array
  */
-
-
 function get_book_model_management_content($pid) {
   $form['manage_book_tab'] = array(
     '#type' => 'tabpage',
@@ -35,8 +31,6 @@ function get_book_model_management_content($pid) {
  * @param string pid
  * @return array
  */
-
-
 function book_management_form(&$form_state, $pid) {
 
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
@@ -49,7 +43,7 @@ function book_management_form(&$form_state, $pid) {
   $purge_form = drupal_get_form('fedora_repository_purge_object_form', $content_helper->pid, check_plain(substr(request_uri(), strlen(base_path()))));
   $potential_collections = get_collections_as_option_array();
   $current_collections = get_collection_relationships($pid);
-  $editform = drupal_get_form('fedora_repository_edit_qdc_form', $pid, 'DC');
+
   $values = array_values($current_collections);
   $collection_value = $values[0];
   $keys = array_keys($current_collections);
@@ -74,25 +68,46 @@ function book_management_form(&$form_state, $pid) {
     '#title' => t('Collection Membership'),
   );
 
-
-  $form['collections']['current'] = array(
-    '#title' => 'Currently Member of',
-    '#type' => 'item',
-    '#value' => $collection_value,
+  $form['collections']['collection_add'] = array(
+    '#type' => 'fieldset',
+    '#collapsed' => true,
+    '#collapsible' => true,
+    '#title' => t('Add Book to Collection'),
   );
-
-  $form['collections']['new_collection'] = array(
+  $form['collections']['collection_add']['new_collection'] = array(
     '#title' => 'New Collection',
-    '#description' => t("Move book object to new collection"),
+    '#description' => t("Add book to new collection"),
     '#type' => 'select',
     '#options' => $potential_collections,
   );
 
-  $form['collections']['submit'] = array(
+  $form['collections']['collection_add']['submit'] = array(
     '#type' => 'submit',
-    '#id' => 'update_collection',
-    '#value' => t('Move Book to New Collection'),
+    '#id' => 'add_collection',
+    '#value' => t('Add Book to New Collection'),
   );
+
+  if (count($current_collections) > 1) {
+    $form['collections']['collection_remove'] = array(
+      '#type' => 'fieldset',
+      '#collapsed' => true,
+      '#collapsible' => true,
+      '#title' => t('Remove Book from Collection'),
+    );
+
+    $form['collections']['collection_remove']['current'] = array(
+      '#title' => 'Currentl Memberships',
+      '#type' => 'select',
+      '#options' => $current_collections,
+    );
+
+    $form['collections']['collection_remove']['submit'] = array(
+      '#type' => 'submit',
+      '#id' => 'remove_collection',
+      '#value' => t('Remove Book from This Collection'),
+    );
+  }
+
 
 
   $form['view_dc'] = array(
@@ -185,18 +200,22 @@ function book_management_form(&$form_state, $pid) {
  * @param array $form
  * @param array $form_state
  */
-
-
-
 function book_management_form_submit($form, &$form_state) {
   global $user;
   $book_pid = $form_state['values']['pid'];
   $collection_pids = get_collection_from_pid($book_pid);
   $item = new Fedora_Item($book_pid);
-  if ($form_state['clicked_button']['#id'] == 'update_collection') {
+
+  if ($form_state['clicked_button']['#id'] == 'add_collection') {
     $new_collection = $form_state['values']['new_collection'];
     $item->add_relationship('isMemberOfCollection', $new_collection, RELS_EXT_URI);
     drupal_goto("fedora/repository/$new_collection");
+  }
+
+  if ($form_state['clicked_button']['#id'] == 'remove_collection') {
+    $current = $form_state['values']['current'];
+    $item->purge_relationship('isMemberOfCollection', $current);
+    drupal_goto("fedora/repository/$book_pid");
   }
 
   if ($form_state['clicked_button']['#id'] == 'refresh_datastreams') {
@@ -222,7 +241,6 @@ function book_management_form_submit($form, &$form_state) {
   }
   drupal_goto('fedora/repository/' . $collection_pids[0]);
 }
-
 
 function book_batch_update_pages($book_pid, $do_ocr, $refresh_images, $make_pdf) {
   $page_pids = get_page_pids($book_pid);
@@ -275,7 +293,6 @@ function replace_cover_thumbnail($book_pid, $page_pid) {
   file_delete($file);
 }
 
-
 function recreate_pdf($book_pid) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
@@ -301,3 +318,4 @@ function recreate_pdf($book_pid) {
   }
   islandora_recursive_directory_delete($file_dir);
 }
+
