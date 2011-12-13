@@ -96,7 +96,7 @@ function book_management_form(&$form_state, $pid) {
     );
 
     $form['collections']['collection_remove']['current'] = array(
-      '#title' => 'Currently Member of',
+      '#title' => 'Currentl Memberships',
       '#type' => 'select',
       '#options' => $current_collections,
     );
