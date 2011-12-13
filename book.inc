@@ -31,9 +31,9 @@ class IslandoraBook {
   public function showFieldSets() {
     module_load_include('inc', 'islandora_book', 'book_pack_utils');
     module_load_include('inc', 'islandora_book', 'add_pages');
-    drupal_set_title($this->item->objectProfile->objLabel);
     module_load_include('module', 'islandora_book');
     module_load_include('inc', 'fedora_repository', 'CollectionClass');
+    drupal_add_css(drupal_get_path('module', 'islandora_book') . '/css/islandora_book.css');
     global $base_url;
     $show_purge_tab = (!empty($_POST['form_id']) && ($_POST['form_id'] == 'islandora_book_purge_pages_form'));
     $page_number = 1;
@@ -106,8 +106,4 @@ class IslandoraBook {
   }
 
 }
-
-
-
-
 
