@@ -4,5 +4,6 @@ package = Islandora Solution Pack
 dependencies[] = fedora_repository
 dependencies[] = xml_forms
 dependencies[] = islandora_content_model_forms
+dependencies[] = islandora_collection_manager
 version = 11.3beta2
 core = 6.x
