@@ -16,6 +16,9 @@ function book_management_wrapper($pid) {
  * @return array
  */
 function get_book_model_management_content($pid) {
+  if(!user_access('manage book object')){
+    return;
+  }
   $form['manage_book_tab'] = array(
     '#type' => 'tabpage',
     '#title' => t('Manage This Book'),
@@ -144,6 +147,11 @@ function book_management_form(&$form_state, $pid) {
     '#title' => t('Recreate PDF from scanned text')
   );
 
+  $form['page_manage']['create_tile_json'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Create data for TILE reader')
+  );
+
   $form['page_manage']['submit'] = array(
     '#type' => 'submit',
     '#id' => 'refresh_datastreams',
@@ -228,7 +236,10 @@ function book_management_form_submit($form, &$form_state) {
     if ($form_state['values']['make_pdf']) {
       $make_pdf = TRUE;
     }
-    book_batch_update_pages($book_pid, $do_ocr, $refresh_images, $make_pdf);
+    if ($form_state['values']['create_tile_json']) {
+      $make_json = TRUE;
+    }
+    book_batch_update_pages($book_pid, $do_ocr, $refresh_images, $make_pdf, $make_json);
   }
   if ($form_state['clicked_button']['#id'] == 'delete_page') {
     $page_pids = get_page_pids($book_pid);
@@ -242,7 +253,7 @@ function book_management_form_submit($form, &$form_state) {
   drupal_goto('fedora/repository/' . $collection_pids[0]);
 }
 
-function book_batch_update_pages($book_pid, $do_ocr, $refresh_images, $make_pdf) {
+function book_batch_update_pages($book_pid, $do_ocr, $refresh_images, $make_pdf, $make_json) {
   $page_pids = get_page_pids($book_pid);
   $count = count($page_pids);
   $batch = array(
@@ -260,6 +271,9 @@ function book_batch_update_pages($book_pid, $do_ocr, $refresh_images, $make_pdf)
   }
   if ($make_pdf) {
     $batch['operations'][] = array('recreate_pdf', array($book_pid));
+  }
+  if ($make_json) {
+    $batch['operations'][] = array('build_json', array($book_pid));
   }
 
   batch_set($batch);
@@ -319,3 +333,61 @@ function recreate_pdf($book_pid) {
   islandora_recursive_directory_delete($file_dir);
 }
 
+function build_json($book_pid) {
+
+  module_load_include('inc', 'islandora_book', 'book_pack_utils');
+  module_load_include("inc", "fedora_repository", "api/fedora_item");
+  $fedora_url = variable_get('fedora_base_url', 'http://localhost:8080/fedora/');
+  // build primary array
+  $json['pages'] = array();
+
+
+  $page_pids = get_page_pids($book_pid);
+  // create fedora item to retrieve datastreams
+
+  foreach ($page_pids as $pid) {
+    $item = new Fedora_Item($pid);
+
+    // get info for lines array
+    $ocr = $item->get_datastream_dissemination('OCR');
+    $ocr_lines = explode("\n", $ocr);
+    $lines = array();
+    $counter = 0;
+    foreach ($ocr_lines as $ocr_line) {
+      // sequesters instances of an escaped slash which may occur legitimately in text
+      $ocr_line = str_replace('\/', '~Pl@c3hOld3R', $ocr_line);
+      $lines[$counter]['text'] = (string)$ocr_line;
+      $lines[$counter]['id'] = "line$counter";
+      $counter++;
+    }
+
+    $page_array = array();
+    $page_array['id'] = $pid;
+    $page_array['url'] = $fedora_url . '/objects/' . $pid . '/datastreams/IMT-JPG/content';
+    $page_array['lines'] = $lines;
+    $page_array['shapes'] = array();
+
+    $json['pages'][] = $page_array;
+  }
+  $json['labels'] = array();
+  $j_string = json_encode($json, TRUE);
+  // restores slashes to their original condiiton - an option to leave slashes unescaped shows up in PHP 5.5
+  $j_string = str_replace('\/', '/', $j_string);
+  // restores sequestered escaped slashes
+  $j_string = str_replace('~Pl@c3hOld3R', '\/', $j_string);
+  $j_string = str_replace($single, $quad, $j_string);
+  //add json string object to book item
+  $j_string = drupal_to_js($json);
+  $j_string = preg_replace('/[^(\x20-\x7F)]*/','', $j_string);
+  $slash = "\\'";
+  $j_string = str_replace($slash, "\\\\'", $j_string);
+
+  $book_item = new fedora_item($book_pid);
+  $datastreams = $book_item->get_datastreams_list_as_array();
+  if (array_key_exists('TILE_JSON', $datastreams)) {
+    $book_item->purge_datastream('TILE_JSON');
+  }
+  $book_item->add_datastream_from_string("$j_string", 'TILE_JSON', 'Tile Data', 'text/plain', 'M');
+  drupal_set_message("Added Tile data to $book_pid");
+  file_delete($file);
+}

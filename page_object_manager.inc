@@ -15,7 +15,11 @@ function get_page_model_management_content($pid) {
   return $form;
 }
 
+
 function page_management_form(&$form_state, $pid) {
+  if (!user_access('manage page object')) {
+    return;
+  }
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   module_load_include('inc', 'fedora_repository', 'plugins/FedoraObjectDetailedContent');
   $content_helper = new FedoraObjectDetailedContent($pid);
