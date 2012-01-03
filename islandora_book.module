@@ -51,7 +51,11 @@ function islandora_book_menu() {
 }
 
 function islandora_book_perm() {
-  return array('delete pages');
+  return array(
+    'delete pages',
+    'manage book object',
+    'manage page object',
+    );
 }
 
 function islandora_book_solution_pack_form() {
