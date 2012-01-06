@@ -87,15 +87,15 @@ function islandora_book_islandora_tabs($content_models, $pid) {
   $content .= do_curl($url);
   $cm_parts = explode('/', $content);
   $content_model = trim($cm_parts[1]);
-  if ($content_model == 'islandora:pageCModel') {
+  if ($content_model == 'islandora:pageCModel' && user_access('manage page object')) {
     $return_tabs = get_page_model_management_content($pid);
-    $return_tabs['fedora_object_details'] = null;
+   // $return_tabs['fedora_object_details'] = null;
     return $return_tabs;
   }
 
   if ($content_model == 'islandora:bookCModel') {
     $return_tabs = get_book_model_management_content($pid);
-    //$return_tabs['fedora_object_details'] = null;
+   // $return_tabs['fedora_object_details'] = null;
     return $return_tabs;
   }
 }
