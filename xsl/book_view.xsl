@@ -14,13 +14,8 @@
 
  <xsl:template match="/">
 
- <h1 ><xsl:value-of select="//mods:titleInfo/mods:nonSort"/><xsl:text> </xsl:text><xsl:value-of select="//mods:titleInfo/mods:title"/>  <xsl:for-each select="//mods:titleInfo/mods:subTitle">
-                                <xsl:value-of select="."/></xsl:for-each></h1>
- <xsl:for-each select="//mods:titleInfo[@type='alternative']/mods.title"><h3>
-                               <!-- <xsl:value-of select="substring-before(text(),'/')"/>-->
-                                <xsl:value-of select="."/><xsl:text> </xsl:text> </h3>
-                                </xsl:for-each>
-    <table cellpadding="3" cellspacing="2" valign="top" ><tr><td valign="top">
+<div id="islandora-book-view">
+    <table class="islandora-book-table"><tr><td >
        <img>
 				<xsl:attribute name="src"><xsl:copy-of select="$OBJECTSPAGE"/>fedora/repository/<xsl:copy-of select="$PID"/>/TN
 				</xsl:attribute>
@@ -28,7 +23,7 @@
 
 
 
-   </td><td ><div style="align:left"><table cellpadding="3" cellspacing="2" width="90%" >
+   </td><td ><div style="align:left"><table class="islandora-book-table" cellpadding="3" cellspacing="2" width="90%" >
   <tr><td align="right" valign="top"><b>By Statement: </b></td><td valign="top"><xsl:value-of select="//mods:note[@type='statement of responsibility']"/></td></tr>
    <tr><td align="right" valign="top"><b>Place of Publication: </b></td ><td valign="top"><xsl:value-of select="//mods:placeTerm[@type='text']"/></td></tr>
     <tr><td align="right" valign="top"><b>Publisher: </b></td><td valign="top"><xsl:value-of select="//mods:publisher"/></td></tr>
@@ -56,6 +51,6 @@
 </div>
 </xsl:if>
 </td></tr></table>
-
+</div>
  </xsl:template>
 </xsl:stylesheet>
