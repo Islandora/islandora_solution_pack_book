@@ -33,7 +33,10 @@ class IslandoraBook {
     module_load_include('inc', 'islandora_book', 'add_pages');
     module_load_include('module', 'islandora_book');
     module_load_include('inc', 'fedora_repository', 'CollectionClass');
-    drupal_add_css(drupal_get_path('module', 'islandora_book') . '/css/islandora_book.css');
+    $path = drupal_get_path('module', 'islandora_book');
+    drupal_add_css($path . '/css/islandora_book.css');
+    drupal_add_js($path . '/js/jquery.selectboxes.min.js');
+    drupal_add_js($path . '/js/book.js');
     global $base_url;
     $show_purge_tab = (!empty($_POST['form_id']) && ($_POST['form_id'] == 'islandora_book_purge_pages_form'));
     $page_number = 1;
@@ -100,6 +103,18 @@ class IslandoraBook {
         '#title' => t('Purge all pages'),
         '#selected' => $show_purge_tab,
         '#content' => drupal_get_form('islandora_book_purge_pages_form', $this->pid),
+      );
+    }
+
+    $scholarly_links = module_invoke_all('islandora_book_links', $this->pid);
+    if (!empty($scholarly_links)) {
+      foreach ($scholarly_links as $scholarly_link) {
+        $links .= $scholarly_link . '<br />';
+      }
+      $tabset['fifth_tab'] = array(
+        '#type' => 'tabpage',
+        '#title' => t("Scholar's Links"),
+        '#content' => $links,
       );
     }
     return $tabset;
