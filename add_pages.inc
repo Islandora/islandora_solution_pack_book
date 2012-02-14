@@ -1,4 +1,5 @@
 <?php
+
 /**
  * book add pages form
  * @param array $form_state
@@ -151,7 +152,6 @@ function book_add_pages_form_submit($form, &$form_state) {
   ibook_create_page_objects($pid, $file_list, $form_state['values']['page_cmodel'], $form_state['values']['relation'], $tmpDir);
 }
 
-
 /**
  * Create a page object for each element in $image_list as a child object of $pid
  * @param string $pid
@@ -172,9 +172,11 @@ function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = '
   $page_pids = array();
   $image_count = count($image_list);
   $batch = array(
-    'title' => "Creating $image_count page objects",
+    'title' => "Creating $image_count page objects and book PDF.",
     'operations' => array(),
     'file' => drupal_get_path('module', 'islandora_book') . '/add_pages.inc',
+    'init_message' => t('Preparing data...'),
+    'progress_message' => t('@current of @total tasks completed.'),
   );
   $page_num = 1;
   $book_title = $book->objectProfile->objLabel;
@@ -183,7 +185,6 @@ function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = '
     $page_num++;
   }
   $batch['operations'][] = array('makePDF', array($pid, $image_list, $tmpDir));
-  $batch['operations'][] = array('deleteDirectory', array($tmpDir));
   batch_set($batch);
   $objectHelper = new ObjectHelper;
   $dc_xml = $objectHelper->getStream($pid, 'DC');
@@ -261,7 +262,6 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
  * @param string $dir
  * @return boolean
  */
-
 function deleteDirectory($dir) {
   if (!file_exists($dir))
     return TRUE;
@@ -300,4 +300,5 @@ function makePDF($book_pid, $file_list, $tmpDir) {
     }
     $book_item->add_datastream_from_file($outputFile, 'PDF', "PDF of Book", 'application/pdf', 'M');
   }
+  deleteDirectory($tmpDir);
 }
