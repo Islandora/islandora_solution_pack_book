@@ -124,6 +124,11 @@ function book_add_pages_form_submit($form, &$form_state) {
 
   foreach ($files as $file) {
     if (is_dir("$tmpDir/$file") && $file != '.' && $file != '..' && $file != '__MACOSX') {
+      $new_file_name = preg_replace("/[^a-z\.\d]/i", "", $file);
+      if ($new_file_name != $file) {
+        rename("$tmpDir/$file", "$tmpDir/$new_file_name");
+        $file = $new_file_name;
+      }
       array_push($dirs, $tmpDir . $file);
     }
   }
