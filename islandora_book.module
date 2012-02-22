@@ -67,26 +67,8 @@ function islandora_book_islandora_tabs($content_models, $pid) {
   module_load_include('inc', 'islandora_book', 'page_object_manager');
   module_load_include('inc', 'islandora_book', 'book_object_manager');
   module_load_include('inc', 'fedora_repository', 'plugins/FedoraObjectDetailedContent');
-  if (!variable_get('islandora_add_collection_tabs', TRUE)) {
-        drupal_add_css(drupal_get_path('module', 'islandora_book') . '/css/islandora_book.css');
-
-    return;
-  }
-
-  $content_model_pids = array();
   $tabset = array();
-  $query = "select \$object from <#ri>
-            where (<info:fedora/$pid> <fedora-model:hasModel> \$object
-            and \$object <fedora-model:state> <info:fedora/fedora-system:def/model#Active>)
-           minus \$object <mulgara:is> <info:fedora/fedora-system:FedoraObject-3.0>";
-
-  $query = htmlentities(urlencode($query));
-  $content_model = '';
-  $url = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
-  $url .= "?type=tuples&flush=TRUE&format=csv&limit=$limit&offset=$offset&lang=itql&stream=on&query=" . $query;
-  $content .= do_curl($url);
-  $cm_parts = explode('/', $content);
-  $content_model = trim($cm_parts[1]);
+  $content_model = $content_models[0]->pid;
   if ($content_model == 'islandora:pageCModel' && user_access('manage page object')) {
     $return_tabs = get_page_model_management_content($pid);
    // $return_tabs['fedora_object_details'] = null;
