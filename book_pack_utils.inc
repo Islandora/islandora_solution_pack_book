@@ -337,3 +337,27 @@ function islandora_recursive_directory_delete($dir) {
   }
   return rmdir($dir);
 }
+
+function get_sorted_pages($book_pid) {
+  $query = <<<XML
+select \$object \$page from <#ri>
+where \$object <fedora-rels-ext:isMemberOf> <info:fedora/$book_pid>
+and \$object <fedora-model:state> <fedora-model:Active>
+and \$object <info:islandora/islandora-system:def/pageinfo#isPageNumber> \$page
+order by \$page
+XML;
+drupal_set_message($query);
+  module_load_include('inc', 'fedora_repository', 'CollectionClass');
+  $collection = new CollectionClass($book_pid);
+  $contents = $collection->getRelatedItems($book_pid, $query);
+  $results_xml = simplexml_load_string($contents);
+  $resultsarray = array();
+  $book_pids = array();
+  foreach ($results_xml->results->result as $result) {
+    $page = str_replace('info:fedora/', '', $result->object->attributes()->uri) ;
+    $number =  str_replace('info:fedora/', '', $result->page->attributes()->uri)+ 0;
+    $book_pids[$number] = $page;
+  }
+ 
+  return $book_pids;
+}
