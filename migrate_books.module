@@ -1,0 +1,76 @@
+<?php
+
+function migrate_books_menu() {
+  $items = array();
+  $items['migrate/books'] = array(
+    'title' => t('Add New Streams'),
+    'page callback' => 'add_relationships',
+    'type' => MENU_CALLBACK,
+    'access arguments' => array('migrate books'),
+  );
+  $items['migrate/collection'] = array(
+    'title' => 'Migrate Collection',
+    'description' => 'Migrate collection to new collection',
+    'file' => 'MoveCollection.inc',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cairn_migrate_collection_form'),
+    'access callback' => 'user_access',
+    'access arguments' => array('view content'), // Use something fedora specific.
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+function migrate_books_perm() {
+  return array(
+    'migrate books'
+  );
+}
+
+function add_relationships($pid = null) {
+
+  $book_query = "select \$object from <#ri>
+    where \$object <fedora-model:hasModel> <info:fedora/islandora:bookCModel>";
+  $book_pids = process_book_query($book_query);
+
+
+  foreach ($book_pids as $book_pid) {
+    add_new_islandora_rdfs($book_pid);
+  }
+
+  $message = "Processed " . count($book_pids) . " book objects";
+  return $message;
+}
+
+function process_book_query($query) {
+  module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
+  $query = htmlentities(urlencode($query));
+  $content = '';
+
+  $url = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
+  $url .= "?type=tuples&flush=TRUE&format=csv&limit=$limit&offset=$offset&lang=itql&stream=on&query=" . $query;
+  $content .= do_curl($url);
+  $results = explode("\n", $content);
+  return array_filter(preg_replace('/^info:fedora\/|"object"/', '', $results));
+}
+
+function add_new_islandora_rdfs($book_pid) {
+  module_load_include('inc', 'islandora_book', 'book_pack_utils');
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  $page_pids = get_page_pids($book_pid);
+  $page_num = 1;
+  foreach ($page_pids as $pid) {
+    $item = new Fedora_Item($pid);
+    if ($item->exists()) {    //added  this to pass by badly broken objects
+      $relationships = $item->get_rdf_relationships();
+      if (!array_key_exists('isPageNumber', $relationships)) {
+        $item->add_relationship('isPageNumber', sprintf("%04d", $page_num), ISLANDORA_PAGE_URI);
+      }
+      if (!array_key_exists('isPageOf', $relationships)) {
+        $item->add_relationship('isPageOf', $book_pid, ISLANDORA_PAGE_URI);
+      }
+      $page_num++;
+    }
+  }
+}
