@@ -8,16 +8,7 @@ function migrate_books_menu() {
     'type' => MENU_CALLBACK,
     'access arguments' => array('migrate books'),
   );
-  $items['migrate/collection'] = array(
-    'title' => 'Migrate Collection',
-    'description' => 'Migrate collection to new collection',
-    'file' => 'MoveCollection.inc',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('cairn_migrate_collection_form'),
-    'access callback' => 'user_access',
-    'access arguments' => array('view content'), // Use something fedora specific.
-    'type' => MENU_NORMAL_ITEM,
-  );
+
 
   return $items;
 }
