@@ -4,12 +4,10 @@ function migrate_books_menu() {
   $items = array();
   $items['migrate/books'] = array(
     'title' => t('Add Islandora RDF relatationships to existing books'),
-    'page callback' => 'add_relationships',
+    'page callback' => 'batch_process_book',
     'type' => MENU_NORMAL_ITEM,
     'access arguments' => array('migrate books'),
   );
-
-
   return $items;
 }
 
@@ -19,20 +17,6 @@ function migrate_books_perm() {
   );
 }
 
-function add_relationships($pid = null) {
-
-  $book_query = "select \$object from <#ri>
-    where \$object <fedora-model:hasModel> <info:fedora/islandora:bookCModel>";
-  $book_pids = process_book_query($book_query);
-
-
-  foreach ($book_pids as $book_pid) {
-    add_new_islandora_rdfs($book_pid);
-  }
-
-  $message = "Processed " . count($book_pids) . " book objects";
-  return $message;
-}
 
 function process_book_query($query) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
@@ -51,6 +35,7 @@ function add_new_islandora_rdfs($book_pid) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   $page_pids = get_page_pids($book_pid);
   $page_num = 1;
+
   foreach ($page_pids as $pid) {
     $item = new Fedora_Item($pid);
     if ($item->exists()) {    //added  this to pass by badly broken objects
@@ -64,4 +49,27 @@ function add_new_islandora_rdfs($book_pid) {
       $page_num++;
     }
   }
+}
+
+function batch_process_book() {
+
+  $book_query = "select \$object from <#ri>
+    where \$object <fedora-model:hasModel> <info:fedora/islandora:bookCModel>";
+  $book_pids = process_book_query($book_query);
+  $book_count = count($book_pids);
+
+  $batch = array(
+    'title' => "Processing $book_count book objects.",
+    'operations' => array(),
+    'init_message' => t('Preparing data...'),
+    'progress_message' => t('@current of @total tasks completed.'),
+  );
+ 
+  foreach ($book_pids as $book_pid) {
+    $batch['operations'][] = array('add_new_islandora_rdfs', array($book_pid));
+    $page_num++;
+  }
+  batch_set($batch);
+  batch_process('/');
+
 }
