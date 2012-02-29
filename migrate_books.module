@@ -3,9 +3,9 @@
 function migrate_books_menu() {
   $items = array();
   $items['migrate/books'] = array(
-    'title' => t('Add New Streams'),
+    'title' => t('Add Islandiora RDF relatationships to existing books'),
     'page callback' => 'add_relationships',
-    'type' => MENU_CALLBACK,
+    'type' => MENU_NORMAL_ITEM,
     'access arguments' => array('migrate books'),
   );
 
