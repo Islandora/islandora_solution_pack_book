@@ -6,8 +6,6 @@
  * @param  string $book_pid
  * @return string
  */
-
-
 function get_page_pids($book_pid) {
   $query = <<<XML
 select \$object \$title from <#ri>
@@ -30,7 +28,6 @@ XML;
   return $book_pids;
 }
 
-
 /**
  *
  * Replaces OCR scan in page object
@@ -39,8 +36,6 @@ XML;
  * @param fedora item $item
  * @return boolean
  */
-
-
 function refresh_ocr($tiff, &$item) {
   $label = $item->objectProfile->objLabel;
   $datastreams = $item->get_datastreams_list_as_array();
@@ -69,7 +64,6 @@ function refresh_ocr($tiff, &$item) {
  * @param fedora item $item
  * @return boolean
  */
-
 function refresh_images($tiff, &$item) {
   $label = $item->objectProfile->objLabel;
   $datastreams = $item->get_datastreams_list_as_array();
@@ -117,7 +111,6 @@ function refresh_images($tiff, &$item) {
  * @param string $dsid
  * @return string
  */
-
 function save_datastream_as_tempfile($pid, $dsid) {
   $tmp_filename = preg_replace("/:|-/", '_', $pid) . '.tif';
   $item = new Fedora_Item($pid);
@@ -137,7 +130,6 @@ function save_datastream_as_tempfile($pid, $dsid) {
  * @param string $dsid
  * @return string
  */
-
 function save_all_tiffs_in_tempdir($pid, $dsid) {
   $tmp_dirname = file_directory_path() . "/" . preg_replace("/:|-/", '_', $pid);
   mkdir($tmp_dirname);
@@ -166,9 +158,6 @@ function save_all_tiffs_in_tempdir($pid, $dsid) {
  * @param Fedora_Item $fedoraItem
  * @return string
  */
-
-
-
 function datastream_display_builder($object_pid, &$fedoraItem) {
   global $fedoraUser, $fedoraPass, $base_url, $user;
   module_load_include('inc', 'fedora_repository', 'ConnectionHelper');
@@ -250,8 +239,6 @@ function datastream_display_builder($object_pid, &$fedoraItem) {
  * @param string $object_pid
  * @return array
  */
-
-
 function get_add_datastream_data($object_pid) {
   if (user_access(ObjectHelper :: $ADD_FEDORA_STREAMS)) {
     $allow = TRUE;
@@ -266,12 +253,6 @@ function get_add_datastream_data($object_pid) {
 }
 
 
-/**
- * Returns all pids this pid has an isMemberOfCollection relationship with
- * @param string $pid
- * @return array
- */
-
 
 /**
  * Returns an array of collection pids for each collection
@@ -279,7 +260,6 @@ function get_add_datastream_data($object_pid) {
  * @param string $pid
  * @return array
  */
-
 function get_collection_from_pid($pid) {
 
   module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
@@ -299,14 +279,12 @@ function get_collection_from_pid($pid) {
   return $object_pids;
 }
 
-
 /**
  * Returns an associative array of collection pids and labels for each collection
  * with which this pid has an isMember or isMemberOfCollection relationship
  * @param string $pid
  * @return array
  */
-
 function get_collection_relationships($pid) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   $current_relationships = array();
@@ -337,3 +315,46 @@ function islandora_recursive_directory_delete($dir) {
   }
   return rmdir($dir);
 }
+
+function get_sorted_pages($book_pid) {
+  $query = <<<XML
+select \$object \$page from <#ri>
+where \$object <fedora-rels-ext:isMemberOf> <info:fedora/$book_pid>
+and \$object <fedora-model:state> <fedora-model:Active>
+and \$object <info:islandora/islandora-system:def/pageinfo#isPageNumber> \$page
+order by \$page
+XML;
+  drupal_set_message($query);
+  module_load_include('inc', 'fedora_repository', 'CollectionClass');
+  $collection = new CollectionClass($book_pid);
+  $contents = $collection->getRelatedItems($book_pid, $query);
+  $results_xml = simplexml_load_string($contents);
+  $resultsarray = array();
+  $book_pids = array();
+  foreach ($results_xml->results->result as $result) {
+    $page = str_replace('info:fedora/', '', $result->object->attributes()->uri);
+    $number = str_replace('info:fedora/', '', $result->page->attributes()->uri) + 0;
+    $book_pids[$number] = $page;
+  }
+
+  return $book_pids;
+}
+
+function add_islandora_rdfs($book_pid) {
+  module_load_include('inc', 'islandora_book', 'book_pack_utils');
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  $page_pids = get_page_pids($book_pid);
+  $page_num = 1;
+  foreach ($page_pids as $pid) {
+    $item = new Fedora_Item($pid);
+    $relationships = $item->get_rdf_relationships();
+    if (!array_key_exists('isPageNumber', $relationships)) {
+      $item->add_relationship('isPageNumber', sprintf("%04d", $page_num), ISLANDORA_PAGE_URI);
+    }
+    if (!array_key_exists('isPageOf', $relationships)) {
+      $item->add_relationship('isPageOf', $book_pid, ISLANDORA_PAGE_URI);
+    }
+    $page_num++;
+  }
+}
+

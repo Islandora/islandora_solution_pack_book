@@ -51,7 +51,7 @@ function page_management_form(&$form_state, $pid) {
     '#type' => 'fieldset',
     '#collapsed' => true,
     '#collapsible' => true,
-    '#title' => t('Update Derived Datastreams'),
+    '#title' => t('Update Derivations'),
     '#description' => t('Update datastreams for this page object.  The orginal stored tiff will be used to create all derived datastreams.'),
   );
   $form['page_manage']['do_ocr'] = array(
@@ -72,7 +72,7 @@ function page_management_form(&$form_state, $pid) {
     '#type' => 'fieldset',
     '#collapsed' => true,
     '#collapsible' => true,
-    '#title' => t('Manage Current Datastreams'),
+    '#title' => t('Current Datastreams'),
   );
 
   $form['current_datastreams']['current_object_details'] = array(

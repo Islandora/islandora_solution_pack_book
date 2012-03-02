@@ -93,22 +93,6 @@ class IslandoraBook {
       );
     }
 
-    if (!$hasPage && user_access('ingest new fedora objects')) {
-      $tabset['third_tab'] = array(
-        '#type' => 'tabpage',
-        '#title' => t('Add pages'),
-        '#content' => drupal_get_form('book_add_pages_form', $this->pid),
-      );
-    }
-    if ($hasPage && user_access('purge objects and datastreams')) {
-      $tabset['fourth_tab'] = array(
-        '#type' => 'tabpage',
-        '#title' => t('Purge all pages'),
-        '#selected' => $show_purge_tab,
-        '#content' => drupal_get_form('islandora_book_purge_pages_form', $this->pid),
-      );
-    }
-
     $scholarly_links = module_invoke_all('islandora_book_links', $this->pid);
     if (!empty($scholarly_links)) {
       foreach ($scholarly_links as $scholarly_link) {
@@ -116,7 +100,7 @@ class IslandoraBook {
       }
       $tabset['fifth_tab'] = array(
         '#type' => 'tabpage',
-        '#title' => t("Scholar's Links"),
+        '#title' => t("Critcal Editing"),
         '#content' => $links,
       );
     }

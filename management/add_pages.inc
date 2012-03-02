@@ -8,8 +8,26 @@
  * @param string $relation
  * @return array
  */
-function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageCModel', $relation = 'isMemberOf') {
+function book_add_pages(&$form_state, $pid, $page_cmodel = 'islandora:pageCModel', $relation = 'isMemberOf') {
   $file = (isset($form_state['values']['ingest-file-location']) ? $form_state['values']['ingest-file-location'] : '');
+  module_load_include('inc', 'islandora_book', 'book_pack_utils');
+  $pages = TRUE;
+  $current_page_count = count(get_page_pids($pid));
+  if ($current_page_count == 0) {
+    $pages = FALSE;
+  }
+  $message = t("This book currently has @count pages, new pages will be appended by default. !break", array("@count" => $current_page_count, '!break' => '<br />'));
+
+  $message .= t("Choose a number lower than @count to insert the new pages at the chosen location", array("@count" => $current_page_count, '!break' => '<br />'));
+
+
+  $form['page_add'] = array(
+    '#type' => 'fieldset',
+    '#collapsed' => true,
+    '#collapsible' => true,
+    '#title' => t('Add pages to this book'),
+    '#description' => t('Add pages to this book object.'),
+  );
   $form['#attributes']['enctype'] = 'multipart/form-data';
   $form['pid'] = array(
     '#type' => 'hidden',
@@ -19,31 +37,43 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
     '#type' => 'hidden',
     '#value' => $page_cmodel,
   );
+
+  $form['page_count'] = array(
+    '#type' => 'hidden',
+    '#value' => $current_page_count,
+  );
+
   $form['relation'] = array(
     '#type' => 'hidden',
     '#value' => $relation,
   );
-
-  $form['#attributes'] = array('enctype' => 'multipart/form-data');
-  $form['upload_options'] = array(
-    '#type' => 'fieldset',
+  if ($pages) {
+    $form['page_add']['insertion_point'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Previous Page number'),
+      '#default_value' => $current_page_count,
+      '#description' => $message,
+      '#size' => 5,
+    );
+  }
+  $form['page_add']['upload_options'] = array(
     '#title' => "<strong>Access zipped page images</strong>",
     '#description' => t('Select either ftp file location on the server, or upload zipped page images, but not both.'),
   );
 
-  $form['upload_options']['file_upload'] = array(
+  $form['page_add']['file_upload'] = array(
     '#type' => 'file',
     '#title' => t('Upload Zipped TIFFs'),
     '#size' => 48,
     '#description' => t('Upload a zip file containing a tiff for each page of this book'),
   );
-  $form['upload_options']['upload_from_server'] = array(
+  $form['page_add']['upload_from_server'] = array(
     '#type' => 'textfield',
     '#description' => 'Server location of previously uploaded file',
     '#title' => 'FTP file location',
   );
 
-  $form['submit'] = array(
+  $form['page_add']['submit'] = array(
     '#type' => 'submit',
     '#weight' => 10,
     '#value' => 'Ingest Pages'
@@ -56,8 +86,16 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
  * @param array $form
  * @param array $form_state
  */
-function book_add_pages_form_validate($form, &$form_state) {
-
+function book_add_pages_validate($form, &$form_state) {
+  $_SESSION['manage_chosen'] = TRUE;
+  if (isset($form_state['values']['insertion_point'])) {
+    $insertion_point = $form_state['values']['insertion_point'] + 0;
+    $count = $form_state['values']['page_count'] + 0;
+    if (!is_int($insertion_point) || $insertion_point > $count || $insertion_point < 0) {
+      form_set_error('insertion_point', "Number must be a positive integer less than or equal to $count");
+      return;
+    }
+  }
   $fieldName = 'file_upload';
   if (isset($_FILES['files']) && is_uploaded_file($_FILES['files']['tmp_name'][$fieldName])) {
     $file = file_save_upload($fieldName);
@@ -86,6 +124,7 @@ function book_add_pages_form_validate($form, &$form_state) {
     form_set_error($fieldName, 'Exactly one of these fields must be populated.');
     return;
   }
+  unset($_SESSION['manage_chosen']);
 }
 
 /**
@@ -93,8 +132,9 @@ function book_add_pages_form_validate($form, &$form_state) {
  * @param array $form
  * @param array $form_state
  */
-function book_add_pages_form_submit($form, &$form_state) {
+function book_add_pages_submit($form, &$form_state) {
   $pid = $form_state['values']['pid'];
+  $start_page = (isset($form_state['values']['insertion_point'])) ? $form_state['values']['insertion_point'] + 1 : 1;
   $dirName = str_replace(':', '_', $pid);
   $current_files = scandir(file_directory_path());
   foreach ($current_files as $current_file) {
@@ -154,7 +194,7 @@ function book_add_pages_form_submit($form, &$form_state) {
     }
   }
   sort($file_list);
-  ibook_create_page_objects($pid, $file_list, $form_state['values']['page_cmodel'], $form_state['values']['relation'], $tmpDir);
+  ibook_create_page_objects($pid, $file_list, $form_state['values']['page_cmodel'], $form_state['values']['relation'], $tmpDir, $start_page);
 }
 
 /**
@@ -166,7 +206,7 @@ function book_add_pages_form_submit($form, &$form_state) {
  * @param string $tmpDir
  * @return boolean
  */
-function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = 'islandora:pageCModel', $relation = 'isMemberOfCollection', $tmpDir) {
+function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = 'islandora:pageCModel', $relation = 'isMemberOfCollection', $tmpDir, $start_page) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   module_load_include('inc', 'fedora_repository', 'api/ObjectHelper');
   $book = new Fedora_Item($pid);
@@ -179,12 +219,13 @@ function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = '
   $batch = array(
     'title' => "Creating $image_count page objects and book PDF.",
     'operations' => array(),
-    'file' => drupal_get_path('module', 'islandora_book') . '/add_pages.inc',
+    'file' => drupal_get_path('module', 'islandora_book') . '/management/add_pages.inc',
     'init_message' => t('Preparing data...'),
     'progress_message' => t('@current of @total tasks completed.'),
   );
-  $page_num = 1;
+  $page_num = $start_page;
   $book_title = $book->objectProfile->objLabel;
+  $batch['operations'][] = array('renumber_pages', array($start_page, $pid, $image_count));
   foreach ($image_list as $image_path) {
     $batch['operations'][] = array('ibook_add_single_page_object', array($pid, $image_path, $page_num, "$book_title - Page " . sprintf("%03d", $page_num), $page_cmodel, $relation));
     $page_num++;
@@ -216,8 +257,12 @@ function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = '
 function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $page_title = NULL, $page_cmodel = 'islandora:pageCModel', $relation = 'isMemberOf') {
   module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
-  $page_item = Fedora_Item::ingest_new_item("$book_pid-" . sprintf("%03d", $page_num), 'A', $page_title);
+  $parts = explode(':', $book_pid);
+  $nextPid = FEDORA_ITEM::get_next_PID_in_namespace($parts[0]);
+  $page_item = Fedora_Item::ingest_new_item($nextPid, 'A', $page_title);
   $page_item->add_relationship('hasModel', $page_cmodel, FEDORA_MODEL_URI);
+  $page_item->add_relationship('isPageNumber', sprintf("%04d", $page_num), ISLANDORA_PAGE_URI);
+  $page_item->add_relationship('isPageOf', $book_pid, ISLANDORA_PAGE_URI);
   $page_item->add_relationship($relation, $book_pid);
   // add original tiff
   $page_item->add_datastream_from_file($page_file, 'TIFF', 'Archival TIFF', 'image/tiff', 'M');
@@ -244,7 +289,7 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
       }
     }
     //add jpeg
-    exec("convert  -resize 800 \"{$page_file}\"[0]  \"$page_file-med.jpg\"", $output, $returnValue);
+    exec("convert -resize 800 \"{$page_file}\"[0] \"$page_file-med.jpg\"", $output, $returnValue);
     if ($returnValue == '0') {
       $page_item->add_datastream_from_file("$page_file-med.jpg", 'JPEG', "JPEG image", 'image/jpeg', 'M');
     }
@@ -306,4 +351,59 @@ function makePDF($book_pid, $file_list, $tmpDir) {
     $book_item->add_datastream_from_file($outputFile, 'PDF', "PDF of Book", 'application/pdf', 'M');
   }
   deleteDirectory($tmpDir);
+}
+
+function page_delete(&$form_state, $pid) {
+
+  if (user_access('delete pages')) {
+    $form['pid'] = array(
+      '#type' => 'hidden',
+      '#value' => $pid,
+    );
+    $form['delete_page'] = array(
+      '#title' => "Permanently Delete Pages from this Book",
+      '#type' => 'fieldset',
+      '#description' => t("Clicking this button will delete this all book pages. <br /> <strong>This action cannot be undone.</strong>"),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+    $form['delete_page']['confirm'] = array(
+      '#title' => "Are you sure?",
+      '#type' => 'fieldset',
+      '#description' => t('<strong>Clicking the delete button will permanantly remove all of its pages.</strong> <br />  <strong>This action cannot be undone.</strong> '),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+
+    $form['delete_page']['confirm']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Delete All Pages'),
+      '#id' => 'delete_pages',
+    );
+  }
+
+  return $form;
+}
+
+function page_delete_submit($form, &$form_state) {
+  $book_pid = $form_state['values']['pid'];
+  module_load_include('inc', 'islandora_book', 'book_pack_utils');
+  $page_pids = get_page_pids($book_pid);
+  foreach ($page_pids as $page_pid) {
+    $item = new Fedora_Item($page_pid);
+    $item->purge();
+  }
+}
+
+function renumber_pages($insertion_point, $book_pid, $new_page_count) {
+  module_load_include('inc', 'islandora_book', 'book_pack_utils');
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  $page_pids = get_sorted_pages($book_pid);
+  for ($i = $insertion_point; $i <= count($page_pids); ++$i) {
+    $item = new Fedora_Item($page_pids[$i]);
+    if ($item->exists()) {
+      $item->purge_relationship('isPageNumber', sprintf("%04d", $i));
+      $item->add_relationship('isPageNumber', sprintf("%04d", $i + $new_page_count), ISLANDORA_PAGE_URI);
+    }
+  }
 }
