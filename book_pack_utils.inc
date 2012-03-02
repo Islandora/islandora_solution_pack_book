@@ -324,7 +324,7 @@ and \$object <fedora-model:state> <fedora-model:Active>
 and \$object <info:islandora/islandora-system:def/pageinfo#isPageNumber> \$page
 order by \$page
 XML;
-  drupal_set_message($query);
+
   module_load_include('inc', 'fedora_repository', 'CollectionClass');
   $collection = new CollectionClass($book_pid);
   $contents = $collection->getRelatedItems($book_pid, $query);
