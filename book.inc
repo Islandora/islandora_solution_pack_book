@@ -63,9 +63,11 @@ class IslandoraBook {
     if ($user->uid != 0) {
       $qs = '?uid=' . base64_encode($user->name . ':' . $user->pass);
     }
-
+    module_load_include('inc', 'islandora_bookviewer', 'islandora_bookviewer');
+    $bookviewer = new IslandoraBookviewer($this->pid);
+    $html = $bookviewer->showAjaxBookViewer('mainpage.php');
     $viewer_url = variable_get('fedora_base_url', '') . '/get/' . $this->pid . '/islandora:viewerSdef/getViewer' . $qs;
-    $html = '<iframe src="' . $viewer_url . '" scrolling="0" frameborder="0" style="width: 100%; height: 800px;">Errors: unable to load viewer</iframe>';
+    // $html = '<iframe src="' . $viewer_url . '" scrolling="0" frameborder="0" style="width: 100%; height: 800px;">Errors: unable to load viewer</iframe>';
     $tabset['pages_tab'] = array(
       // #type and #title are the minimum requirements.
       '#type' => 'tabpage',
