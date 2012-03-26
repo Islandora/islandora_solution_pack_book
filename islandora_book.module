@@ -47,6 +47,38 @@ function islandora_book_menu() {
     'file' => 'ObjectManager.inc',
     'type' => MENU_CALLBACK,
   );
+
+  $items['islandora/book/upload'] = array(
+    'page callback' => 'upload_pages',
+    'access arguments' => array('view fedora collection'),
+    'file' => 'pageload/upload_frame.inc',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['islandora/book/upload_setup'] = array(
+    'page callback' => 'upload_setup',
+    'access arguments' => array('view fedora collection'),
+    'file' => 'pageload/upload_frame.inc',
+    'type' => MENU_CALLBACK,
+  );
+  $items['islandora/book/process_file'] = array(
+    'page callback' => 'process_file',
+    'access arguments' => array('view fedora collection'),
+    'file' => 'pageload/upload_frame.inc',
+    'type' => MENU_CALLBACK,
+  );
+  $items['islandora/book/process_page_directory'] = array(
+    'page callback' => 'prep_add_form',
+    'access arguments' => array('view fedora collection'),
+    'file' => 'pageload/prepare_add_pages_form.inc',
+    'type' => MENU_CALLBACK,
+  );
+  $items['islandora/book/delete_book_files'] = array(
+    'page callback' => 'delete_book_page_files',
+    'access arguments' => array('view fedora collection'),
+    'file' => 'pageload/upload_frame.inc',
+    'type' => MENU_CALLBACK,
+  );
   return $items;
 }
 
@@ -55,7 +87,7 @@ function islandora_book_perm() {
     'delete pages',
     'manage book object',
     'manage page object',
-    );
+  );
 }
 
 function islandora_book_solution_pack_form() {
@@ -71,27 +103,24 @@ function islandora_book_islandora_tabs($content_models, $pid) {
   $content_model = $content_models[0]->pid;
   if ($content_model == 'islandora:pageCModel' && user_access('manage page object')) {
     $return_tabs = get_page_model_management_content($pid);
-   // $return_tabs['fedora_object_details'] = null;
+    // $return_tabs['fedora_object_details'] = null;
     return $return_tabs;
   }
 
   if ($content_model == 'islandora:bookCModel') {
     $return_tabs = get_book_model_management_content($pid);
-   // $return_tabs['fedora_object_details'] = null;
+    // $return_tabs['fedora_object_details'] = null;
     return $return_tabs;
   }
 }
-
 
 /**
  * Implementation of hook_init
  * (currenlty disabled)
  */
-
 function disabled_islandora_book_init() {
 
-    drupal_add_css(drupal_get_path('module', 'islandora_book') . '/css/islandora_book.css');
-   
+  drupal_add_css(drupal_get_path('module', 'islandora_book') . '/css/islandora_book.css');
 }
 
 /**
@@ -309,7 +338,7 @@ function _islandora_book_viewer_available() {
  * @return array
  */
 function islandora_book_required_fedora_objects() {
-
+  module_load_include('inc', 'fedora_repository', 'fedora_repository.solutionpacks');
   // Add the form and associate it to the content model
   $module_path = drupal_get_path('module', 'islandora_book');
   $form_name = 'Islandora Books MODS Form';
@@ -413,8 +442,6 @@ function islandora_book_required_fedora_objects() {
     ),
   );
 }
-
-
 
 /**
  * islandora book help

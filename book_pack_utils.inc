@@ -252,8 +252,6 @@ function get_add_datastream_data($object_pid) {
   return $dataStreamBody;
 }
 
-
-
 /**
  * Returns an array of collection pids for each collection
  * with which this pid has an isMember or isMemberOfCollection relationship
@@ -358,3 +356,60 @@ function add_islandora_rdfs($book_pid) {
   }
 }
 
+/**
+ * Retrieves a sorted array of all files within a nested zip file.
+ * @param file $zipped_file
+ * @return array
+ */
+function get_files_from_zip($zip_file) {
+  $file_dir = pathinfo($zip_file, PATHINFO_DIRNAME);
+  $tmpDir = $file_dir . '/tmpZip';
+  if (!is_dir($tmpDir)) {
+    mkdir($tmpDir, 0766);
+  }
+  $file_list = array();
+
+  $cmdString = "unzip -q -o -d $tmpDir \"$zip_file\"";
+
+  system($cmdString, $retVal);
+  file_delete("$tmpDir \"$zip_file\"");
+
+  $dirs = array();
+  array_push($dirs, $tmpDir);
+  $files = scandir($tmpDir);
+
+  foreach ($files as $file) {
+    if (is_dir("$tmpDir/$file") && $file != '.' && $file != '..' && $file != '__MACOSX') {
+      $new_file_name = preg_replace("/[^a-z\.\d]/i", "", $file);
+      if ($new_file_name != $file) {
+        rename("$tmpDir/$file", "$tmpDir/$new_file_name");
+        $file = $new_file_name;
+      }
+      array_push($dirs, $tmpDir . $file);
+    }
+  }
+
+  foreach ($dirs as $directory) {
+    if ($tiff_dir = opendir($directory)) {
+      while (FALSE !== ($file_name = readdir($tiff_dir))) {
+        $fullfile = $directory . $file_name;
+        if (!is_dir($fullfile)) {
+          $new_file_name = preg_replace("/[^a-z\.\d]/i", "", $file_name);
+          $new_file_name = preg_replace("/\.tiff$/", ".tif", $new_file_name);
+          if ($new_file_name != $file_name) {
+            rename($directory . "/" . $file_name, $directory . "/$new_file_name");
+            $file_name = $new_file_name;
+          }
+        }
+
+        $ext = pathinfo($file_name, PATHINFO_EXTENSION);
+        if ($ext == 'tif' || $ext == 'tiff') {
+          array_push($file_list, "$directory" . "/$file_name");
+        }
+      }
+      closedir($tiff_dir);
+    }
+  }
+  sort($file_list);
+  return $file_list;
+}
