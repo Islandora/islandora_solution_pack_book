@@ -1,5 +1,21 @@
 <?php
 
+
+function book_add_pages(&$form_state, $pid){
+   $form['page_add'] = array(
+    '#attributes' => array('class' =>'page_fieldset'),
+    '#type' => 'fieldset',
+    '#collapsed' => FALSE,
+    '#collapsible' => true,
+    //'#title' => t('Add pages to this book'),
+    //'#description' => t('Add pages to this book object.'),
+
+  );
+   $form['page_add']['link'] = array(
+     '#value' => l(t("Add, Append or Insert Pages"), "islandora/book/upload/$pid"),
+   );
+return $form;
+}
 /**
  * book add pages form
  * @param array $form_state
@@ -8,7 +24,7 @@
  * @param string $relation
  * @return array
  */
-function book_add_pages(&$form_state, $pid, $page_cmodel = 'islandora:pageCModel', $relation = 'isMemberOf') {
+function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageCModel', $relation = 'isMemberOf') {
   $file = (isset($form_state['values']['ingest-file-location']) ? $form_state['values']['ingest-file-location'] : '');
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   $pages = TRUE;
@@ -17,18 +33,16 @@ function book_add_pages(&$form_state, $pid, $page_cmodel = 'islandora:pageCModel
     $pages = FALSE;
   }
   $message = t("This book currently has @count pages, new pages will be appended by default. !break", array("@count" => $current_page_count, '!break' => '<br />'));
-
   $message .= t("Choose a number lower than @count to insert the new pages at the chosen location", array("@count" => $current_page_count, '!break' => '<br />'));
-
 
   $form['page_add'] = array(
     '#type' => 'fieldset',
     '#collapsed' => true,
-    '#collapsible' => true,
+    '#collapsible' => false,
     '#title' => t('Add pages to this book'),
     '#description' => t('Add pages to this book object.'),
   );
-  $form['#attributes']['enctype'] = 'multipart/form-data';
+ 
   $form['pid'] = array(
     '#type' => 'hidden',
     '#value' => $pid,
@@ -61,17 +75,6 @@ function book_add_pages(&$form_state, $pid, $page_cmodel = 'islandora:pageCModel
     '#description' => t('Select either ftp file location on the server, or upload zipped page images, but not both.'),
   );
 
-  $form['page_add']['file_upload'] = array(
-    '#type' => 'file',
-    '#title' => t('Upload Zipped TIFFs'),
-    '#size' => 48,
-    '#description' => t('Upload a zip file containing a tiff for each page of this book'),
-  );
-  $form['page_add']['upload_from_server'] = array(
-    '#type' => 'textfield',
-    '#description' => 'Server location of previously uploaded file',
-    '#title' => 'FTP file location',
-  );
 
   $form['page_add']['submit'] = array(
     '#type' => 'submit',
@@ -86,7 +89,7 @@ function book_add_pages(&$form_state, $pid, $page_cmodel = 'islandora:pageCModel
  * @param array $form
  * @param array $form_state
  */
-function book_add_pages_validate($form, &$form_state) {
+function book_add_pages_form_validate($form, &$form_state) {
   $_SESSION['manage_chosen'] = TRUE;
   if (isset($form_state['values']['insertion_point'])) {
     $insertion_point = $form_state['values']['insertion_point'] + 0;
@@ -96,34 +99,7 @@ function book_add_pages_validate($form, &$form_state) {
       return;
     }
   }
-  $fieldName = 'file_upload';
-  if (isset($_FILES['files']) && is_uploaded_file($_FILES['files']['tmp_name'][$fieldName])) {
-    $file = file_save_upload($fieldName);
-    if ($file->filemime != 'application/zip') {
-      form_set_error($fieldName, 'Input file must be a .zip file');
-      return;
-    }
-    if (!$file) {
-      form_set_error($fieldName, 'Error uploading file.');
-      return;
-    }
-    $form_state['values']['file'] = $file->filepath;
-  }
 
-  if ($form_state['values']['upload_from_server']) {
-    if (is_file($form_state['values']['upload_from_server'])) {
-      $form_state['values']['file'] = $form_state['values']['upload_from_server'];
-    }
-    else {
-      form_set_error('upload_from_server', 'File not found.');
-      return;
-    }
-  }
-
-  if (!isset($form_state['values']['file'])) {
-    form_set_error($fieldName, 'Exactly one of these fields must be populated.');
-    return;
-  }
   unset($_SESSION['manage_chosen']);
 }
 
@@ -132,68 +108,12 @@ function book_add_pages_validate($form, &$form_state) {
  * @param array $form
  * @param array $form_state
  */
-function book_add_pages_submit($form, &$form_state) {
+function book_add_pages_form_submit($form, &$form_state) {
   $pid = $form_state['values']['pid'];
   $start_page = (isset($form_state['values']['insertion_point'])) ? $form_state['values']['insertion_point'] + 1 : 1;
   $dirName = str_replace(':', '_', $pid);
-  $current_files = scandir(file_directory_path());
-  foreach ($current_files as $current_file) {
-    if ($current_file != '.' && $current_file != '..' && is_dir($current_file)) {
-      $fileage = time() - filectime(file_directory_path() . "/$current_file");
-      if ($fileage > 60 * 60) {
-        deleteDirectory(file_directory_path() . "/$current_file");
-      }
-    }
-  }
   $tmpDir = file_directory_path() . '/' . $dirName . '/';
-  if (!is_dir($tmpDir)) {
-    mkdir($tmpDir, 0766);
-  }
-  $zip_file = $form_state['values']['file'];
-
-  // $zip_file = $file->filepath;
-  $file_list = array();
-  $cmdString = "unzip -q -o -d $tmpDir \"$zip_file\"";
-
-  system($cmdString, $retVal);
-  file_delete("$tmpDir \"$zip_file\"");
-
-  $dirs = array();
-  array_push($dirs, $tmpDir);
-  $files = scandir($tmpDir);
-
-  foreach ($files as $file) {
-    if (is_dir("$tmpDir/$file") && $file != '.' && $file != '..' && $file != '__MACOSX') {
-      $new_file_name = preg_replace("/[^a-z\.\d]/i", "", $file);
-      if ($new_file_name != $file) {
-        rename("$tmpDir/$file", "$tmpDir/$new_file_name");
-        $file = $new_file_name;
-      }
-      array_push($dirs, $tmpDir . $file);
-    }
-  }
-
-  foreach ($dirs as $directory) {
-    if ($tiff_dir = opendir($directory)) {
-      while (FALSE !== ($file_name = readdir($tiff_dir))) {
-        $fullfile = $directory . $file_name;
-        if (!is_dir($fullfile)) {
-          $new_file_name = preg_replace("/[^a-z\.\d]/i", "", $file_name);
-          $new_file_name = preg_replace("/\.tiff$/", ".tif", $new_file_name);
-          if ($new_file_name != $file_name) {
-            rename($directory . "/" . $file_name, $directory . "/$new_file_name");
-            $file_name = $new_file_name;
-          }
-        }
-        $ext = strrchr($file_name, '.');
-        if ($ext == '.tif' || $ext == '.tiff') {
-          array_push($file_list, "$directory" . "/$file_name");
-        }
-      }
-      closedir($tiff_dir);
-    }
-  }
-  sort($file_list);
+  $file_list = get_page_files($pid);
   ibook_create_page_objects($pid, $file_list, $form_state['values']['page_cmodel'], $form_state['values']['relation'], $tmpDir, $start_page);
 }
 
@@ -231,7 +151,9 @@ function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = '
     $page_num++;
   }
   $batch['operations'][] = array('makePDF', array($pid, $image_list, $tmpDir));
+  $collection = get_collection_from_pid($pid);
   batch_set($batch);
+  batch_process("fedora/repository/$pid");
   $objectHelper = new ObjectHelper;
   $dc_xml = $objectHelper->getStream($pid, 'DC');
   if (!preg_match('/<dc:type>ingested<\/dc:type>/', $dc_xml)) {
@@ -243,6 +165,8 @@ function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = '
     $root->appendChild($typeNode);
     $book->modify_datastream_by_value($xml->saveXML(), 'DC', 'Dublin core', 'text/xml', TRUE, "Added Type of Ingested", FALSE);
   }
+  $collection = get_collection_from_pid($pid);
+  drupal_goto('fedora/repository/' .$collection[0]);
 }
 
 /**
@@ -407,3 +331,54 @@ function renumber_pages($insertion_point, $book_pid, $new_page_count) {
     }
   }
 }
+
+
+/**
+ * retrieves all files from temporary directory, including zipped files, and ordering by mtime
+ * @param string $pid
+ * @return array
+ */
+function get_page_files($pid) {
+  module_load_include('inc', 'islandora_book', 'management/add_pages');
+  $flat_pid = str_replace(':', '_', $pid);
+  module_load_include('inc', 'islandora_book', 'book_pack_utils');
+  $file_dir = file_directory_path() . "/$flat_pid/";
+  $files = scandir($file_dir);
+
+//clean and order array input array
+
+  $temp_process = array();
+  foreach ($files as $file) {
+    if ($file != '.' && $file != '..') {
+      $filename = $file_dir . $file;
+      $temp_process[$filename] = filemtime($filename);
+    }
+  }
+  asort($temp_process);
+  $sorted_files = array_keys($temp_process);
+// unzip files and add them to array in the correct order
+// spaces are rmoved from file names in the interest of consistency
+
+  $ordered_files = array();
+  foreach ($sorted_files as $candidate) {
+    $old_filename = pathinfo($candidate, PATHINFO_FILENAME);
+    $ext = pathinfo($candidate, PATHINFO_EXTENSION);
+    $new_file_name = preg_replace("/[^a-z\.\d]/i", "", $old_filename);
+    if ($new_file_name != $old_filename) {
+      $new_fullname = str_replace($old_filename, $new_file_name, $candidate);
+      $success =rename("$candidate", "$new_fullname");
+      $candidate = $new_fullname;
+    }
+    if ($ext == 'tif' || $ext == 'tiff') {
+      $ordered_files[] = $candidate;
+    }
+    if ($ext == 'zip') {
+      $unzipped_files = get_files_from_zip($candidate);
+      $ordered_files = array_merge($ordered_files, $unzipped_files);
+    }
+  }
+ // ordered files now has all the information we need to do a sucessful page ingest
+
+ return $ordered_files;
+}
+

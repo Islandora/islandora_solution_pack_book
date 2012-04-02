@@ -85,8 +85,6 @@ function islandora_book_admin_settings(&$form_state) {
   return ($form);
 }
 
-
-
 /**
  * update ocr div ??
  */
@@ -176,3 +174,17 @@ function book_admin_refresh($form, &$form_state) {
   form_execute_handlers('submit', $form, $form_state);
   $form_state['rebuild'] = TRUE;
 }
+
+function is_url_valid($url) {
+  $handle = curl_init($url);
+  curl_setopt($handle, CURLOPT_RETURNTRANSFER, TRUE);
+  $response = curl_exec($handle);
+  $httpCode = curl_getinfo($handle, CURLINFO_HTTP_CODE);
+  $retval = TRUE;
+  if ($httpCode % 100 == 4) {
+    $retval = FALSE;
+  }
+  curl_close($handle);
+  return $retval;
+}
+

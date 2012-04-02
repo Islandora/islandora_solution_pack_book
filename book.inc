@@ -29,7 +29,7 @@ class IslandoraBook {
    * @return string 
    */
   public function showFieldSets() {
-
+    global $user;
     module_load_include('inc', 'islandora_book', 'book_pack_utils');
     module_load_include('inc', 'islandora_book', 'add_pages');
     module_load_include('module', 'islandora_book');
@@ -66,9 +66,12 @@ class IslandoraBook {
     if ($user->uid != 0) {
       $qs = '?uid=' . base64_encode($user->name . ':' . $user->pass);
     }
-
+    module_load_include('inc', 'islandora_bookviewer', 'islandora_bookviewer');
+    $bookviewer = new IslandoraBookviewer($this->pid);
+    $html = $bookviewer->showAjaxBookViewer('mainpage.php');
+    //$html = $bookviewer->showBookViewer();
     $viewer_url = variable_get('fedora_base_url', '') . '/get/' . $this->pid . '/islandora:viewerSdef/getViewer' . $qs;
-    $html = '<iframe src="' . $viewer_url . '" scrolling="0" frameborder="0" style="width: 100%; height: 800px;">Errors: unable to load viewer</iframe>';
+    // $html = '<iframe src="' . $viewer_url . '" scrolling="0" frameborder="0" style="width: 100%; height: 800px;">Errors: unable to load viewer</iframe>';
     $tabset['pages_tab'] = array(
       // #type and #title are the minimum requirements.
       '#type' => 'tabpage',
@@ -94,13 +97,13 @@ class IslandoraBook {
     }
 
     $scholarly_links = module_invoke_all('islandora_book_links', $this->pid);
-    if (!empty($scholarly_links)) {
+    if (!empty($scholarly_links) && $hasPage) {
       foreach ($scholarly_links as $scholarly_link) {
         $links .= $scholarly_link . '<br />';
       }
       $tabset['fifth_tab'] = array(
         '#type' => 'tabpage',
-        '#title' => t("Critcal Editing"),
+        '#title' => t("Critical Editing"),
         '#content' => $links,
       );
     }

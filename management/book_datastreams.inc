@@ -78,6 +78,10 @@ function update_datastreams(&$form_state, $pid) {
   );
 
 
+  $form['page_manage']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Update datastreams')
+  );
   return $form;
 }
 
