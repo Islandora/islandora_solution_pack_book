@@ -413,3 +413,68 @@ function get_files_from_zip($zip_file) {
   sort($file_list);
   return $file_list;
 }
+
+/**
+ * Renumbers all pages associated with a book
+ *
+ * @param integer $insertion_point
+ * @param string $book_pid
+ * @param integer $new_page_count 
+ */
+function renumber_pages($insertion_point, $book_pid, $new_page_count) {
+  module_load_include('inc', 'islandora_book', 'book_pack_utils');
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  $page_pids = get_sorted_pages($book_pid);
+  $book_item = new Fedora_Item($book_pid);
+  $book_title = $book_item->objectProfile->objLabel;
+  for ($i = $insertion_point; $i <= count($page_pids); ++$i) {
+    $item = new Fedora_Item($page_pids[$i]);
+    if ($item->exists()) {
+      $new_title = "$book_title - Page " . sprintf("%03d", $i + $new_page_count);
+      $item->purge_relationship('isPageNumber', sprintf("%04d", $i));
+      $item->add_relationship('isPageNumber', sprintf("%04d", $i + $new_page_count), ISLANDORA_PAGE_URI);
+      $item->modify_object($label = "$new_title", $state = NULL, $ownerId = NULL, $logMessage = 'Modified by Islandora API');
+    }
+  }
+}
+
+function post_deletion_renumber_pages($book_pid) {
+  module_load_include('inc', 'islandora_book', 'book_pack_utils');
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  $page_pids = get_sorted_pages($book_pid);
+  $page_pids = array_values($page_pids);
+  $book_item = new Fedora_Item($book_pid);
+  $book_title = $book_item->objectProfile->objLabel;
+
+  for ($i = 0; $i < count($page_pids); ++$i) {
+    $item = new Fedora_Item($page_pids[$i]);
+    if ($item->exists()) {
+      $current_number = get_page_number($page_pids[$i]);
+      if ($current_number != $i + 1) {
+        $item->purge_relationship('isPageNumber', sprintf("%04d", $current_number));
+        $item->add_relationship('isPageNumber', sprintf("%04d", $i + 1), ISLANDORA_PAGE_URI);
+        $item->modify_object($label = "$book_title - Page " . sprintf("%03d", $i + 1), $state = NULL, $ownerId = NULL, $logMessage = 'Modified by Islandora API');
+      }
+    }
+  }
+}
+
+/**
+ * Returns page number associated wih page pid
+ * @param string $page_pid
+ * @return <type>
+ */
+function get_page_number($page_pid) {
+  module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
+  $query_string = "select \$object from <#ri>
+                   where <info:fedora/$page_pid> <info:islandora/islandora-system:def/pageinfo#isPageNumber> \$object";
+  $query_string = htmlentities(urlencode($query_string));
+  $content = '';
+  $url = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
+  $url .= '?type=tuples&flush=true&format=csv&limit=13000&lang=itql&stream=on&query=' . $query_string;
+  $content .= do_curl($url);
+  $results = explode("\n", $content);
+  $pid = preg_replace('/^info:fedora\/|"object"| /', '', $results);
+  $pid = array_values(array_filter($pid));
+  return intval($pid[0]);
+}

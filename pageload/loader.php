@@ -37,16 +37,16 @@
             <!-- The fileinput-button span is used to style the file input field as button -->
             <span class="btn btn-success fileinput-button">
               <i class="icon-plus icon-white"></i>
-              <span>Add files to list</span>
+              <span>Add files to upload queue</span>
               <input type="file" name="files[]" multiple>
             </span>
             <button id="add_page" type="button" class="btn btn-primary">
               <i class="icon-upload icon-white"></i>
-              <span>Add pages to book</span>
+              <span>Ingest Uploaded files</span>
             </button>
             <button id="delete_page_files" type="button" class="btn btn-danger delete">
               <i class="icon-trash icon-white"></i>
-              <span>Delete these files</span>
+              <span>Empty upload queue</span>
             </button>
             
           </div>

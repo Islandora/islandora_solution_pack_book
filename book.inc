@@ -95,7 +95,7 @@ class IslandoraBook {
     }
 
     $scholarly_links = module_invoke_all('islandora_book_links', $this->pid);
-    if (!empty($scholarly_links)) {
+    if (!empty($scholarly_links) && $hasPage) {
       foreach ($scholarly_links as $scholarly_link) {
         $links .= $scholarly_link . '<br />';
       }
