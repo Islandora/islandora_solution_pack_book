@@ -57,7 +57,8 @@ function islandora_book_admin_settings(&$form_state) {
     '#type' => 'textfield',
     '#title' => t('Solr subject field'),
     '#description' => t('The solr field containing your untokenized subject value, used to link between books with the same subject.'),
-    '#default_value' => variable_get('islandora_book_solr_subject_field', ''),
+    // keep default value as previous default so its backward compatible
+    '#default_value' => variable_get('islandora_book_solr_subject_field', 'mods.subject'),
   );
   if ($ocr) {
     $form['book_ahah_wrapper']['islandora_ocr_path'] = array(
