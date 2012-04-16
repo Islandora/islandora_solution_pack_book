@@ -27,7 +27,7 @@ class IMTViewer {
     $htmlstr = preg_replace('/Image" src="([^"]+)"/', $pstring, $htmlstr);
     $htmlstr = preg_replace('/<\/body><\/html>/', '', $htmlstr);
     $htmlstr = preg_replace('/<\?xml(.*?)head>/s', '', $htmlstr);
-    if (!$htmlstr){
+    if (!$htmlstr) {
       $htmlstr = '<div><div><a href="' . $base_url . '/fedora/repository/' . $this->pid . '/JPEG/">View Full Size</a></div>' .
       '<div><a href="' . $base_url . '/fedora/repository/' . $this->pid . '/JPEG/"><img src="' .
       $base_url . '/fedora/repository/' . $this->pid . '/JPEG/' . '" /></a></div>';

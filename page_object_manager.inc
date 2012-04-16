@@ -15,7 +15,6 @@ function get_page_model_management_content($pid) {
   return $form;
 }
 
-
 function page_management_form(&$form_state, $pid) {
   if (!user_access('manage page object')) {
     return;
@@ -23,10 +22,10 @@ function page_management_form(&$form_state, $pid) {
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   module_load_include('inc', 'fedora_repository', 'plugins/FedoraObjectDetailedContent');
   $content_helper = new FedoraObjectDetailedContent($pid);
-  $objectHelper = new ObjectHelper();
+  $object_helper = new ObjectHelper();
   $ds_list = datastream_display_builder($content_helper->pid, $content_helper->item);
   $add_datastreams_details = get_add_datastream_data($content_helper->pid);
-  $dc_html = $objectHelper->getFormattedDC($content_helper->item);
+  $dc_html = $object_helper->getFormattedDC($content_helper->item);
   $purge_form = drupal_get_form('fedora_repository_purge_object_form', $content_helper->pid, check_plain(substr(request_uri(), strlen(base_path()))));
   $form = array();
   $form['pid'] = array(
@@ -37,8 +36,8 @@ function page_management_form(&$form_state, $pid) {
 
   $form['view_dc'] = array(
     '#type' => 'fieldset',
-    '#collapsed' => true,
-    '#collapsible' => true,
+    '#collapsed' => TRUE,
+    '#collapsible' => TRUE,
     '#title' => t('View Metadata'),
   );
 
@@ -49,8 +48,8 @@ function page_management_form(&$form_state, $pid) {
   );
   $form['page_manage'] = array(
     '#type' => 'fieldset',
-    '#collapsed' => true,
-    '#collapsible' => true,
+    '#collapsed' => TRUE,
+    '#collapsible' => TRUE,
     '#title' => t('Update Derived Datastreams'),
     '#description' => t('Update datastreams for this page object.  The orginal stored tiff will be used to create all derived datastreams.'),
   );
@@ -70,8 +69,8 @@ function page_management_form(&$form_state, $pid) {
   );
   $form['current_datastreams'] = array(
     '#type' => 'fieldset',
-    '#collapsed' => true,
-    '#collapsible' => true,
+    '#collapsed' => TRUE,
+    '#collapsible' => TRUE,
     '#title' => t('Manage Current Datastreams'),
   );
 
@@ -82,8 +81,8 @@ function page_management_form(&$form_state, $pid) {
   );
   $form['add_datastreams'] = array(
     '#type' => 'fieldset',
-    '#collapsed' => true,
-    '#collapsible' => true,
+    '#collapsed' => TRUE,
+    '#collapsible' => TRUE,
     '#title' => t('Add Additional Datastreams'),
   );
   if (count($add_datastreams_details) > 0) {
