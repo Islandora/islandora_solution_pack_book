@@ -477,7 +477,7 @@ function islandora_book_purge_pages_form_submit($form, &$form_state) {
   else {
     unset($form_state['storage']['confirm']);
     $soapHelper = new ConnectionHelper();
-    $client = $soapHelper->getSoapClient(variable_get('fedora_soap_manage_url', 'http://localhost:8080/fedora/services/management?wsdl'));
+    $client = $soapHelper->getSoapClient(variable_get('fedora_soap_manage_url', 'http://localhost:8080/fedora/wsdl?api=API-M'));
     $pids_to_delete = get_page_pids($pid);
     foreach ($pids_to_delete as $pid_to_delete) {
       $params = array(
