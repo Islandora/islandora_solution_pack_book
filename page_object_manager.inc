@@ -71,7 +71,7 @@ function page_management_form(&$form_state, $pid) {
     '#type' => 'fieldset',
     '#collapsed' => TRUE,
     '#collapsible' => TRUE,
-    '#title' => t('Current Datastreams'),
+    '#title' => t('Manage Current Datastreams'),
   );
 
   $form['current_datastreams']['current_object_details'] = array(
