@@ -165,7 +165,7 @@ function islandora_book_create_book_view($pid, $query = NULL) {
     'OBJECTSPAGE' => base_path(),
     'PID' => $pid,
     'INGESTED' => $ingested,
-    'SOLRFIELD' => variable_get('islandora_book_solr_subject_field', ''),
+    'SOLRFIELD' => variable_get('islandora_book_solr_subject_field', 'mods.subject'),
   );
   $proc->setParameter("", $params);
   $xsl = new DomDocument();
@@ -185,7 +185,6 @@ function islandora_book_create_book_view($pid, $query = NULL) {
   else {
     $xsl = $proc->importStylesheet($xsl);
     $output = $proc->transformToXML($input);
-    //$output .= $newdom->saveXML();
   }
   if (isset($query)) {
     module_load_include('inc', 'fedora_repository', 'core/SearchClass');
