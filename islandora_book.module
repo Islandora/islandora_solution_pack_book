@@ -281,45 +281,7 @@ function islandora_book_theme() {
   );
 }
 
-/**
- * Implementation of hook_requirements().
- *
- * @return
- *   An array describing the status of the site regarding available updates.
- *   If there is no update data, only one record will be returned, indicating
- *   that the status of core can't be determined. If data is available, there
- *   will be two records: one for core, and another for all of contrib
- *   (assuming there are any contributed modules or themes enabled on the
- *   site). In addition to the fields expected by hook_requirements ('value',
- *   'severity', and optionally 'description'), this array will contain a
- *   'reason' attribute, which is an integer constant to indicate why the
- *   given status is being returned (UPDATE_NOT_SECURE, UPDATE_NOT_CURRENT, or
- *   UPDATE_UNKNOWN). This is used for generating the appropriate e-mail
- *   notification messages during update_cron(), and might be useful for other
- *   modules that invoke update_requirements() to find out if the site is up
- *   to date or not.
- *
- * @see _update_message_text()
- * @see _update_cron_notify()
- */
-function islandora_book_requirements($phase) {
-  global $base_url;
-  if ($phase == 'runtime') {
-    module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
-    $requirements['iiv-war'] = array();
-    $requirements['iiv-war']['title'] = t("Islandora OpenLayers image viewer web app");
-    if (!_islandora_book_viewer_available()) {
-      $requirements['iiv-war']['value'] = ("Not available");
-      $requirements['iiv-war']['severity'] = REQUIREMENT_ERROR;
-      $requirements['iiv-war']['description'] = t('Ensure that Fedora is running and that the <a href="@iiv-home">IIV</a> app is deployed.', array('@iiv-home' => 'http://github.com/islandora/iiv'));
-    }
-    else {
-      $requirements['iiv-war']['value'] = ("Available");
-      $requirements['iiv-war']['severity'] = REQUIREMENT_OK;
-    }
-  }
-  return $requirements;
-}
+
 
 /**
  * _islandora_book_viewer_available 
@@ -443,8 +405,6 @@ function islandora_book_required_fedora_objects() {
 }
 
 /**
-<<<<<<< HEAD
-=======
  * islandora book purge pages form
  * @global string $base_url
  * @param array $form_state
@@ -535,7 +495,6 @@ function islandora_book_purge_pages_form_submit($form, &$form_state) {
 }
 
 /**
->>>>>>> ba2480adeffd1ae760f98685df5758b1df1e2653
  * islandora book help
  * implementaion of hook_help()
  * @param type $path
