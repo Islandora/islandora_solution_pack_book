@@ -125,7 +125,7 @@ function disabled_islandora_book_init() {
 
 /**
  * Islandora book book viewer
- * Allows viweing of book object thorugh embedded player
+ * Allows viewing of book object thorugh embedded player
  * @global user $user
  * @param string $pid
  * @return html
@@ -158,9 +158,9 @@ function islandora_book_create_book_view($pid, $query = NULL) {
   global $user;
   module_load_include('inc', 'fedora_repository', 'api/ObjectHelper');
   $path = drupal_get_path('module', 'islandora_book');
-  $objectHelper = new ObjectHelper;
-  $xml = $objectHelper->getStream($pid, 'MODS');
-  $dc_xml = $objectHelper->getStream($pid, 'DC');
+  $object_helper = new ObjectHelper;
+  $xml = $object_helper->getStream($pid, 'MODS');
+  $dc_xml = $object_helper->getStream($pid, 'DC');
   if (!$dc_xml) {
     drupal_set_message(t('Object does not exist.'), 'error');
     return '';
@@ -184,15 +184,19 @@ function islandora_book_create_book_view($pid, $query = NULL) {
   try {
     $proc = new XsltProcessor();
   } catch (Exception $e) {
-    drupal_set_message(t('Error loading Book View XSLT: $e', array('@e' => check_plain($e->getMessage()))));
+    drupal_set_message(t('Error loading Book View XSLT: @e', array('@e' => check_plain($e->getMessage()))));
     return;
   }
 
   //inject into xsl stylesheet
-  $proc->setParameter('', 'userID', $user->uid);
-  $proc->setParameter('', 'objectsPage', base_path());
-  $proc->setParameter('', 'pid', $pid);
-  $proc->setParameter('', 'ingested', $ingested);
+  $params = array(
+    'USERID' => $user->uid,
+    'OBJECTSPAGE' => base_path(),
+    'PID' => $pid,
+    'INGESTED' => $ingested,
+    'SOLRFIELD' => variable_get('islandora_book_solr_subject_field', 'mods.subject'),
+  );
+  $proc->setParameter("", $params);
   $xsl = new DomDocument();
   $test = $xsl->load($path . '/xsl/book_view.xsl');
   if (!isset($test)) {
@@ -209,8 +213,7 @@ function islandora_book_create_book_view($pid, $query = NULL) {
   }
   else {
     $xsl = $proc->importStylesheet($xsl);
-    $newdom = $proc->transformToDoc($input);
-    $output .= $newdom->saveXML();
+    $output = $proc->transformToXML($input);
   }
   if (isset($query)) {
     module_load_include('inc', 'fedora_repository', 'core/SearchClass');
@@ -218,12 +221,8 @@ function islandora_book_create_book_view($pid, $query = NULL) {
     $pageQuery = convert_query_to_page_query($query, $pid);
     $output .= '<div>' . $searchClass->custom_search($pageQuery, $startPage, '/xsl/pageResults.xsl', 500) . '</div>'; //limit results to 500 pages of a book since there is no paging if we enable paging in xslt this can be changed
     //return $output."<div>used this query to find this page $query and new query = $pageQuery</div>";
-
-    return $output;
   }
-  else {
-    return $output;
-  }
+  return $output;
 }
 
 /**
@@ -444,6 +443,99 @@ function islandora_book_required_fedora_objects() {
 }
 
 /**
+<<<<<<< HEAD
+=======
+ * islandora book purge pages form
+ * @global string $base_url
+ * @param array $form_state
+ * @param string $pid
+ * @param string $referrer
+ * @return array
+ */
+function islandora_book_purge_pages_form(&$form_state, $pid, $referrer = NULL) {
+  global $base_url;
+  if (!user_access('purge objects and datastreams')) {
+    return NULL;
+  }
+  if ($pid == NULL) {
+    return NULL;
+  }
+  $form['pid'] = array(
+    '#type' => 'hidden',
+    '#value' => "$pid"
+  );
+  if (!strstr(drupal_get_destination(), urlencode('fedora/repository'))) {
+    $form['referrer'] = array(
+      '#type' => 'hidden',
+      '#value' => $referrer,
+    );
+  }
+  if (!isset($form_state['storage']['confirm'])) {
+    // do your normal $form definition here
+
+
+    $form['submit'] = array(
+      '#type' => 'image_button',
+      '#src' => drupal_get_path('module', 'fedora_repository') . '/images/purge_big.png',
+      '#value' => t('Purge'),
+      '#suffix' => 'Purge all pages associated with this book',
+    );
+
+    return $form;
+  }
+  else {
+    // ALSO do $form definition here. Your final submit handler (after user clicks Yes, I Confirm) will only see $form_state info defined here. Form you create here passed as param1 to confirm_form
+
+    return confirm_form($form, 'Confirm Purge ALL pages?', $referrer, 'Are you sure you want to delete these objects? This action cannot be undone.', 'Purge Pages', 'Cancel'); //Had better luck leaving off last param 'name'
+  }
+  return $form;
+}
+
+/**
+ * islandora book purge pages form submit
+ * @param array $form
+ * @param array $form_state
+ */
+function islandora_book_purge_pages_form_submit($form, &$form_state) {
+  module_load_include('inc', 'fedora_repository', 'api/ConnectionHelper');
+  module_load_include('inc', 'islandora_book', 'book_pack_utils');
+  $pid = $form_state['values']['pid'];
+  if (!isset($form_state['storage']['confirm'])) {
+    $form_state['storage']['confirm'] = TRUE; // this will cause the form to be rebuilt, entering the confirm part of the form
+    $form_state['rebuild'] = TRUE; // along with this
+  }
+  else {
+    unset($form_state['storage']['confirm']);
+    $soapHelper = new ConnectionHelper();
+    $client = $soapHelper->getSoapClient(variable_get('fedora_soap_manage_url', 'http://localhost:8080/fedora/wsdl?api=API-M'));
+    $pids_to_delete = get_page_pids($pid);
+    foreach ($pids_to_delete as $pid_to_delete) {
+      $params = array(
+        "pid" => $pid_to_delete,
+        "logMessage" => "Purged",
+        "force" => ""
+      );
+      try {
+
+        $object = $client->__soapCall('purgeObject', array($params));
+        // unset($form_state['storage']['confirm']);
+      } catch (exception $e) {
+        if (preg_match('/org\.fcrepo\.server\.security\.xacml\.pep\.AuthzDeniedException/', $e->getMessage())) {
+          drupal_set_message(t('Error:  Insufficient permissions to purge object.'), 'error');
+        }
+        else {
+          drupal_set_message(t("@message", check_plain($e->getMessage())), 'error');
+        }
+        return;
+      }
+    }
+
+    $form_state['redirect'] = "fedora/repository/$pid";
+  }
+}
+
+/**
+>>>>>>> ba2480adeffd1ae760f98685df5758b1df1e2653
  * islandora book help
  * implementaion of hook_help()
  * @param type $path

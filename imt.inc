@@ -33,11 +33,10 @@ class IMTViewer {
     $htmlstr = preg_replace('/<\/body><\/html>/', '', $htmlstr);
     $htmlstr = preg_replace('/<\?xml(.*?)head>/s', '', $htmlstr);
     if (!$htmlstr) {
-      $htmlstr = '<div><div><a href="' . $base_url . '/fedora/repository/' . $this->pid . '/JPEG/">' . t('View Full Size') . '</a><br />' .
-          ' <a href="' . $base_url . '/fedora/repository/' . $book . '">' . t('Return to Book View') . '</a></div>' .
-          ' <a href="' . $base_url . '/sites/all/modules/emic_canvas/impl/index.html?PID=' . $this->pid . '">' . t('Annotate with Shared Canvas') . '</a></div>' .
-          '<div><a href="' . $base_url . '/fedora/repository/' . $this->pid . '"><img src="' .
-          $base_url . '/fedora/repository/' . $this->pid . '/JPEG/' . '" /></a></div>';
+
+      $htmlstr = '<div><div><a href="' . $base_url . '/fedora/repository/' . $this->pid . '/JPEG/">View Full Size</a></div>' .
+      '<div><a href="' . $base_url . '/fedora/repository/' . $this->pid . '/JPEG/"><img src="' .
+      $base_url . '/fedora/repository/' . $this->pid . '/JPEG/' . '" /></a></div>';
     }
     $collection_fieldset = array(
       '#attributes' => array(),

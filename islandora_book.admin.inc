@@ -33,7 +33,7 @@ function islandora_book_admin_settings(&$form_state) {
 
   $form['islandora_book_create_images'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Create derivative images locally ?'),
+    '#title' => t('Create derivative images locally?'),
     '#description' => t('Leave this box checked unless processing of images is done on an external server.'),
     '#default_value' => variable_get('islandora_book_create_images', TRUE),
   );
@@ -59,6 +59,13 @@ function islandora_book_admin_settings(&$form_state) {
       'wrapper' => 'ibook-url',
       'effect' => 'fade',
       'event' => 'change'),
+  );
+  $form['book_ahah_wrapper']['islandora_book_solr_subject_field'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Solr subject field'),
+    '#description' => t('The solr field containing your untokenized subject value, used to link between books with the same subject.'),
+    // keep default value as previous default so its backward compatible
+    '#default_value' => variable_get('islandora_book_solr_subject_field', 'mods.subject'),
   );
   if ($ocr) {
     $form['book_ahah_wrapper']['islandora_ocr_path'] = array(
