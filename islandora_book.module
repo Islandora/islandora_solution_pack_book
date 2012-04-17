@@ -47,6 +47,38 @@ function islandora_book_menu() {
     'file' => 'ObjectManager.inc',
     'type' => MENU_CALLBACK,
   );
+
+  $items['islandora/book/upload'] = array(
+    'page callback' => 'upload_pages',
+    'access arguments' => array('view fedora collection'),
+    'file' => 'pageload/upload_frame.inc',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['islandora/book/upload_setup'] = array(
+    'page callback' => 'upload_setup',
+    'access arguments' => array('view fedora collection'),
+    'file' => 'pageload/upload_frame.inc',
+    'type' => MENU_CALLBACK,
+  );
+  $items['islandora/book/process_file'] = array(
+    'page callback' => 'process_file',
+    'access arguments' => array('view fedora collection'),
+    'file' => 'pageload/upload_frame.inc',
+    'type' => MENU_CALLBACK,
+  );
+  $items['islandora/book/process_page_directory'] = array(
+    'page callback' => 'prep_add_form',
+    'access arguments' => array('view fedora collection'),
+    'file' => 'pageload/prepare_add_pages_form.inc',
+    'type' => MENU_CALLBACK,
+  );
+  $items['islandora/book/delete_book_files'] = array(
+    'page callback' => 'delete_book_page_files',
+    'access arguments' => array('view fedora collection'),
+    'file' => 'pageload/upload_frame.inc',
+    'type' => MENU_CALLBACK,
+  );
   return $items;
 }
 
@@ -55,7 +87,7 @@ function islandora_book_perm() {
     'delete pages',
     'manage book object',
     'manage page object',
-    );
+  );
 }
 
 function islandora_book_solution_pack_form() {
@@ -71,27 +103,24 @@ function islandora_book_islandora_tabs($content_models, $pid) {
   $content_model = $content_models[0]->pid;
   if ($content_model == 'islandora:pageCModel' && user_access('manage page object')) {
     $return_tabs = get_page_model_management_content($pid);
-   // $return_tabs['fedora_object_details'] = null;
+    // $return_tabs['fedora_object_details'] = null;
     return $return_tabs;
   }
 
   if ($content_model == 'islandora:bookCModel') {
     $return_tabs = get_book_model_management_content($pid);
-   // $return_tabs['fedora_object_details'] = null;
+    // $return_tabs['fedora_object_details'] = null;
     return $return_tabs;
   }
 }
-
 
 /**
  * Implementation of hook_init
  * (currenlty disabled)
  */
-
 function disabled_islandora_book_init() {
 
-    drupal_add_css(drupal_get_path('module', 'islandora_book') . '/css/islandora_book.css');
-   
+  drupal_add_css(drupal_get_path('module', 'islandora_book') . '/css/islandora_book.css');
 }
 
 /**
@@ -252,45 +281,7 @@ function islandora_book_theme() {
   );
 }
 
-/**
- * Implementation of hook_requirements().
- *
- * @return
- *   An array describing the status of the site regarding available updates.
- *   If there is no update data, only one record will be returned, indicating
- *   that the status of core can't be determined. If data is available, there
- *   will be two records: one for core, and another for all of contrib
- *   (assuming there are any contributed modules or themes enabled on the
- *   site). In addition to the fields expected by hook_requirements ('value',
- *   'severity', and optionally 'description'), this array will contain a
- *   'reason' attribute, which is an integer constant to indicate why the
- *   given status is being returned (UPDATE_NOT_SECURE, UPDATE_NOT_CURRENT, or
- *   UPDATE_UNKNOWN). This is used for generating the appropriate e-mail
- *   notification messages during update_cron(), and might be useful for other
- *   modules that invoke update_requirements() to find out if the site is up
- *   to date or not.
- *
- * @see _update_message_text()
- * @see _update_cron_notify()
- */
-function islandora_book_requirements($phase) {
-  global $base_url;
-  if ($phase == 'runtime') {
-    module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
-    $requirements['iiv-war'] = array();
-    $requirements['iiv-war']['title'] = t("Islandora OpenLayers image viewer web app");
-    if (!_islandora_book_viewer_available()) {
-      $requirements['iiv-war']['value'] = ("Not available");
-      $requirements['iiv-war']['severity'] = REQUIREMENT_ERROR;
-      $requirements['iiv-war']['description'] = t('Ensure that Fedora is running and that the <a href="@iiv-home">IIV</a> app is deployed.', array('@iiv-home' => 'http://github.com/islandora/iiv'));
-    }
-    else {
-      $requirements['iiv-war']['value'] = ("Available");
-      $requirements['iiv-war']['severity'] = REQUIREMENT_OK;
-    }
-  }
-  return $requirements;
-}
+
 
 /**
  * _islandora_book_viewer_available 
@@ -308,7 +299,7 @@ function _islandora_book_viewer_available() {
  * @return array
  */
 function islandora_book_required_fedora_objects() {
-
+  module_load_include('inc', 'fedora_repository', 'fedora_repository.solutionpacks');
   // Add the form and associate it to the content model
   $module_path = drupal_get_path('module', 'islandora_book');
   $form_name = 'Islandora Books MODS Form';

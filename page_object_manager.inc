@@ -48,6 +48,7 @@ function page_management_form(&$form_state, $pid) {
   );
   $form['page_manage'] = array(
     '#type' => 'fieldset',
+
     '#collapsed' => TRUE,
     '#collapsible' => TRUE,
     '#title' => t('Update Derived Datastreams'),
@@ -69,6 +70,7 @@ function page_management_form(&$form_state, $pid) {
   );
   $form['current_datastreams'] = array(
     '#type' => 'fieldset',
+
     '#collapsed' => TRUE,
     '#collapsible' => TRUE,
     '#title' => t('Manage Current Datastreams'),
@@ -94,7 +96,7 @@ function page_management_form(&$form_state, $pid) {
   }
   if (user_access('delete pages')) {
     $form['delete_page'] = array(
-      '#title' => "Permanently Delete this page",
+      '#title' => t( "Permanently Delete This Page"),
       '#type' => 'fieldset',
       '#description' => t("Clicking this button will delete this page. <br /> <strong>This action cannot be undone.</strong>"),
       '#collapsible' => TRUE,
@@ -139,9 +141,11 @@ function page_management_form_submit($form, &$form_state) {
   }
   if ($form_state['clicked_button']['#id'] == 'delete_page') {
     $book_pids = get_collection_from_pid($pid);
+    $page_number = get_page_number($pid);
+    $book_pid = $book_pids[0];
     $item->purge($pid . ' deleted by user identified as ' . $user->name);
-    $book = $book_pids[0];
-    drupal_goto("fedora/repository/$book");
+     post_deletion_renumber_pages($book_pid);
+    drupal_goto("fedora/repository/$book_pid");
   }
 }
 
