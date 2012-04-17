@@ -35,6 +35,7 @@ class IMTViewer {
     if (!$htmlstr) {
       $htmlstr = '<div><div><a href="' . $base_url . '/fedora/repository/' . $this->pid . '/JPEG/">' . t('View Full Size') . '</a><br />' .
           ' <a href="' . $base_url . '/fedora/repository/' . $book . '">' . t('Return to Book View') . '</a></div>' .
+          ' <a href="' . $base_url . '/sites/all/modules/emic_canvas/impl/index.html?PID=' . $this->pid . '">' . t('Annotate with Shared Canvas') . '</a></div>' .
           '<div><a href="' . $base_url . '/fedora/repository/' . $this->pid . '"><img src="' .
           $base_url . '/fedora/repository/' . $this->pid . '/JPEG/' . '" /></a></div>';
     }

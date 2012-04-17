@@ -10,7 +10,7 @@ function book_add_pages(&$form_state, $pid) {
       //'#description' => t('Add pages to this book object.'),
   );
   $form['page_add']['link'] = array(
-    '#value' => l(t("Add, Append or Insert Pages"), "islandora/book/upload/$pid"),
+    '#value' => l(t("Append or Insert Pages"), "islandora/book/upload/$pid"),
   );
   return $form;
 }

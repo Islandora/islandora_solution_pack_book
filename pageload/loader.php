@@ -29,6 +29,7 @@
       <div class="page-header">
         <h3 id="book_title">Add page files</h3>
       </div>
+      <a id="back_to_book"href="#">Return to Book</a>
       <!-- The file upload form used as target for the file upload widget -->
       <form id="fileupload" action="server/php/" method="POST" enctype="multipart/form-data">
         <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
