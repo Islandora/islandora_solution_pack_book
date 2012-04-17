@@ -29,19 +29,26 @@ function islandora_book_admin_settings(&$form_state) {
     '#type' => 'item',
     '#value' => $help_page,
   );
-  $form['book_ahah_wrapper'] = array(
-    '#prefix' => '<div id="ibook-url">',
-    '#suffix' => '</div>',
-    '#type' => 'fieldset',
-  );
 
-  $form['book_ahah_wrapper']['islandora_book_create_images'] = array(
+
+  $form['islandora_book_create_images'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Create derivative images locally ?'),
+    '#title' => t('Create derivative images locally?'),
     '#description' => t('Leave this box checked unless processing of images is done on an external server.'),
     '#default_value' => variable_get('islandora_book_create_images', TRUE),
   );
 
+  $form['islandora_create_book_pdf'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Create PDF locally ?'),
+    '#description' => t('Check this box to have a PDF produced locally on ingest.'),
+    '#default_value' => variable_get('islandora_create_book_pdf', FALSE),
+  );
+    $form['book_ahah_wrapper'] = array(
+    '#prefix' => '<div id="ibook-url">',
+    '#suffix' => '</div>',
+    '#type' => 'fieldset',
+  );
   $form['book_ahah_wrapper']['islandora_book_do_ocr'] = array(
     '#type' => 'checkbox',
     '#title' => t('Perform OCR on incoming TIFF images?'),
@@ -52,6 +59,13 @@ function islandora_book_admin_settings(&$form_state) {
       'wrapper' => 'ibook-url',
       'effect' => 'fade',
       'event' => 'change'),
+  );
+  $form['book_ahah_wrapper']['islandora_book_solr_subject_field'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Solr subject field'),
+    '#description' => t('The solr field containing your untokenized subject value, used to link between books with the same subject.'),
+    // keep default value as previous default so its backward compatible
+    '#default_value' => variable_get('islandora_book_solr_subject_field', 'mods.subject'),
   );
   if ($ocr) {
     $form['book_ahah_wrapper']['islandora_ocr_path'] = array(
@@ -84,8 +98,6 @@ function islandora_book_admin_settings(&$form_state) {
   $form['#theme'] = 'system_settings_form';
   return ($form);
 }
-
-
 
 /**
  * update ocr div ??
@@ -176,3 +188,17 @@ function book_admin_refresh($form, &$form_state) {
   form_execute_handlers('submit', $form, $form_state);
   $form_state['rebuild'] = TRUE;
 }
+
+function is_url_valid($url) {
+  $handle = curl_init($url);
+  curl_setopt($handle, CURLOPT_RETURNTRANSFER, TRUE);
+  $response = curl_exec($handle);
+  $httpCode = curl_getinfo($handle, CURLINFO_HTTP_CODE);
+  $retval = TRUE;
+  if ($httpCode % 100 == 4) {
+    $retval = FALSE;
+  }
+  curl_close($handle);
+  return $retval;
+}
+

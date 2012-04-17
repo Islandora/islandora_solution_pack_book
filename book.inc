@@ -29,6 +29,7 @@ class IslandoraBook {
    * @return string 
    */
   public function showFieldSets() {
+    global $user;
     module_load_include('inc', 'islandora_book', 'book_pack_utils');
     module_load_include('inc', 'islandora_book', 'add_pages');
     module_load_include('module', 'islandora_book');
@@ -63,9 +64,12 @@ class IslandoraBook {
     if ($user->uid != 0) {
       $qs = '?uid=' . base64_encode($user->name . ':' . $user->pass);
     }
-
-    $viewer_url = variable_get('fedora_base_url', '') . '/get/' . $this->pid . '/islandora:viewerSdef/getViewer' . $qs;
-    $html = '<iframe src="' . $viewer_url . '" scrolling="0" frameborder="0" style="width: 100%; height: 800px;">Errors: unable to load viewer</iframe>';
+    module_load_include('inc', 'islandora_bookviewer', 'islandora_bookviewer');
+    $bookviewer = new IslandoraBookviewer($this->pid);
+    $html = $bookviewer->showAjaxBookViewer('mainpage.php');
+    //$html = $bookviewer->showBookViewer();
+    //$viewer_url = variable_get('fedora_base_url', '') . '/get/' . $this->pid . '/islandora:viewerSdef/getViewer' . $qs;
+    // $html = '<iframe src="' . $viewer_url . '" scrolling="0" frameborder="0" style="width: 100%; height: 800px;">Errors: unable to load viewer</iframe>';
     $tabset['pages_tab'] = array(
       // #type and #title are the minimum requirements.
       '#type' => 'tabpage',
@@ -90,30 +94,14 @@ class IslandoraBook {
       );
     }
 
-    if (!$hasPage && user_access('ingest new fedora objects')) {
-      $tabset['third_tab'] = array(
-        '#type' => 'tabpage',
-        '#title' => t('Add pages'),
-        '#content' => drupal_get_form('book_add_pages_form', $this->pid),
-      );
-    }
-    if ($hasPage && user_access('purge objects and datastreams')) {
-      $tabset['fourth_tab'] = array(
-        '#type' => 'tabpage',
-        '#title' => t('Purge all pages'),
-        '#selected' => $show_purge_tab,
-        '#content' => drupal_get_form('islandora_book_purge_pages_form', $this->pid),
-      );
-    }
-
     $scholarly_links = module_invoke_all('islandora_book_links', $this->pid);
-    if (!empty($scholarly_links)) {
+    if (!empty($scholarly_links) && $hasPage) {
       foreach ($scholarly_links as $scholarly_link) {
         $links .= $scholarly_link . '<br />';
       }
       $tabset['fifth_tab'] = array(
         '#type' => 'tabpage',
-        '#title' => t("Scholar's Links"),
+        '#title' => t("Critical Editing"),
         '#content' => $links,
       );
     }
