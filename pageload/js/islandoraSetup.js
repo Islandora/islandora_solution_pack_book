@@ -33,5 +33,10 @@ $(function () {
     dataType: 'json'
   });
 
+  $('#back_to_book').click(function(e){
+    e.preventDefault();
+
+    window.top.location.href = 'http://localhost/Development/fedora/repository/islandora:1912';
+  });
 
 });

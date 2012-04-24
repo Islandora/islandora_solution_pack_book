@@ -30,6 +30,7 @@ class IslandoraBook {
    */
   public function showFieldSets() {
     global $user;
+    global $base_url;
     module_load_include('inc', 'islandora_book', 'book_pack_utils');
     module_load_include('inc', 'islandora_book', 'add_pages');
     module_load_include('module', 'islandora_book');
@@ -70,7 +71,7 @@ class IslandoraBook {
     $bookviewer = new IslandoraBookviewer($this->pid);
     $html = $bookviewer->showAjaxBookViewer('mainpage.php');
     //$html = $bookviewer->showBookViewer();
-    $viewer_url = variable_get('fedora_base_url', '') . '/get/' . $this->pid . '/islandora:viewerSdef/getViewer' . $qs;
+    //$viewer_url = variable_get('fedora_base_url', '') . '/get/' . $this->pid . '/islandora:viewerSdef/getViewer' . $qs;
     // $html = '<iframe src="' . $viewer_url . '" scrolling="0" frameborder="0" style="width: 100%; height: 800px;">Errors: unable to load viewer</iframe>';
     $tabset['pages_tab'] = array(
       // #type and #title are the minimum requirements.
@@ -83,7 +84,7 @@ class IslandoraBook {
     $tabset['first_tab'] = array(
       // #type and #title are the minimum requirements.
       '#type' => 'tabpage',
-      '#title' => t('Description'),
+      '#title' => t('About'),
       // This will be the content of the tab.
       '#content' => islandora_book_create_book_view($this->pid),
     );
@@ -91,13 +92,14 @@ class IslandoraBook {
     if ($hasPage) {
       $tabset['second_tab'] = array(
         '#type' => 'tabpage',
-        '#title' => t('Read'),
+        '#title' => t('Reading Edition'),
         '#content' => $html
       );
     }
 
     $scholarly_links = module_invoke_all('islandora_book_links', $this->pid);
-    if (!empty($scholarly_links) && $hasPage) {
+
+    if (empty($scholarly_links) && $hasPage) {
       foreach ($scholarly_links as $scholarly_link) {
         $links .= $scholarly_link . '<br />';
       }
@@ -106,6 +108,7 @@ class IslandoraBook {
         '#title' => t("Critical Editing"),
         '#content' => $links,
       );
+
     }
     return $tabset;
   }

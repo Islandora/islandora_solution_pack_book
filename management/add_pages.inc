@@ -10,8 +10,12 @@ function book_add_pages(&$form_state, $pid) {
       //'#description' => t('Add pages to this book object.'),
   );
   $form['page_add']['link'] = array(
-    '#value' => l(t("Add, Append or Insert Pages"), "islandora/book/upload/$pid"),
+    '#value' => l(t("Append or Insert Pages"), "islandora/book/upload/$pid") . '<br />',
   );
+  $form['page_add']['bd_link'] = array(
+    '#value' => l(t("Create Digital Page"), "islandora/book/borndigital/$pid"),
+  );
+
   return $form;
 }
 
@@ -26,6 +30,16 @@ function book_add_pages(&$form_state, $pid) {
 function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageCModel', $relation = 'isMemberOf') {
   $file = (isset($form_state['values']['ingest-file-location']) ? $form_state['values']['ingest-file-location'] : '');
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  $item = new Fedora_Item($pid);
+  $book_title = $item->objectProfile->objLabel;
+
+  $prompt = t("Add pages to @title", array('@title' => $book_title));
+  $submit_prompt = t('Ingest Pages');
+  if ($page_cmodel == 'islandora:bd_pageCModel') {
+    $prompt = t("Create digital page for @title", array('@title' => $book_title));
+    $submit_prompt = t("Create page");
+  }
   $pages = TRUE;
   $current_page_count = count(get_page_pids($pid));
   if ($current_page_count == 0) {
@@ -38,13 +52,17 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
     '#type' => 'fieldset',
     '#collapsed' => true,
     '#collapsible' => false,
-    '#title' => t('Add pages to this book'),
-    '#description' => t('Add pages to this book object.'),
+    '#title' => $prompt,
+    '#description' => t('Add page content to this book.'),
   );
 
   $form['pid'] = array(
     '#type' => 'hidden',
     '#value' => $pid,
+  );
+  $form['book_title'] = array(
+    '#type' => 'hidden',
+    '#value' => $book_title,
   );
   $form['page_cmodel'] = array(
     '#type' => 'hidden',
@@ -78,7 +96,7 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
   $form['page_add']['submit'] = array(
     '#type' => 'submit',
     '#weight' => 10,
-    '#value' => 'Ingest Pages'
+    '#value' => $submit_prompt,
   );
   return $form;
 }
@@ -108,12 +126,37 @@ function book_add_pages_form_validate($form, &$form_state) {
  * @param array $form_state
  */
 function book_add_pages_form_submit($form, &$form_state) {
+  global $base_path;
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  $pageCModel = $form_state['values']['page_cmodel'];
   $pid = $form_state['values']['pid'];
   $start_page = (isset($form_state['values']['insertion_point'])) ? $form_state['values']['insertion_point'] + 1 : 1;
   $dirName = str_replace(':', '_', $pid);
   $tmpDir = file_directory_path() . '/' . $dirName . '/';
-  $file_list = get_page_files($pid);
-  ibook_create_page_objects($pid, $file_list, $form_state['values']['page_cmodel'], $form_state['values']['relation'], $tmpDir, $start_page);
+  $relationship = $form_state['values']['relation'];
+  if ($pageCModel == 'islandora:pageCModel') {
+    $file_list = get_page_files($pid);
+    ibook_create_page_objects($pid, $file_list, $form_state['values']['page_cmodel'], $relationship, $tmpDir, $start_page);
+  }
+  if ($pageCModel == 'islandora:bd_pageCModel') {
+    renumber_pages($start_page, $pid, 1);
+    $path =  drupal_get_path('module', 'islandora_book') . '/images/';
+
+    
+    $book_title = $form_state['values']['book_title'];
+    $page_title = "$book_title - Page " . sprintf("%03d", $start_page);
+    $parts = explode(':', $pid);
+    $nextPid = FEDORA_ITEM::get_next_PID_in_namespace($parts[0]);
+    $page_item = Fedora_Item::ingest_new_item($nextPid, 'A', $page_title);
+    $page_item->add_relationship('hasModel', $pageCModel, FEDORA_MODEL_URI);
+    $page_item->add_relationship('isPageNumber', sprintf("%04d", $start_page), ISLANDORA_PAGE_URI);
+    $page_item->add_relationship('isPageOf', $pid, ISLANDORA_PAGE_URI);
+    $page_item->add_relationship($relationship, $pid);
+    $page_item->add_datastream_from_file($path .'Borndigital_tn.png' , 'TN', 'Thumbnail', 'image/png', 'M');
+    $page_item->add_datastream_from_file($path . 'Borndigital_Fullsize.jpg', 'JPEG', 'JPEG Image', 'image/jpg', 'M');
+    $page_item->add_datastream_from_string('Born digital - not yet edited', 'OCR', 'OCR', 'text/plain', 'M' );
+    drupal_goto("fedora/repository/$pid");
+  }
 }
 
 /**
