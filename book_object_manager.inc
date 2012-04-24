@@ -40,7 +40,7 @@ function get_book_model_management_content($pid) {
   }
   $form['manage_book_tab'] = array(
     '#type' => 'tabpage',
-    '#title' => t('Manage This Book'),
+    '#title' => t('Manage'),
     '#content' => $content,
     '#selected' => $selected,
     

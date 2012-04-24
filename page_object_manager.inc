@@ -8,7 +8,7 @@ function page_management_wrapper($pid) {
 function get_page_model_management_content($pid) {
   $form['manage_page_tab'] = array(
     '#type' => 'tabpage',
-    '#title' => t('Manage This Page Object'),
+    '#title' => t('Manage'),
     '#content' => drupal_get_form('page_management_form', $pid),
     '#selected' => FALSE,
   );

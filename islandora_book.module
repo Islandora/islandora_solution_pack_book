@@ -54,6 +54,12 @@ function islandora_book_menu() {
     'file' => 'pageload/upload_frame.inc',
     'type' => MENU_CALLBACK,
   );
+  $items['islandora/book/borndigital'] = array(
+    'page callback' => 'create_borndigital',
+    'access arguments' => array('view fedora collection'),
+    'file' => 'management/born_digital.inc',
+    'type' => MENU_CALLBACK,
+  );
 
   $items['islandora/book/upload_setup'] = array(
     'page callback' => 'upload_setup',
@@ -281,8 +287,6 @@ function islandora_book_theme() {
   );
 }
 
-
-
 /**
  * _islandora_book_viewer_available 
  * @return boolean
@@ -315,6 +319,13 @@ function islandora_book_required_fedora_objects() {
         array(
           'foxml_file' => "$module_path/xml/islandora_pageCModel.xml",
           'pid' => 'islandora:pageCModel',
+          'dsid' => NULL,
+          'datastream_file' => NULL,
+          'dsversion' => NULL,
+        ),
+        array(
+          'foxml_file' => "$module_path/xml/islandora_bd_pageCModel.xml",
+          'pid' => 'islandora:bd_pageCModel',
           'dsid' => NULL,
           'datastream_file' => NULL,
           'dsversion' => NULL,
