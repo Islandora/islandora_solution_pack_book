@@ -51,7 +51,14 @@ class IslandoraBook {
       $page_number = $tail;
     }
     $class = new CollectionClass();
-    $results = $class->getRelatedItems($this->pid);
+  $query = <<<XML
+select \$object \$page from <#ri>
+where \$object <fedora-rels-ext:isMemberOf> <info:fedora/$this->pid>
+and \$object <fedora-model:state> <fedora-model:Active>
+and \$object <info:islandora/islandora-system:def/pageinfo#isPageNumber> \$page
+order by \$page
+XML;
+    $results = $class->getRelatedItems($this->pid, $query);
     $page_items = $class->renderCollection($results, $this->pid, NULL, NULL, $page_number);
     $page_pids = get_page_pids($this->pid);
 

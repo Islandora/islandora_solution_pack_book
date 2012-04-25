@@ -48,7 +48,6 @@ function page_management_form(&$form_state, $pid) {
   );
   $form['page_manage'] = array(
     '#type' => 'fieldset',
-
     '#collapsed' => TRUE,
     '#collapsible' => TRUE,
     '#title' => t('Update Derived Datastreams'),
@@ -70,7 +69,6 @@ function page_management_form(&$form_state, $pid) {
   );
   $form['current_datastreams'] = array(
     '#type' => 'fieldset',
-
     '#collapsed' => TRUE,
     '#collapsible' => TRUE,
     '#title' => t('Manage Current Datastreams'),
@@ -94,9 +92,32 @@ function page_management_form(&$form_state, $pid) {
       '#content' => $add_datastreams_details,
     );
   }
+  $form['renumber'] = array(
+    '#type' => 'fieldset',
+    '#collapsed' => TRUE,
+    '#collapsible' => TRUE,
+    '#title' => t('Renumber Page'),
+  );
+  $book_pids = get_collection_from_pid($pid);
+  $page_number = get_page_number($pid);
+  $book_pid = $book_pids[0];
+
+  $page_count = count(get_sorted_pages($book_pid));
+  $form['renumber']['new_page'] = array(
+    '#type' => 'textfield',
+    '#title' => t('New Page Number for page @num', array('@num' => $page_number)),
+    '#size' => 5,
+    '#description' => t('New page number must be between 1 and  @page_count inclusive', array('@page_count' => $page_count)),
+  );
+  $form['renumber']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Update Number'),
+    '#id' => 'renumber_page',
+  );
+
   if (user_access('delete pages')) {
     $form['delete_page'] = array(
-      '#title' => t( "Permanently Delete This Page"),
+      '#title' => t("Permanently Delete This Page"),
       '#type' => 'fieldset',
       '#description' => t("Clicking this button will delete this page. <br /> <strong>This action cannot be undone.</strong>"),
       '#collapsible' => TRUE,
@@ -124,6 +145,11 @@ function page_management_form_submit($form, &$form_state) {
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   global $user;
   $pid = $form_state['values']['pid'];
+  $book_pids = get_collection_from_pid($pid);
+  $current_page = get_page_number($pid);
+  $book_pid = $book_pids[0];
+  $pages = get_sorted_pages($book_pid);
+
   $item = new Fedora_Item($pid);
   if ($form_state['clicked_button']['#id'] == 'refresh_datastreams') {
     $tiff_file_path = save_datastream_as_tempfile($pid, 'TIFF');
@@ -140,12 +166,33 @@ function page_management_form_submit($form, &$form_state) {
     file_delete($tiff_file_path);
   }
   if ($form_state['clicked_button']['#id'] == 'delete_page') {
-    $book_pids = get_collection_from_pid($pid);
-    $page_number = get_page_number($pid);
-    $book_pid = $book_pids[0];
     $item->purge($pid . ' deleted by user identified as ' . $user->name);
-     post_deletion_renumber_pages($book_pid);
+    post_deletion_renumber_pages($book_pid);
     drupal_goto("fedora/repository/$book_pid");
+  }
+
+  if ($form_state['clicked_button']['#id'] == 'renumber_page') {
+    $new_page = $form_state['values']['new_page'];
+    $item = new Fedora_Item($pid);
+    $item->purge_relationship('isPageNumber', sprintf("%04d", $current_page));
+    $item->add_relationship('isPageNumber', sprintf("%04d", $new_page), ISLANDORA_PAGE_URI);
+    if ($new_page < $current_page) {
+      for ($working_page = $new_page; $working_page < $current_page; $working_page++) {
+        $item = new Fedora_Item($pages[$working_page]);
+        $item->purge_relationship('isPageNumber', sprintf("%04d", $working_page));
+        $item->add_relationship('isPageNumber', sprintf("%04d", $working_page + 1), ISLANDORA_PAGE_URI);
+      }
+    }
+
+    if ($new_page > $current_page) {
+      for ($working_page = $new_page; $working_page > $current_page; $working_page--) {
+        $item = new Fedora_Item($pages[$working_page]);
+        $item->purge_relationship('isPageNumber', sprintf("%04d", $working_page));
+        $item->add_relationship('isPageNumber', sprintf("%04d", $working_page - 1), ISLANDORA_PAGE_URI);
+      }
+    }
+
+    drupal_goto("fedora/repository/$pid");
   }
 }
 
