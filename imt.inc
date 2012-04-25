@@ -56,6 +56,7 @@ class IMTViewer {
       '#type' => 'tabpage',
       '#title' => $item->objectProfile->objLabel,
       '#content' => theme('fieldset', $collection_fieldset),
+      '#selected' => true,
     );
     return $tabset;
   }
