@@ -86,12 +86,14 @@ XML;
       '#title' => t('Pages'),
       '#selected' => $pages_selected,
       '#content' => $page_items,
+      '#weight' =>15,
     );
 
     $tabset['first_tab'] = array(
       // #type and #title are the minimum requirements.
       '#type' => 'tabpage',
       '#title' => t('About'),
+      '#weight' =>1,
       // This will be the content of the tab.
       '#content' => islandora_book_create_book_view($this->pid),
     );
@@ -100,7 +102,8 @@ XML;
       $tabset['second_tab'] = array(
         '#type' => 'tabpage',
         '#title' => t('Reading Edition'),
-        '#content' => $html
+        '#content' => $html,
+        '#weight' => 10,
       );
     }
 
@@ -114,6 +117,7 @@ XML;
         '#type' => 'tabpage',
         '#title' => t("Critical Editing"),
         '#content' => $links,
+        '#weight' =>3,
       );
 
     }
