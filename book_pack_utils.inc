@@ -331,8 +331,7 @@ XML;
   $book_pids = array();
   foreach ($results_xml->results->result as $result) {
     $page = str_replace('info:fedora/', '', $result->object->attributes()->uri);
-    $number = str_replace('info:fedora/', '', $result->page->attributes()->uri) + 0;
-    $book_pids[$number] = $page;
+    $book_pids[] = $page;
   }
 
   return $book_pids;
