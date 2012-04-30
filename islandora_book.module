@@ -115,7 +115,7 @@ function islandora_book_islandora_tabs($content_models, $pid) {
 
   if ($content_model == 'islandora:bookCModel') {
     $return_tabs = get_book_model_management_content($pid);
-    // $return_tabs['fedora_object_details'] = null;
+    $return_tabs['fedora_object_details'] = null;
     return $return_tabs;
   }
 }
