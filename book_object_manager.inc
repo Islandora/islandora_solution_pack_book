@@ -43,6 +43,7 @@ function get_book_model_management_content($pid) {
     '#title' => t('Manage'),
     '#content' => $content,
     '#selected' => $selected,
+    '#weight' => 100
     
   );
   return $form;

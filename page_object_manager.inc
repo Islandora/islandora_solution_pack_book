@@ -21,6 +21,10 @@ function page_management_form(&$form_state, $pid) {
   }
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   module_load_include('inc', 'fedora_repository', 'plugins/FedoraObjectDetailedContent');
+  module_load_include('inc', 'fedora_repository', 'ObjectHelper');
+  global $base_url;
+  $edit_metadata_link = l(t('Edit Metadata'), $base_url . '/fedora/repository/editmetadata/' . $pid . '/metadata', array('attributes' => array('class' => 'islandora-repo-button')));
+
   $content_helper = new FedoraObjectDetailedContent($pid);
   $object_helper = new ObjectHelper();
   $ds_list = datastream_display_builder($content_helper->pid, $content_helper->item);
@@ -38,7 +42,7 @@ function page_management_form(&$form_state, $pid) {
     '#type' => 'fieldset',
     '#collapsed' => TRUE,
     '#collapsible' => TRUE,
-    '#title' => t('View Metadata'),
+    '#title' => t('Metadata'),
   );
 
   $form['view_dc']['dublin_core'] = array(
@@ -46,6 +50,12 @@ function page_management_form(&$form_state, $pid) {
     '#title' => t('View'),
     '#content' => $dc_html,
   );
+
+  $form['view_dc']['edit'] = array(
+    '#type' => 'markup',
+    '#value' => $edit_metadata_link,
+  );
+
   $form['page_manage'] = array(
     '#type' => 'fieldset',
     '#collapsed' => TRUE,
