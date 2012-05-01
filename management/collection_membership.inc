@@ -58,7 +58,7 @@ function book_collection_management(&$form_state, $pid) {
     );
 
     $form['collections']['collection_remove']['current'] = array(
-      '#title' => 'Currentl Memberships',
+      '#title' => 'Current Memberships',
       '#type' => 'select',
       '#options' => $current_collections,
     );
