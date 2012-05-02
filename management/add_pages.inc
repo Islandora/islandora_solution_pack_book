@@ -140,9 +140,9 @@ function book_add_pages_form_submit($form, &$form_state) {
   }
   if ($pageCModel == 'islandora:bd_pageCModel') {
     renumber_pages($start_page, $pid, 1);
-    $path =  drupal_get_path('module', 'islandora_book') . '/images/';
+    $path = drupal_get_path('module', 'islandora_book') . '/images/';
 
-    
+
     $book_title = $form_state['values']['book_title'];
     $page_title = "$book_title - Page " . sprintf("%03d", $start_page);
     $parts = explode(':', $pid);
@@ -152,9 +152,9 @@ function book_add_pages_form_submit($form, &$form_state) {
     $page_item->add_relationship('isPageNumber', sprintf("%04d", $start_page), ISLANDORA_PAGE_URI);
     $page_item->add_relationship('isPageOf', $pid, ISLANDORA_PAGE_URI);
     $page_item->add_relationship($relationship, $pid);
-    $page_item->add_datastream_from_file($path .'Borndigital_tn.png' , 'TN', 'Thumbnail', 'image/png', 'M');
+    $page_item->add_datastream_from_file($path . 'Borndigital_tn.png', 'TN', 'Thumbnail', 'image/png', 'M');
     $page_item->add_datastream_from_file($path . 'Borndigital_Fullsize.jpg', 'JPEG', 'JPEG Image', 'image/jpg', 'M');
-    $page_item->add_datastream_from_string('Born digital - not yet edited', 'OCR', 'OCR', 'text/plain', 'M' );
+    $page_item->add_datastream_from_string('Born digital - not yet edited', 'OCR', 'OCR', 'text/plain', 'M');
     drupal_goto("fedora/repository/$pid");
   }
 }
@@ -323,6 +323,8 @@ function makePDF($book_pid, $file_list, $tmpDir) {
 }
 
 function page_delete(&$form_state, $pid) {
+  module_load_include('inc','islandora_book','management/IslandoraBookPageTable');
+  $table = islandora_book_page_table($pid);
 
   if (user_access('delete pages')) {
     $form['pid'] = array(
@@ -336,32 +338,20 @@ function page_delete(&$form_state, $pid) {
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
     );
-    $form['delete_page']['confirm'] = array(
-      '#title' => "Are you sure?",
-      '#type' => 'fieldset',
-      '#description' => t('<strong>Clicking the delete button will permanantly remove all of its pages.</strong> <br />  <strong>This action cannot be undone.</strong> '),
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
+
+    $form['delete_page']['table'] = array(
+      'table' => $table,
     );
+
 
     $form['delete_page']['confirm']['submit'] = array(
       '#type' => 'submit',
-      '#value' => t('Delete All Pages'),
+      '#value' => t('Delete Selected Pages'),
       '#id' => 'delete_pages',
     );
   }
 
   return $form;
-}
-
-function page_delete_submit($form, &$form_state) {
-  $book_pid = $form_state['values']['pid'];
-  module_load_include('inc', 'islandora_book', 'book_pack_utils');
-  $page_pids = get_page_pids($book_pid);
-  foreach ($page_pids as $page_pid) {
-    $item = new Fedora_Item($page_pid);
-    $item->purge();
-  }
 }
 
 /**
@@ -413,3 +403,31 @@ function get_page_files($pid) {
   return $ordered_files;
 }
 
+function page_delete_submit($form, &$form_state) {
+
+  module_load_include('inc', 'islandora_book', 'book_pack_utils');
+  $book_pid = $form_state['values']['pid'];
+  $page_pids = @array_filter($form_state['values']['table']['selections']);
+  $count = count($page_pids);
+  $batch = array(
+    'title' => t("Deleting @page_count pages", array('@page_count' => $count)),
+    'operations' => array(),
+    'file' => drupal_get_path('module', 'islandora_book') . '/management/add_pages.inc',
+    'init_message' => t('Preparing data...'),
+    'progress_message' => t('@current of @total pages deleted.'),
+  );
+
+  foreach ($page_pids as $page_pid) {
+    $batch['operations'][] = array('islandora_book_delete_single_page', array($page_pid));
+    $batch['operations'][] =array('post_deletion_renumber_pages', array($book_pid));
+  }
+  batch_set($batch);
+  batch_process("fedora/repository/$book_pid");
+}
+
+function islandora_book_delete_single_page($page_pid) {
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  global $user;
+  $item = new Fedora_Item($page_pid);
+  $item->purge($pid . ' deleted by user identified as ' . $user->name);
+}
