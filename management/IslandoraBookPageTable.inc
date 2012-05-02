@@ -40,7 +40,7 @@ XML;
   );
 
   $table = array(
-    '#header' => array(theme('table_select_header_cell'), t('Select All'), ''),
+    '#header' => array(theme('table_select_header_cell'), t('Page Pid'), 'Page Label'),
     '#theme' => 'islandora_book_page_table',
     '#tree' => TRUE,
     'rows' => array(),

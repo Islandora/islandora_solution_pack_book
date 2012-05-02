@@ -323,7 +323,7 @@ function makePDF($book_pid, $file_list, $tmpDir) {
 }
 
 function page_delete(&$form_state, $pid) {
-  module_load_include('inc','islandora_book','management/IslandoraBookPageTable');
+  module_load_include('inc', 'islandora_book', 'management/IslandoraBookPageTable');
   $table = islandora_book_page_table($pid);
 
   if (user_access('delete pages')) {
@@ -334,7 +334,6 @@ function page_delete(&$form_state, $pid) {
     $form['delete_page'] = array(
       '#title' => "Permanently Delete Pages from this Book",
       '#type' => 'fieldset',
-      '#description' => t("Clicking this button will delete this all book pages. <br /> <strong>This action cannot be undone.</strong>"),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
     );
@@ -419,7 +418,7 @@ function page_delete_submit($form, &$form_state) {
 
   foreach ($page_pids as $page_pid) {
     $batch['operations'][] = array('islandora_book_delete_single_page', array($page_pid));
-    $batch['operations'][] =array('post_deletion_renumber_pages', array($book_pid));
+    $batch['operations'][] = array('post_deletion_renumber_pages', array($book_pid));
   }
   batch_set($batch);
   batch_process("fedora/repository/$book_pid");
