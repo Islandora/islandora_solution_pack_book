@@ -45,8 +45,8 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
   if ($current_page_count == 0) {
     $pages = FALSE;
   }
-  $message = t("This book currently has @count pages, new pages will be appended by default. !break", array("@count" => $current_page_count, '!break' => '<br />'));
-  $message .= t("Choose a number lower than @count to insert the new pages at the chosen location", array("@count" => $current_page_count, '!break' => '<br />'));
+  $message = t("This sequence currently has @count pages. Additional pages will be appended at the end of the sequence by default. !break", array("@count" => $current_page_count, '!break' => '<br />'));
+  $message .= t("Choose a number lower than @count to insert page(s) at a specific location in the sequence.", array("@count" => $current_page_count, '!break' => '<br />'));
 
   $form['page_add'] = array(
     '#type' => 'fieldset',
@@ -81,7 +81,7 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
   if ($pages) {
     $form['page_add']['insertion_point'] = array(
       '#type' => 'textfield',
-      '#title' => t('Previous Page number'),
+      '#title' => t('Last sequence number'),
       '#default_value' => $current_page_count,
       '#description' => $message,
       '#size' => 5,
@@ -418,8 +418,8 @@ function page_delete_submit($form, &$form_state) {
 
   foreach ($page_pids as $page_pid) {
     $batch['operations'][] = array('islandora_book_delete_single_page', array($page_pid));
-    $batch['operations'][] = array('post_deletion_renumber_pages', array($book_pid));
   }
+  $batch['operations'][] = array('wrap_post_deletion_renumber_pages', array($book_pid));
   batch_set($batch);
   batch_process("fedora/repository/$book_pid");
 }
@@ -429,4 +429,15 @@ function islandora_book_delete_single_page($page_pid) {
   global $user;
   $item = new Fedora_Item($page_pid);
   $item->purge($pid . ' deleted by user identified as ' . $user->name);
+}
+
+
+/**
+ * Wrapper to call function from utilities page
+ * Batch will not call functions from multiple files
+ * @param string $book_pid
+ */
+function wrap_post_deletion_renumber_pages($book_pid) {
+  module_load_include('inc', 'islandora_book', 'book_pack_utils');
+  post_deletion_renumber_pages($book_pid);
 }
