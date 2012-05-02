@@ -362,7 +362,7 @@ function add_islandora_rdfs($book_pid) {
  */
 function get_files_from_zip($zip_file) {
   $file_dir = pathinfo($zip_file, PATHINFO_DIRNAME);
-  $tmpDir = $file_dir . '/tmpZip';
+  $tmpDir = $file_dir . '/tmpZip/';
   if (!is_dir($tmpDir)) {
     mkdir($tmpDir, 0766);
   }
