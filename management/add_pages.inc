@@ -179,7 +179,7 @@ function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = '
   $page_pids = array();
   $image_count = count($image_list);
   $batch = array(
-    'title' => "Creating $image_count page objects and book PDF.",
+    'title' => "Creating $image_count page objects.",
     'operations' => array(),
     'file' => drupal_get_path('module', 'islandora_book') . '/management/add_pages.inc',
     'init_message' => t('Preparing data...'),
@@ -195,7 +195,7 @@ function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = '
   if (variable_get('islandora_create_book_pdf', FALSE)) {
     $batch['operations'][] = array('makePDF', array($pid, $image_list, $tmpDir));
   }
-  $batch['operations'][] = array('  deleteDirectory($tmpDir);', array($tmpDir));
+  $batch['operations'][] = array('deleteDirectory', array($tmpDir));
   $collection = get_collection_from_pid($pid);
   batch_set($batch);
   batch_process("fedora/repository/$pid");
