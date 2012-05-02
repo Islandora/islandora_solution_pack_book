@@ -283,9 +283,15 @@ function islandora_book_theme() {
     ),
     'islandora_book_simple_book_search_form' => array(
       'arguments' => array('form' => NULL),
+    ),
+    'islandora_book_page_table' => array(
+      'arguments' => array('element' => NULL),
+      'file' => 'management/IslandoraBookPageTable.inc',
     )
   );
 }
+
+
 
 /**
  * _islandora_book_viewer_available 
