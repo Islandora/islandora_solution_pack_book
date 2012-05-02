@@ -34,7 +34,7 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
   $item = new Fedora_Item($pid);
   $book_title = $item->objectProfile->objLabel;
 
-  $prompt = t("Add pages to @title", array('@title' => $book_title));
+  $prompt = t("Add page(s) to @title", array('@title' => $book_title));
   $submit_prompt = t('Ingest Pages');
   if ($page_cmodel == 'islandora:bd_pageCModel') {
     $prompt = t("Create digital page for @title", array('@title' => $book_title));
@@ -53,7 +53,6 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
     '#collapsed' => true,
     '#collapsible' => false,
     '#title' => $prompt,
-    '#description' => t('Add page content to this book.'),
   );
 
   $form['pid'] = array(
