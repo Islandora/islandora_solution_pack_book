@@ -52,6 +52,9 @@ function refresh_ocr($tiff, &$item, $language) {
     file_delete("$tiff.txt");
     $success = TRUE;
   }
+  if(!$success){
+    drupal_set_message(t('OCR replacement for @pid was unsuccessful', array('@pid'=> $item->pid)));
+  }
 
   return $success;
 }
