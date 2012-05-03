@@ -31,6 +31,15 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
   $file = (isset($form_state['values']['ingest-file-location']) ? $form_state['values']['ingest-file-location'] : '');
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  $languages = array(
+    'eng' => t('English'),
+    'deu-frak' => t('German'),
+    'por' => t('Portugese'),
+    'fra' => t('French'),
+    'spa' => t('Spanish'),
+    'hin' =>  t('Hindi'),
+
+  );
   $item = new Fedora_Item($pid);
   $book_title = $item->objectProfile->objLabel;
 
@@ -86,9 +95,11 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
       '#size' => 5,
     );
   }
-  $form['page_add']['upload_options'] = array(
-    '#title' => "<strong>Access zipped page images</strong>",
-    '#description' => t('Select either ftp file location on the server, or upload zipped page images, but not both.'),
+  $form['page_add']['language'] = array(
+    '#title' => t('Language'),
+    '#type' => 'select',
+    '#options' => $languages,
+    '#selected' => 'eng',
   );
 
 
@@ -133,9 +144,10 @@ function book_add_pages_form_submit($form, &$form_state) {
   $dirName = str_replace(':', '_', $pid);
   $tmpDir = file_directory_path() . '/' . $dirName . '/';
   $relationship = $form_state['values']['relation'];
+  $language = $form_state['values']['language'];
   if ($pageCModel == 'islandora:pageCModel') {
     $file_list = get_page_files($pid);
-    ibook_create_page_objects($pid, $file_list, $form_state['values']['page_cmodel'], $relationship, $tmpDir, $start_page);
+    ibook_create_page_objects($pid, $file_list, $form_state['values']['page_cmodel'], $relationship, $tmpDir, $start_page, $language);
   }
   if ($pageCModel == 'islandora:bd_pageCModel') {
     renumber_pages($start_page, $pid, 1);
@@ -167,7 +179,7 @@ function book_add_pages_form_submit($form, &$form_state) {
  * @param string $tmpDir
  * @return boolean
  */
-function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = 'islandora:pageCModel', $relation = 'isMemberOfCollection', $tmpDir, $start_page) {
+function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = 'islandora:pageCModel', $relation = 'isMemberOfCollection', $tmpDir, $start_page, $language = 'eng') {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   module_load_include('inc', 'fedora_repository', 'api/ObjectHelper');
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
@@ -189,7 +201,7 @@ function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = '
   $book_title = $book->objectProfile->objLabel;
   $batch['operations'][] = array('renumber_pages', array($start_page, $pid, $image_count));
   foreach ($image_list as $image_path) {
-    $batch['operations'][] = array('ibook_add_single_page_object', array($pid, $image_path, $page_num, "$book_title - Page " . sprintf("%03d", $page_num), $page_cmodel, $relation));
+    $batch['operations'][] = array('ibook_add_single_page_object', array($pid, $image_path, $page_num, "$book_title - Page " . sprintf("%03d", $page_num), $page_cmodel, $relation, $language));
     $page_num++;
   }
   if (variable_get('islandora_create_book_pdf', FALSE)) {
@@ -223,7 +235,7 @@ function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = '
  * @param string $page_cmodel
  * @param string $relation
  */
-function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $page_title = NULL, $page_cmodel = 'islandora:pageCModel', $relation = 'isMemberOf') {
+function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $page_title = NULL, $page_cmodel = 'islandora:pageCModel', $relation = 'isMemberOf', $language) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   $parts = explode(':', $book_pid);
@@ -269,7 +281,7 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
     $executable = variable_get('islandora_ocr_path', '/usr/bin/tesseract');
     $returnValue = "";
     $output = "";
-    exec("$executable $page_file $page_file -l eng", $output, $returnValue);
+    exec("$executable $page_file $page_file -l $language", $output, $returnValue);
     if ($returnValue == '0') {
       $page_item->add_datastream_from_file("$page_file.txt", 'OCR', "Scanned Text", 'text/plain', 'M');
     }
@@ -429,7 +441,6 @@ function islandora_book_delete_single_page($page_pid) {
   $item = new Fedora_Item($page_pid);
   $item->purge($pid . ' deleted by user identified as ' . $user->name);
 }
-
 
 /**
  * Wrapper to call function from utilities page
