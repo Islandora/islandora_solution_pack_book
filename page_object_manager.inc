@@ -23,6 +23,16 @@ function page_management_form(&$form_state, $pid) {
   module_load_include('inc', 'fedora_repository', 'plugins/FedoraObjectDetailedContent');
   module_load_include('inc', 'fedora_repository', 'ObjectHelper');
   global $base_url;
+
+  $languages = array(
+    'eng' => t('English'),
+    'deu-frak' => t('German'),
+    'por' => t('Portugese'),
+    'fra' => t('French'),
+    'spa' => t('Spanish'),
+    'hin' => t('Hindi'),
+  );
+
   $edit_metadata_link = l(t('Edit Metadata'), $base_url . '/fedora/repository/editmetadata/' . $pid . '/metadata', array('attributes' => array('class' => 'islandora-repo-button')));
 
   $content_helper = new FedoraObjectDetailedContent($pid);
@@ -66,6 +76,12 @@ function page_management_form(&$form_state, $pid) {
   $form['page_manage']['do_ocr'] = array(
     '#type' => 'checkbox',
     '#title' => t('Refresh OCR for this page')
+  );
+  $form['page_manage']['language'] = array(
+    '#title' => t('Language'),
+    '#type' => 'select',
+    '#options' => $languages,
+    '#selected' => 'eng',
   );
   $form['page_manage']['recreate_derivatives'] = array(
     '#type' => 'checkbox',
@@ -164,7 +180,7 @@ function page_management_form_submit($form, &$form_state) {
   if ($form_state['clicked_button']['#id'] == 'refresh_datastreams') {
     $tiff_file_path = save_datastream_as_tempfile($pid, 'TIFF');
     if ($form_state['values']['do_ocr']) {
-      $success = refresh_ocr($tiff_file_path, $item);
+      $success = refresh_ocr($tiff_file_path, $item, $form_state['values']['language']);
       if ($success) {
         drupal_set_message(t("OCR refreshed for this page"));
       }
