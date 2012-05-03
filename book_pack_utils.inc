@@ -36,14 +36,14 @@ XML;
  * @param fedora item $item
  * @return boolean
  */
-function refresh_ocr($tiff, &$item) {
+function refresh_ocr($tiff, &$item, $language) {
   $label = $item->objectProfile->objLabel;
   $datastreams = $item->get_datastreams_list_as_array();
   $executable = variable_get('islandora_ocr_path', '/usr/bin/tesseract');
   $returnValue = "";
   $output = "";
   $success = FALSE;
-  exec("$executable $tiff $tiff -l eng", $output, $returnValue);
+  exec("$executable $tiff $tiff -l $language", $output, $returnValue);
   if ($returnValue == '0') {
     if (array_key_exists('OCR', $datastreams)) {
       $item->purge_datastream('OCR');
