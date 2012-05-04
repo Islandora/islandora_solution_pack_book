@@ -94,13 +94,14 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
       '#size' => 5,
     );
   }
-  $form['page_add']['language'] = array(
-    '#title' => t('Language'),
-    '#type' => 'select',
-    '#options' => $languages,
-    '#selected' => 'eng',
-  );
-
+  if ($page_cmodel == 'islandora:pageCModel') {
+    $form['page_add']['language'] = array(
+      '#title' => t('Language'),
+      '#type' => 'select',
+      '#options' => $languages,
+      '#selected' => 'eng',
+    );
+  }
 
   $form['page_add']['submit'] = array(
     '#type' => 'submit',
@@ -143,7 +144,7 @@ function book_add_pages_form_submit($form, &$form_state) {
   $dirName = str_replace(':', '_', $pid);
   $tmpDir = file_directory_path() . '/' . $dirName . '/';
   $relationship = $form_state['values']['relation'];
-  $language = $form_state['values']['language'];
+  $language = (isset($form_state['values']['language'])) ? $form_state['values']['language'] : 'eng';
   if ($pageCModel == 'islandora:pageCModel') {
     $file_list = get_page_files($pid);
     ibook_create_page_objects($pid, $file_list, $form_state['values']['page_cmodel'], $relationship, $tmpDir, $start_page, $language);
@@ -164,6 +165,7 @@ function book_add_pages_form_submit($form, &$form_state) {
     $page_item->add_relationship($relationship, $pid);
     $page_item->add_datastream_from_file($path . 'Borndigital_tn.png', 'TN', 'Thumbnail', 'image/png', 'M');
     $page_item->add_datastream_from_file($path . 'Borndigital_Fullsize.jpg', 'JPEG', 'JPEG Image', 'image/jpg', 'M');
+    $page_item->add_datastream_from_file($path . 'Borndigital.jp2', 'JP2', 'Compressed JP2', 'image/jp2', 'M');
     $page_item->add_datastream_from_string('Born digital - not yet edited', 'OCR', 'OCR', 'text/plain', 'M');
     drupal_goto("fedora/repository/$pid");
   }
