@@ -152,7 +152,7 @@ function page_management_form(&$form_state, $pid) {
     $form['delete_page']['confirm'] = array(
       '#title' => "Are you sure?",
       '#type' => 'fieldset',
-      '#description' => t('<strong>Clicking the delete button will permanantly remove this page. <br />  <strong>This action cannot be undone.</strong> '),
+      '#description' => t('<strong>Clicking the delete button will permanantly remove this page. </strong><br />  <strong>This action cannot be undone.</strong> '),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
     );
