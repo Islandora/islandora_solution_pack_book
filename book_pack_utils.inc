@@ -36,13 +36,20 @@ XML;
  * @param fedora item $item
  * @return boolean
  */
-function refresh_ocr($tiff, &$item, $language) {
+function refresh_ocr($tiff, &$item, $language, $preprocess = FALSE) {
   $label = $item->objectProfile->objLabel;
   $datastreams = $item->get_datastreams_list_as_array();
   $executable = variable_get('islandora_ocr_path', '/usr/bin/tesseract');
   $returnValue = "";
   $output = "";
   $success = FALSE;
+  if ($preprocess) {
+    $command = "gimp -d -i -b '(munge-typeset-ocr $tiff '$tiff.png' 5.0 10.0 0.0 200.0 5.0)' -b '(gimp-quit 0)'";
+    exec($command, $output, $returnVal);
+    if($returnVal == 0 ){
+      $tiff = "$tiff.png";
+    }
+  }
   exec("$executable $tiff $tiff -l $language", $output, $returnValue);
   if ($returnValue == '0') {
     if (array_key_exists('OCR', $datastreams)) {
@@ -52,8 +59,8 @@ function refresh_ocr($tiff, &$item, $language) {
     file_delete("$tiff.txt");
     $success = TRUE;
   }
-  if(!$success){
-    drupal_set_message(t('OCR replacement for @pid was unsuccessful', array('@pid'=> $item->pid)));
+  if (!$success) {
+    drupal_set_message(t('OCR replacement for @pid was unsuccessful', array('@pid' => $item->pid)));
   }
 
   return $success;

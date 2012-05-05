@@ -14,8 +14,6 @@ function upload_setup($pid) {
   $label = $item->objectProfile->objLabel;
   global $base_url;
   global $base_path;
-  unset($_SESSION['upload_url']);
-  unset($_SESSION['upload_dir']);
   unset($_SESSION['script_url']);
   $flat_pid = str_replace(':', '_', $pid);
   $upload_dir = $_SERVER['DOCUMENT_ROOT'] . $base_path . file_directory_path() . "/$flat_pid/";
@@ -29,13 +27,11 @@ function upload_setup($pid) {
   if (!is_dir($thumbnail_dir)) {
     mkdir($thumbnail_dir, 0766);
   }
-  $_SESSION['upload_url'] = $save_path;
-  $_SESSION['upload_dir'] = $upload_dir;
   $_SESSION['script_url'] = $base_url . '/pageview/uploadHandler.inc';
 
   $results = array();
   $results['dir_callback'] = $base_url . "/islandora/book/process_page_directory/$pid";
-  $results['book_callback'] = $base_url . '/islandora/book/process_file';
+  $results['book_callback'] = $base_url . "/islandora/book/process_file/$flat_pid";
   $results['delete_callback'] = $base_url . "/islandora/book/delete_book_files/$flat_pid";
   $results['book_title'] = $label;
 
@@ -43,13 +39,13 @@ function upload_setup($pid) {
   echo $json;
 }
 
-function process_file() {
+function process_file($flat_pid) {
 
   error_reporting(E_ALL | E_STRICT);
   module_load_include('inc', 'islandora_book', 'pageload/uploadHandler');
   // require('upload.class.php');
 
-  $upload_handler = new UploadHandler();
+  $upload_handler = new UploadHandler($flat_pid);
 
   header('Pragma: no-cache');
   header('Cache-Control: no-store, no-cache, must-revalidate');
