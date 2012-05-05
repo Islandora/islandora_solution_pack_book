@@ -10,7 +10,7 @@ $(function () {
     return results[1] || 0;
   }
   var PID = $.urlParam('PID');
-;
+
   var here = window.location.toString();
   var splitter = here.indexOf('/sites/');
   if(splitter > 0){
