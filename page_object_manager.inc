@@ -83,6 +83,11 @@ function page_management_form(&$form_state, $pid) {
     '#description' => t('Will add additional processing for typewritten text.'),
     '#type' => 'checkbox',
   );
+    $form['page_manage']['cwrcgone'] = array(
+    '#title' => t('Refresh OCR within editor?'),
+    '#description' => t('Refreshing will show newest OCR in the editor, but all current annotations for this page will be lost.'),
+    '#type' => 'checkbox',
+  );
   $form['page_manage']['language'] = array(
     '#title' => t('Language'),
     '#type' => 'select',
@@ -188,8 +193,9 @@ function page_management_form_submit($form, &$form_state) {
     $tiff_file_path = save_datastream_as_tempfile($pid, 'TIFF');
     $language = $form_state['values']['language'];
     $preprocess = $form_state['values']['preprocess'];
+    $deleteCWRC = $form_state['values']['cwrcgone'];
     if ($form_state['values']['do_ocr']) {
-      $success = refresh_ocr($tiff_file_path, $item, $language, $preprocess);
+      $success = refresh_ocr($tiff_file_path, $item, $language, $preprocess, $deleteCWRC);
       if ($success) {
         drupal_set_message(t("OCR refreshed for this page"));
       }
