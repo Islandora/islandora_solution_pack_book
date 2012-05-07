@@ -36,7 +36,7 @@ XML;
  * @param fedora item $item
  * @return boolean
  */
-function refresh_ocr($tiff, &$item, $language, $preprocess = FALSE) {
+function refresh_ocr($tiff, &$item, $language, $preprocess = FALSE, $deleteCWRC = FALSE) {
   $label = $item->objectProfile->objLabel;
   $datastreams = $item->get_datastreams_list_as_array();
   $executable = variable_get('islandora_ocr_path', '/usr/bin/tesseract');
@@ -59,6 +59,9 @@ XML;
   if ($returnValue == '0') {
     if (array_key_exists('OCR', $datastreams)) {
       $item->purge_datastream('OCR');
+      if (array_key_exists('CWRC', $datastreams)){
+         $item->purge_datastream('CWRC');
+      }
     }
     $item->add_datastream_from_file("$tiff.txt", 'OCR', "Scanned Text", 'text/plain', 'M');
     file_delete("$tiff.txt");

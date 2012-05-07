@@ -99,14 +99,14 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
       '#description' => t('Will add additional processing for typewritten text.'),
       '#type' => 'checkbox',
     );
-  }
+  
   $form['page_add']['language'] = array(
     '#title' => t('Language'),
     '#type' => 'select',
     '#options' => $languages,
-    '#selected' => 'eng',
-  );
-
+      '#selected' => 'eng',
+    );
+}
 
   $form['page_add']['submit'] = array(
     '#type' => 'submit',
