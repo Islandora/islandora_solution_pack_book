@@ -77,18 +77,18 @@ function page_management_form(&$form_state, $pid) {
     '#type' => 'checkbox',
     '#title' => t('Refresh OCR for this page')
   );
+  $form['page_manage']['preprocess'] = array(
+    '#title' => t('Preprocess as typetext?'),
+    '#description' => t('Will add additional processing for typewritten text.'),
+    '#type' => 'checkbox',
+  );
   $form['page_manage']['language'] = array(
     '#title' => t('Language'),
     '#type' => 'select',
     '#options' => $languages,
     '#selected' => 'eng',
   );
-//    $form['page_manage']['preprocess'] = array(
-//    '#title' => t('Preprocess typetext?'),
-//    '#description' => t('Will add additonal processing for typewritten text.'),
-//    '#type' => 'checkbox',
-//
-//  );
+
   $form['page_manage']['recreate_derivatives'] = array(
     '#type' => 'checkbox',
     '#title' => t('Refresh all derived images')
