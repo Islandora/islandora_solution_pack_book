@@ -38,6 +38,7 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
     'fra' => t('French'),
     'spa' => t('Spanish'),
     'hin' => t('Hindi'),
+    'jpn' => t('Japanese'),
   );
   $item = new Fedora_Item($pid);
   $book_title = $item->objectProfile->objLabel;
@@ -282,6 +283,7 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
     $executable = variable_get('islandora_ocr_path', '/usr/bin/tesseract');
     $returnValue = "";
     $output = "";
+    $command = "$executable $page_file $page_file -l $language";
     exec("$executable $page_file $page_file -l $language", $output, $returnValue);
     if ($returnValue == '0') {
       $page_item->add_datastream_from_file("$page_file.txt", 'OCR', "Scanned Text", 'text/plain', 'M');
