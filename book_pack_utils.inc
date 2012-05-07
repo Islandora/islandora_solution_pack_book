@@ -43,7 +43,7 @@ function refresh_ocr($tiff, &$item, $language, $preprocess = FALSE, $deleteCWRC 
   $returnValue = "";
   $output = "";
   $success = FALSE;
-
+  $original = $tiff;
 
 
   if ($preprocess) {
@@ -52,7 +52,9 @@ gimp -f -d -i -b "(munge-typeset \"$tiff\" \"$tiff.png\" 200.0 10.0 1.0 500.0)" 
 XML;
     exec($command, $output, $returnVal);
     if ($returnVal == 0) {
-      $tiff = "$tiff.png";
+      if (file_exists($tiff.png)){
+        $tiff = "$tiff.png";
+      }
     }
   }
   exec("$executable $tiff $tiff -l $language", $output, $returnValue);
@@ -65,6 +67,9 @@ XML;
     }
     $item->add_datastream_from_file("$tiff.txt", 'OCR', "Scanned Text", 'text/plain', 'M');
     file_delete("$tiff.txt");
+    if($tiff != $original){
+      file_delete($tiff);
+    }
     $success = TRUE;
   }
   if (!$success) {
