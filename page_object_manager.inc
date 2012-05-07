@@ -31,6 +31,7 @@ function page_management_form(&$form_state, $pid) {
     'fra' => t('French'),
     'spa' => t('Spanish'),
     'hin' => t('Hindi'),
+    'jpn' => t('Japanese'),
   );
 
   $edit_metadata_link = l(t('Edit Metadata'), $base_url . '/fedora/repository/editmetadata/' . $pid . '/metadata', array('attributes' => array('class' => 'islandora-repo-button')));
