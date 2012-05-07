@@ -80,6 +80,11 @@ function update_datastreams(&$form_state, $pid) {
     '#type' => 'checkbox',
     '#title' => t('Refresh OCR for this book')
   );
+  $form['page_manage']['preprocess'] = array(
+    '#title' => t('Preprocess as typetext?'),
+    '#description' => t('Will add additional processing for typewritten text.'),
+    '#type' => 'checkbox',
+  );
   $form['page_manage']['language'] = array(
     '#title' => t('Language'),
     '#type' => 'select',
@@ -119,6 +124,7 @@ function update_datastreams_submit($form, &$form_state) {
     if ($form_state['values']['do_ocr']) {
       $do_ocr = TRUE;
       $language = $form_state['values']['language'];
+      $preprocess = $form_state['values']['preprocess'];
     }
     if ($form_state['values']['recreate_derivatives']) {
       $refresh_images = TRUE;
@@ -126,7 +132,7 @@ function update_datastreams_submit($form, &$form_state) {
     if ($form_state['values']['make_pdf']) {
       $make_pdf = TRUE;
     }
-    book_batch_update_pages($book_pid, $do_ocr, $refresh_images, $make_pdf, $langauge = 'eng');
+    book_batch_update_pages($book_pid, $do_ocr, $refresh_images, $make_pdf, $langauge = 'eng', $preprocess);
   }
 
   drupal_goto('fedora/repository/' . $book_pid);
