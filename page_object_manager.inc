@@ -83,6 +83,12 @@ function page_management_form(&$form_state, $pid) {
     '#options' => $languages,
     '#selected' => 'eng',
   );
+//    $form['page_manage']['preprocess'] = array(
+//    '#title' => t('Preprocess typetext?'),
+//    '#description' => t('Will add additonal processing for typewritten text.'),
+//    '#type' => 'checkbox',
+//
+//  );
   $form['page_manage']['recreate_derivatives'] = array(
     '#type' => 'checkbox',
     '#title' => t('Refresh all derived images')
@@ -179,8 +185,10 @@ function page_management_form_submit($form, &$form_state) {
   $item = new Fedora_Item($pid);
   if ($form_state['clicked_button']['#id'] == 'refresh_datastreams') {
     $tiff_file_path = save_datastream_as_tempfile($pid, 'TIFF');
+    $language = $form_state['values']['language'];
+    $preprocess = $form_state['values']['preprocess'];
     if ($form_state['values']['do_ocr']) {
-      $success = refresh_ocr($tiff_file_path, $item, $form_state['values']['language']);
+      $success = refresh_ocr($tiff_file_path, $item, $language, $preprocess);
       if ($success) {
         drupal_set_message(t("OCR refreshed for this page"));
       }

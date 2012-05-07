@@ -44,7 +44,7 @@ function refresh_ocr($tiff, &$item, $language, $preprocess = FALSE) {
   $output = "";
   $success = FALSE;
   if ($preprocess) {
-    $command = "gimp -d -i -b '(munge-typeset-ocr $tiff '$tiff.png' 5.0 10.0 0.0 200.0 5.0)' -b '(gimp-quit 0)'";
+    $command = "gimp -d -i -b '(munge-typeset-ocr $tiff $tiff.png 5.0 10.0 0.0 200.0 5.0)' -b '(gimp-quit 0)'";
     exec($command, $output, $returnVal);
     if($returnVal == 0 ){
       $tiff = "$tiff.png";

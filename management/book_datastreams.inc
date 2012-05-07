@@ -58,6 +58,7 @@ function update_datastreams(&$form_state, $pid) {
     'fra' => t('French'),
     'spa' => t('Spanish'),
     'hin' => t('Hindi'),
+    'jpn' => t('Japanese'),
   );
 
   $collection_key = $keys[0];
