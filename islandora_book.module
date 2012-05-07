@@ -107,7 +107,7 @@ function islandora_book_islandora_tabs($content_models, $pid) {
   module_load_include('inc', 'fedora_repository', 'plugins/FedoraObjectDetailedContent');
   $tabset = array();
   $content_model = $content_models[0]->pid;
-  if ($content_model == 'islandora:pageCModel' && user_access('manage page object')) {
+  if (($content_model == 'islandora:pageCModel'|| $content_model == 'islandora:bd_pageCModel') && user_access('manage page object')) {
     $return_tabs = get_page_model_management_content($pid);
     $return_tabs['fedora_object_details'] = null;
     return $return_tabs;
