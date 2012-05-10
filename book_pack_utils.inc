@@ -53,7 +53,7 @@ XML;
     exec($command, $output, $returnVal);
 
     if ($returnVal == 0) {
-      if (file_exists($tiff.png)){
+      if (file_exists($tiff . png)) {
         $tiff = "$tiff.png";
       }
     }
@@ -62,13 +62,13 @@ XML;
   if ($returnValue == '0') {
     if (array_key_exists('OCR', $datastreams)) {
       $item->purge_datastream('OCR');
-      if (array_key_exists('CWRC', $datastreams)){
-         $item->purge_datastream('CWRC');
+      if (array_key_exists('CWRC', $datastreams)) {
+        $item->purge_datastream('CWRC');
       }
     }
     $item->add_datastream_from_file("$tiff.txt", 'OCR', "Scanned Text", 'text/plain', 'M');
     file_delete("$tiff.txt");
-    if($tiff != $original){
+    if ($tiff != $original) {
       file_delete($tiff);
     }
     $success = TRUE;
@@ -195,7 +195,7 @@ function datastream_display_builder($object_pid, &$fedoraItem) {
 
   if (user_access(ObjectHelper :: $VIEW_DETAILED_CONTENT_LIST)) {
     $current_datastreams = 'All Datastreams';
-    //$metaDataText='Description';
+//$metaDataText='Description';
     $mainStreamLabel = NULL;
     $object = $fedoraItem->get_datastreams_list_as_SimpleXML();
     if (!isset($object)) {
@@ -224,7 +224,7 @@ function datastream_display_builder($object_pid, &$fedoraItem) {
           if ($datastreamValue->ID == 'TN') {
             $hasTNStream = TRUE;
           }
-          //create the links to each datastream
+//create the links to each datastream
           $dataStreamBody .= $object_helper->create_link_for_ds($object_pid, $datastreamValue); //"<tr><td><b>$key :</b></td><td>$value</td></tr>\n";
         }
       }
@@ -234,7 +234,7 @@ function datastream_display_builder($object_pid, &$fedoraItem) {
 
 
 
-    //if they have access let them add a datastream
+//if they have access let them add a datastream
     if (user_access(ObjectHelper :: $ADD_FEDORA_STREAMS)) {
       $allow = TRUE;
       if (module_exists('fedora_fesl')) {
@@ -453,8 +453,9 @@ function renumber_pages($insertion_point, $book_pid, $new_page_count) {
   for ($i = $insertion_point; $i <= count($page_pids); ++$i) {
     $item = new Fedora_Item($page_pids[$i]);
     if ($item->exists()) {
+      $current_number = get_page_number($page_pids[$i]);
       $new_title = "$book_title - Page " . sprintf("%03d", $i + $new_page_count);
-      $item->purge_relationship('isPageNumber', sprintf("%04d", $i));
+      $item->purge_relationship('isPageNumber', $current_number);
       $item->add_relationship('isPageNumber', sprintf("%04d", $i + $new_page_count), ISLANDORA_PAGE_URI);
       $item->modify_object($label = "$new_title", $state = NULL, $ownerId = NULL, $logMessage = 'Modified by Islandora API');
     }
