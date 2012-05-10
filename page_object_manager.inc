@@ -215,11 +215,13 @@ function page_management_form_submit($form, &$form_state) {
   if ($form_state['clicked_button']['#id'] == 'renumber_page') {
     $new_page = $form_state['values']['new_page'];
     $item = new Fedora_Item($pid);
+
     $item->purge_relationship('isPageNumber', sprintf("%04d", $current_page));
     $item->add_relationship('isPageNumber', sprintf("%04d", $new_page), ISLANDORA_PAGE_URI);
+    
     if ($new_page < $current_page) {
       for ($working_page = $new_page; $working_page < $current_page; $working_page++) {
-        $item = new Fedora_Item($pages[$working_page]);
+        $item = new Fedora_Item($pages[$working_page -1]);
         $item->purge_relationship('isPageNumber', sprintf("%04d", $working_page));
         $item->add_relationship('isPageNumber', sprintf("%04d", $working_page + 1), ISLANDORA_PAGE_URI);
       }
@@ -227,7 +229,7 @@ function page_management_form_submit($form, &$form_state) {
 
     if ($new_page > $current_page) {
       for ($working_page = $new_page; $working_page > $current_page; $working_page--) {
-        $item = new Fedora_Item($pages[$working_page]);
+        $item = new Fedora_Item($pages[$working_page -1]);
         $item->purge_relationship('isPageNumber', sprintf("%04d", $working_page));
         $item->add_relationship('isPageNumber', sprintf("%04d", $working_page - 1), ISLANDORA_PAGE_URI);
       }
