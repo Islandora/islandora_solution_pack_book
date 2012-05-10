@@ -52,8 +52,9 @@ class IslandoraBook {
     }
     $class = new CollectionClass();
   $query = <<<XML
-select \$object \$page from <#ri>
+select \$object \$title \$page from <#ri>
 where \$object <fedora-rels-ext:isMemberOf> <info:fedora/$this->pid>
+and \$object <dc:title> \$title
 and \$object <fedora-model:state> <fedora-model:Active>
 and \$object <info:islandora/islandora-system:def/pageinfo#isPageNumber> \$page
 order by \$page
