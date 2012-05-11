@@ -48,7 +48,7 @@ function refresh_ocr($tiff, &$item, $language, $preprocess = FALSE, $deleteCWRC 
 
   if ($preprocess) {
     $command = <<<XML
-gimp -f -d -i -b "(munge-typeset \"$tiff\" \"$tiff.png\" 200.0 10.0 1.0 500.0)" -b "(gimp-quit 0)"
+  gimp -d -i -b "(munge-typeset-ocr \"$tiff\" \"$tiff.png\" 5.0 10.0 0.0 200.0 5.0)" -b "(gimp-quit 0)"
 XML;
     exec($command, $output, $returnVal);
 
