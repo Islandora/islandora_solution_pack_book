@@ -999,8 +999,7 @@
                                 <properties>
                                     <type>textfield</type>
                                     <access>TRUE</access>
-                                    <description>Name of a country, i.e. a political entity
-                                        considered a country.</description>
+                                    <description>Name of a country, i.e. a political entity considered a country.</description>
                                     <required>FALSE</required>
                                     <title>Country</title>
                                     <tree>TRUE</tree>
@@ -1030,8 +1029,7 @@
                                 <properties>
                                     <type>textfield</type>
                                     <access>TRUE</access>
-                                    <description>Includes first order political divisions called
-                                        provinces within a country, e.g. in Canada.</description>
+                                    <description>Includes first order political divisions called provinces within a country, e.g. in Canada.</description>
                                     <required>FALSE</required>
                                     <title>Province</title>
                                     <tree>TRUE</tree>
@@ -1061,9 +1059,7 @@
                                 <properties>
                                     <type>textfield</type>
                                     <access>TRUE</access>
-                                    <description>Includes regions that have status as a
-                                        jurisdiction, usually incorporating more than one first
-                                        level jurisdiction.</description>
+                                    <description>Includes regions that have status as a jurisdiction, usually incorporating more than one first level jurisdiction.</description>
                                     <required>FALSE</required>
                                     <title>Region</title>
                                     <tree>TRUE</tree>
@@ -1093,8 +1089,7 @@
                                 <properties>
                                     <type>textfield</type>
                                     <access>TRUE</access>
-                                    <description>Name of the largest local administrative unit in
-                                        various countries, e.g. England.</description>
+                                    <description>Name of the largest local administrative unit in various countries, e.g. England.</description>
                                     <required>FALSE</required>
                                     <title>County</title>
                                     <tree>TRUE</tree>
@@ -1124,8 +1119,7 @@
                                 <properties>
                                     <type>textfield</type>
                                     <access>TRUE</access>
-                                    <description>Name of an inhabited place incorporated as a city,
-                                        town, etc.</description>
+                                    <description>Name of an inhabited place incorporated as a city, town, etc.</description>
                                     <required>FALSE</required>
                                     <title>City</title>
                                     <tree>TRUE</tree>
@@ -1155,8 +1149,7 @@
                                 <properties>
                                     <type>textfield</type>
                                     <access>TRUE</access>
-                                    <description>Name of a smaller unit within a populated place,
-                                        e.g., neighborhoods, parks, or streets.</description>
+                                    <description>Name of a smaller unit within a populated place, e.g., neighborhoods, parks, or streets.</description>
                                     <required>FALSE</required>
                                     <title>City Section</title>
                                     <tree>TRUE</tree>
@@ -1216,8 +1209,7 @@
                                 <properties>
                                     <type>textfield</type>
                                     <access>TRUE</access>
-                                    <description>Contains a statement of coordinates covered by the
-                                        resource.</description>
+                                    <description>Contains a statement of coordinates covered by the resource.</description>
                                     <required>FALSE</required>
                                     <title>Coordinates</title>
                                     <tree>TRUE</tree>
