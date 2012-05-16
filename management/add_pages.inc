@@ -99,14 +99,14 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
       '#description' => t('Will add additional processing for typewritten text.'),
       '#type' => 'checkbox',
     );
-  
-  $form['page_add']['language'] = array(
-    '#title' => t('Language'),
-    '#type' => 'select',
-    '#options' => $languages,
+
+    $form['page_add']['language'] = array(
+      '#title' => t('Language'),
+      '#type' => 'select',
+      '#options' => $languages,
       '#selected' => 'eng',
     );
-}
+  }
 
   $form['page_add']['submit'] = array(
     '#type' => 'submit',
@@ -252,34 +252,41 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
   $page_item->add_relationship('isPageNumber', sprintf("%04d", $page_num), ISLANDORA_PAGE_URI);
   $page_item->add_relationship('isPageOf', $book_pid, ISLANDORA_PAGE_URI);
   $page_item->add_relationship($relation, $book_pid);
-  // add original tiff
-  $page_item->add_datastream_from_file($page_file, 'TIFF', 'Archival TIFF', 'image/tiff', 'M');
+  // add original image
+  $ext = pathinfo($page_file, PATHINFO_EXTENSION);
+  module_load_include('inc', 'fedora_repository', 'MimeClass');
+  $mime_helper = new MimeClass();
+  $mimetype = $mime_helper->get_mimetype($page_file);
+  $page_item->add_datastream_from_file($page_file, $ext, 'Archival IMAGE', $mimetype, 'M');
   $page_file = preg_replace('/\/\//', '/', $page_file);
+
 
   //add compresed jp2 for viewer
   if (variable_get('islandora_book_create_images', TRUE)) {
-    exec('kdu_compress -i "' . $page_file . '" -o "' . $page_file . '.jp2' . '" -rate 0.5 Clayers=1 Clevels=7 "Cprecincts={256,256},{256,256},{256,256},{128,128},{128,128},{64,64},{64,64},{32,32},{16,16}" "Corder=RPCL" "ORGgen_plt=yes" "ORGtparts=R" "Cblk={32,32}" Cuse_sop=yes', $output, $returnValue);
-    if ($returnValue == '0') {
-      $page_item->add_datastream_from_file("$page_file.jp2", 'JP2', "Compressed JP2", 'image/jp2', 'M');
-    }
-
-    //add thumbnail image
-    exec("convert {$page_file}[0] -colorspace RGB -thumbnail 120x $page_file-tn.jpg", $output, $returnValue);
-    if ($returnValue == '0') {
-      $page_item->add_datastream_from_file("$page_file-tn.jpg", 'TN', 'Thumbnail', 'image/jpeg', 'M');
-      if ($page_num == 1) {
-        $book_item = new Fedora_Item($book_pid);
-        $DSIDS = $book_item->get_datastreams_list_as_array();
-        if (array_key_exists("TN", $DSIDS)) {
-          $book_item->purge_datastream('TN');
-        }
-        $book_item->add_datastream_from_file("$page_file-tn.jpg", 'TN', 'Thumbnail', 'image/jpeg', 'M');
+    if ($ext == 'tif' || $ext == 'tiff') {
+      exec('kdu_compress -i "' . $page_file . '" -o "' . $page_file . '.jp2' . '" -rate 0.5 Clayers=1 Clevels=7 "Cprecincts={256,256},{256,256},{256,256},{128,128},{128,128},{64,64},{64,64},{32,32},{16,16}" "Corder=RPCL" "ORGgen_plt=yes" "ORGtparts=R" "Cblk={32,32}" Cuse_sop=yes', $output, $returnValue);
+      if ($returnValue == '0') {
+        $page_item->add_datastream_from_file("$page_file.jp2", 'JP2', "Compressed JP2", 'image/jp2', 'M');
       }
-    }
-    //add jpeg
-    exec("convert -resize 800 \"{$page_file}\"[0] \"$page_file-med.jpg\"", $output, $returnValue);
-    if ($returnValue == '0') {
-      $page_item->add_datastream_from_file("$page_file-med.jpg", 'JPEG', "JPEG image", 'image/jpeg', 'M');
+
+      //add thumbnail image
+      exec("convert {$page_file}[0] -colorspace RGB -thumbnail 120x $page_file-tn.jpg", $output, $returnValue);
+      if ($returnValue == '0') {
+        $page_item->add_datastream_from_file("$page_file-tn.jpg", 'TN', 'Thumbnail', 'image/jpeg', 'M');
+        if ($page_num == 1) {
+          $book_item = new Fedora_Item($book_pid);
+          $DSIDS = $book_item->get_datastreams_list_as_array();
+          if (array_key_exists("TN", $DSIDS)) {
+            $book_item->purge_datastream('TN');
+          }
+          $book_item->add_datastream_from_file("$page_file-tn.jpg", 'TN', 'Thumbnail', 'image/jpeg', 'M');
+        }
+      }
+      //add jpeg
+      exec("convert -resize 800 \"{$page_file}\"[0] \"$page_file-med.jpg\"", $output, $returnValue);
+      if ($returnValue == '0') {
+        $page_item->add_datastream_from_file("$page_file-med.jpg", 'JPEG', "JPEG image", 'image/jpeg', 'M');
+      }
     }
   }
   //perform OCR using Tesseract, add text datastream
@@ -418,9 +425,11 @@ function get_page_files($pid) {
       $success = rename("$candidate", "$new_fullname");
       $candidate = $new_fullname;
     }
-    if ($ext == 'tif' || $ext == 'tiff') {
+    $allowed_extentions = array('tif', 'tiff', 'jpg', 'jpeg');
+    if (in_array(strtolower($ext), $allowed_extentions)) {
       $ordered_files[] = $candidate;
     }
+
     if ($ext == 'zip') {
       $unzipped_files = get_files_from_zip($candidate);
       $ordered_files = array_merge($ordered_files, $unzipped_files);

@@ -426,9 +426,11 @@ function get_files_from_zip($zip_file) {
         }
 
         $ext = pathinfo($file_name, PATHINFO_EXTENSION);
-        if ($ext == 'tif' || $ext == 'tiff') {
+        $allowed_extentions = array('tif', 'tiff', 'jpg', 'jpeg');
+        if (in_array(strtolower($ext), $allowed_extentions)) {
           array_push($file_list, "$directory" . "/$file_name");
         }
+    
       }
       closedir($tiff_dir);
     }
