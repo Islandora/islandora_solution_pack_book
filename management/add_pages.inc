@@ -257,7 +257,9 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
   module_load_include('inc', 'fedora_repository', 'MimeClass');
   $mime_helper = new MimeClass();
   $mimetype = $mime_helper->get_mimetype($page_file);
-  $page_item->add_datastream_from_file($page_file, $ext, 'Archival IMAGE', $mimetype, 'M');
+  $label = "Archival TIFF";
+
+  $page_item->add_datastream_from_file($page_file, strtoupper($ext), 'Archival IMAGE', $mimetype, 'M');
   $page_file = preg_replace('/\/\//', '/', $page_file);
 
 
@@ -268,25 +270,24 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
       if ($returnValue == '0') {
         $page_item->add_datastream_from_file("$page_file.jp2", 'JP2', "Compressed JP2", 'image/jp2', 'M');
       }
-
-      //add thumbnail image
-      exec("convert {$page_file}[0] -colorspace RGB -thumbnail 120x $page_file-tn.jpg", $output, $returnValue);
-      if ($returnValue == '0') {
-        $page_item->add_datastream_from_file("$page_file-tn.jpg", 'TN', 'Thumbnail', 'image/jpeg', 'M');
-        if ($page_num == 1) {
-          $book_item = new Fedora_Item($book_pid);
-          $DSIDS = $book_item->get_datastreams_list_as_array();
-          if (array_key_exists("TN", $DSIDS)) {
-            $book_item->purge_datastream('TN');
-          }
-          $book_item->add_datastream_from_file("$page_file-tn.jpg", 'TN', 'Thumbnail', 'image/jpeg', 'M');
+    }
+    //add thumbnail image
+    exec("convert {$page_file}[0] -colorspace RGB -thumbnail 120x $page_file-tn.jpg", $output, $returnValue);
+    if ($returnValue == '0') {
+      $page_item->add_datastream_from_file("$page_file-tn.jpg", 'TN', 'Thumbnail', 'image/jpeg', 'M');
+      if ($page_num == 1) {
+        $book_item = new Fedora_Item($book_pid);
+        $DSIDS = $book_item->get_datastreams_list_as_array();
+        if (array_key_exists("TN", $DSIDS)) {
+          $book_item->purge_datastream('TN');
         }
+        $book_item->add_datastream_from_file("$page_file-tn.jpg", 'TN', 'Thumbnail', 'image/jpeg', 'M');
       }
-      //add jpeg
-      exec("convert -resize 800 \"{$page_file}\"[0] \"$page_file-med.jpg\"", $output, $returnValue);
-      if ($returnValue == '0') {
-        $page_item->add_datastream_from_file("$page_file-med.jpg", 'JPEG', "JPEG image", 'image/jpeg', 'M');
-      }
+    }
+    //add medium jpeg
+    exec("convert -resize 800 \"{$page_file}\" \"$page_file-med.jpg\"", $output, $returnValue);
+    if ($returnValue == '0') {
+      $page_item->add_datastream_from_file("$page_file-med.jpg", 'JPEG', "JPEG image", 'image/jpeg', 'M');
     }
   }
   //perform OCR using Tesseract, add text datastream
