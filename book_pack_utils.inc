@@ -135,8 +135,8 @@ function refresh_images($tiff, &$item) {
  * @param string $dsid
  * @return string
  */
-function save_datastream_as_tempfile($pid, $dsid) {
-  $tmp_filename = preg_replace("/:|-/", '_', $pid) . '.tif';
+function save_datastream_as_tempfile($pid, $dsid, $ext = '.tif') {
+  $tmp_filename = preg_replace("/:|-/", '_', $pid) . $ext;
   $item = new Fedora_Item($pid);
   $url = variable_get('fedora_base_url', 'http://localhost:8080/fedora') . "/objects/$pid/datastreams/$dsid/content";
   $file_contents = do_curl($url);

@@ -172,7 +172,13 @@ function update_individual_pages($page_pid, $do_ocr, $refresh_images, $language,
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   $item = new Fedora_Item($page_pid);
-  $tiff_file_path = save_datastream_as_tempfile($page_pid, 'TIFF');
+  $stream = 'TIFF';
+  $ext = ".tif";
+  if (!key_exists('TIFF', $item->datastreams)){
+    $stream = 'JPEG';
+    $ext = '.jpg';
+  }
+  $tiff_file_path = save_datastream_as_tempfile($page_pid, $stream, $ext);
   if ($do_ocr) {
     refresh_ocr($tiff_file_path, $item, $language, $preprocess, $deleteCWRC);
   }
