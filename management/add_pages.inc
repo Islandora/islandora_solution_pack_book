@@ -214,7 +214,7 @@ function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = '
   if (variable_get('islandora_create_book_pdf', FALSE)) {
     $batch['operations'][] = array('makePDF', array($pid, $image_list, $tmpDir));
   }
-//  $batch['operations'][] = array('deleteDirectory', array($tmpDir));
+  $batch['operations'][] = array('deleteDirectory', array($tmpDir));
   $collection = get_collection_from_pid($pid);
   batch_set($batch);
   batch_process("fedora/repository/$pid");
@@ -269,6 +269,7 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
       exec('kdu_compress -i "' . $page_file . '" -o "' . $page_file . '.jp2' . '" -rate 0.5 Clayers=1 Clevels=7 "Cprecincts={256,256},{256,256},{256,256},{128,128},{128,128},{64,64},{64,64},{32,32},{16,16}" "Corder=RPCL" "ORGgen_plt=yes" "ORGtparts=R" "Cblk={32,32}" Cuse_sop=yes', $output, $returnValue);
       if ($returnValue == '0') {
         $page_item->add_datastream_from_file("$page_file.jp2", 'JP2', "Compressed JP2", 'image/jp2', 'M');
+       
       }
     }
     //add thumbnail image
@@ -282,12 +283,14 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
           $book_item->purge_datastream('TN');
         }
         $book_item->add_datastream_from_file("$page_file-tn.jpg", 'TN', 'Thumbnail', 'image/jpeg', 'M');
+        
       }
     }
     //add medium jpeg
     exec("convert -resize 800 \"{$page_file}\" \"$page_file-med.jpg\"", $output, $returnValue);
     if ($returnValue == '0') {
       $page_item->add_datastream_from_file("$page_file-med.jpg", 'JPEG', "JPEG image", 'image/jpeg', 'M');
+      
     }
   }
   //perform OCR using Tesseract, add text datastream
@@ -386,7 +389,6 @@ function page_delete(&$form_state, $pid) {
       '#id' => 'delete_pages',
     );
   }
-
   return $form;
 }
 
