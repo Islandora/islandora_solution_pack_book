@@ -83,7 +83,7 @@ function page_management_form(&$form_state, $pid) {
     '#description' => t('Will add additional processing for typewritten text.'),
     '#type' => 'checkbox',
   );
-    $form['page_manage']['cwrcgone'] = array(
+  $form['page_manage']['cwrcgone'] = array(
     '#title' => t('Refresh OCR within editor?'),
     '#description' => t('Refreshing will show newest OCR in the editor, but all current annotations for this page will be lost.'),
     '#type' => 'checkbox',
@@ -189,8 +189,14 @@ function page_management_form_submit($form, &$form_state) {
   $pages = get_sorted_pages($book_pid);
 
   $item = new Fedora_Item($pid);
+  $stream = 'TIFF';
+  $ext = ".tif";
+  if (!key_exists('TIFF', $item->datastreams)) {
+    $stream = 'JPG';
+    $ext = '.jpg';
+  }
   if ($form_state['clicked_button']['#id'] == 'refresh_datastreams') {
-    $tiff_file_path = save_datastream_as_tempfile($pid, 'TIFF');
+    $tiff_file_path = save_datastream_as_tempfile($pid, $stream, $ext = '.tif');
     $language = $form_state['values']['language'];
     $preprocess = $form_state['values']['preprocess'];
     $deleteCWRC = $form_state['values']['cwrcgone'];
@@ -218,10 +224,10 @@ function page_management_form_submit($form, &$form_state) {
 
     $item->purge_relationship('isPageNumber', sprintf("%04d", $current_page));
     $item->add_relationship('isPageNumber', sprintf("%04d", $new_page), ISLANDORA_PAGE_URI);
-    
+
     if ($new_page < $current_page) {
       for ($working_page = $new_page; $working_page < $current_page; $working_page++) {
-        $item = new Fedora_Item($pages[$working_page -1]);
+        $item = new Fedora_Item($pages[$working_page - 1]);
         $item->purge_relationship('isPageNumber', sprintf("%04d", $working_page));
         $item->add_relationship('isPageNumber', sprintf("%04d", $working_page + 1), ISLANDORA_PAGE_URI);
       }
@@ -229,7 +235,7 @@ function page_management_form_submit($form, &$form_state) {
 
     if ($new_page > $current_page) {
       for ($working_page = $new_page; $working_page > $current_page; $working_page--) {
-        $item = new Fedora_Item($pages[$working_page -1]);
+        $item = new Fedora_Item($pages[$working_page - 1]);
         $item->purge_relationship('isPageNumber', sprintf("%04d", $working_page));
         $item->add_relationship('isPageNumber', sprintf("%04d", $working_page - 1), ISLANDORA_PAGE_URI);
       }

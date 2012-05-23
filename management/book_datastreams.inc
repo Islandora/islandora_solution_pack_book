@@ -175,7 +175,7 @@ function update_individual_pages($page_pid, $do_ocr, $refresh_images, $language,
   $stream = 'TIFF';
   $ext = ".tif";
   if (!key_exists('TIFF', $item->datastreams)){
-    $stream = 'JPEG';
+    $stream = 'JPG';
     $ext = '.jpg';
   }
   $tiff_file_path = save_datastream_as_tempfile($page_pid, $stream, $ext);
