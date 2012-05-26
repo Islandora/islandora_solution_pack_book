@@ -1,8 +1,8 @@
 <?php
 
 /**
- * @file 
- * Islandora book 
+ * @file
+ * Islandora book
  */
 
 /**
@@ -26,7 +26,7 @@ class IslandoraBook {
    * Show field sets
    * @global string $base_url
    * @global user $user
-   * @return string 
+   * @return string
    */
   public function showFieldSets() {
     global $user;
@@ -41,8 +41,6 @@ class IslandoraBook {
     drupal_add_js($path . '/js/book.js');
     global $base_url;
     $show_purge_tab = (!empty($_POST['form_id']) && ($_POST['form_id'] == 'islandora_book_purge_pages_form'));
-    global $base_url;
-    $show_purge_tab = (!empty($_POST['form_id']) && ($_POST['form_id'] == 'islandora_book_purge_pages_form'));
     $page_number = 1;
     $pages_selected = FALSE;
     $qstring = $_GET['q'];
@@ -54,11 +52,11 @@ class IslandoraBook {
     }
     $class = new CollectionClass();
   $query = <<<XML
-select \$object \$title \$page from <#ri>
+select \$object \$page from <#ri>
 where \$object <fedora-rels-ext:isMemberOf> <info:fedora/$this->pid>
-and \$object <dc:title> \$title
 and \$object <fedora-model:state> <fedora-model:Active>
-and \$object <info:islandora/islandora-system:def/pageinfo#isPageNumber> \$page
+and (\$object <info:islandora/islandora-system:def/paged-item-info#sequenceNumber> \$page
+or \$object <http://islandora.ca/ontology/relsext#isSequenceNumber> \$page)
 order by \$page
 XML;
     $results = $class->getRelatedItems($this->pid, $query);
@@ -76,12 +74,23 @@ XML;
       $qs = '?uid=' . base64_encode($user->name . ':' . $user->pass);
     }
     module_load_include('inc', 'islandora_bookviewer', 'islandora_bookviewer');
-    $bookviewer = new IslandoraBookviewer($this->pid);
-    $html = $bookviewer->showAjaxBookViewer('mainpage.php');
-    //$html = $bookviewer->showBookViewer();
-    //$viewer_url = variable_get('fedora_base_url', '') . '/get/' . $this->pid . '/islandora:viewerSdef/getViewer' . $qs;
-    // $html = '<iframe src="' . $viewer_url . '" scrolling="0" frameborder="0" style="width: 100%; height: 800px;">Errors: unable to load viewer</iframe>';
-    $tabset['pages_tab'] = array(
+    module_load_include('inc', 'fedora_repository','ObjectHelper');
+    $oh = new ObjectHelper();
+    //This is a bit of a hack but allows us to handle two viewers in one solution pack
+    //ideally we would do module invoke_all and then implement the viewers in a module
+    //but two modules for 4 lines of code seems a bit much.
+    $sequence_number = (empty($_GET['startpage'])) ? '1' : $_GET['startpage'];
+    $cmodels = $oh->get_content_models_list($this->pid);
+    foreach($cmodels as $cmodel){
+      if($cmodel->pid == "islandora:iaBookCModel"){
+        $bookviewer = new IslandoraBookviewer($this->pid);
+         $html = $bookviewer->showAjaxBookViewer('mainpage.php',$sequence_number);
+      } else {
+        $viewer_url = variable_get('fedora_base_url', '') . '/get/' . $this->pid . '/islandora:viewerSdef/getViewer' . $qs;
+        $html = '<iframe src="' . $viewer_url . '" scrolling="0" frameborder="0" style="width: 100%; height: 800px;">Errors: unable to load viewer</iframe>';
+      }
+    }
+     $tabset['pages_tab'] = array(
       // #type and #title are the minimum requirements.
       '#type' => 'tabpage',
       '#title' => t('Pages'),
@@ -104,7 +113,7 @@ XML;
         '#type' => 'tabpage',
         '#title' => t('Reading Edition'),
         '#content' => $html,
-        '#weight' => 10,
+        '#weight' => -10,
       );
     }
 

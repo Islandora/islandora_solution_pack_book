@@ -1,5 +1,7 @@
 <?php
 
+
+
 /**
  * builds form
  * @param array form_state
@@ -12,7 +14,7 @@ function current_datastreams(&$form_state, $pid) {
   module_load_include('inc', 'fedora_repository', 'plugins/FedoraObjectDetailedContent');
   $content_helper = new FedoraObjectDetailedContent($pid);
   $objectHelper = new ObjectHelper();
-  $ds_list = datastream_display_builder($content_helper->pid, $content_helper->item);
+  $ds_list =  $objectHelper->get_formatted_datastream_list($content_helper->pid, NULL, $content_helper->item);
   $add_datastreams_details = get_add_datastream_data($content_helper->pid);
 
   $form = array();
@@ -43,7 +45,6 @@ function current_datastreams(&$form_state, $pid) {
 
   return $form;
 }
-
 /**
  * builds form
  * @param array form_state
@@ -51,24 +52,10 @@ function current_datastreams(&$form_state, $pid) {
  * @return array
  */
 function update_datastreams(&$form_state, $pid) {
-  $languages = array(
-    'eng' => t('English'),
-    'deu-frak' => t('German'),
-    'por' => t('Portugese'),
-    'fra' => t('French'),
-    'spa' => t('Spanish'),
-    'hin' => t('Hindi'),
-    'jpn' => t('Japanese'),
-  );
 
   $collection_key = $keys[0];
 
   $form = array();
-  $form['book_pid'] = array(
-    '#type' => 'hidden',
-    '#value' => $pid,
-  );
-
   $form['page_manage'] = array(
     '#type' => 'fieldset',
     '#collapsed' => true,
@@ -79,22 +66,6 @@ function update_datastreams(&$form_state, $pid) {
   $form['page_manage']['do_ocr'] = array(
     '#type' => 'checkbox',
     '#title' => t('Refresh OCR for this book')
-  );
-  $form['page_manage']['cwrcgone'] = array(
-    '#title' => t('Refresh OCR within editor?'),
-    '#description' => t('Refreshing will show newest OCR in the editor, but all current annotations for this page will be lost.'),
-    '#type' => 'checkbox',
-  );
-  $form['page_manage']['preprocess'] = array(
-    '#title' => t('Preprocess as typetext?'),
-    '#description' => t('Will add additional processing for typewritten text.'),
-    '#type' => 'checkbox',
-  );
-  $form['page_manage']['language'] = array(
-    '#title' => t('Language'),
-    '#type' => 'select',
-    '#options' => $languages,
-    '#selected' => 'eng',
   );
   $form['page_manage']['recreate_derivatives'] = array(
     '#type' => 'checkbox',
@@ -108,7 +79,6 @@ function update_datastreams(&$form_state, $pid) {
 
 
   $form['page_manage']['submit'] = array(
-    '#id' => 'refresh_datastreams',
     '#type' => 'submit',
     '#value' => t('Update datastreams')
   );
@@ -122,15 +92,12 @@ function update_datastreams(&$form_state, $pid) {
  */
 function update_datastreams_submit($form, &$form_state) {
   global $user;
-  $book_pid = $form_state['values']['book_pid'];
+  $book_pid = $form_state['values']['pid'];
   $item = new Fedora_Item($book_pid);
-  $deleteCWRC = FALSE;
+
   if ($form_state['clicked_button']['#id'] == 'refresh_datastreams') {
     if ($form_state['values']['do_ocr']) {
       $do_ocr = TRUE;
-      $language = $form_state['values']['language'];
-      $preprocess = $form_state['values']['preprocess'];
-      $deleteCWRC = $form_state['values']['cwrcgone'];
     }
     if ($form_state['values']['recreate_derivatives']) {
       $refresh_images = TRUE;
@@ -138,23 +105,23 @@ function update_datastreams_submit($form, &$form_state) {
     if ($form_state['values']['make_pdf']) {
       $make_pdf = TRUE;
     }
-    book_batch_update_pages($book_pid, $do_ocr, $refresh_images, $make_pdf, $language = 'eng', $preprocess, $deleteCWRC);
+    book_batch_update_pages($book_pid, $do_ocr, $refresh_images, $make_pdf);
   }
 
-  drupal_goto('fedora/repository/' . $book_pid);
+  drupal_goto('fedora/repository/' . $collection_pids[0]);
 }
 
-function book_batch_update_pages($book_pid, $do_ocr, $refresh_images, $make_pdf, $language, $preprocess, $deleteCWRC) {
+function book_batch_update_pages($book_pid, $do_ocr, $refresh_images, $make_pdf) {
   $page_pids = get_page_pids($book_pid);
   $count = count($page_pids);
   $batch = array(
     'title' => "updating $count page objects",
     'operations' => array(),
-    'file' => drupal_get_path('module', 'islandora_book') . '/management/book_datastreams.inc',
+    'file' => drupal_get_path('module', 'islandora_book') . '/book_object_manager.inc',
   );
   if ($do_ocr || $refresh_images) {
     foreach ($page_pids as $page_pid) {
-      $batch['operations'][] = array('update_individual_pages', array($page_pid, $do_ocr, $refresh_images, $language, $preprocess, $deleteCWRC));
+      $batch['operations'][] = array('update_individual_pages', array($page_pid, $do_ocr, $refresh_images));
     }
     if ($refresh_images) {
       $batch['operations'][] = array('replace_cover_thumbnail', array($book_pid, reset($page_pids)));
@@ -164,23 +131,18 @@ function book_batch_update_pages($book_pid, $do_ocr, $refresh_images, $make_pdf,
     $batch['operations'][] = array('recreate_pdf', array($book_pid));
   }
 
+
   batch_set($batch);
   batch_process("fedora/repository/$book_pid");
 }
 
-function update_individual_pages($page_pid, $do_ocr, $refresh_images, $language, $preprocess, $deleteCWRC) {
+function update_individual_pages($page_pid, $do_ocr, $refresh_images) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   $item = new Fedora_Item($page_pid);
-  $stream = 'TIFF';
-  $ext = ".tif";
-  if (!key_exists('TIFF', $item->datastreams)){
-    $stream = 'JPG';
-    $ext = '.jpg';
-  }
-  $tiff_file_path = save_datastream_as_tempfile($page_pid, $stream, $ext);
+  $tiff_file_path = save_datastream_as_tempfile($page_pid, 'TIFF');
   if ($do_ocr) {
-    refresh_ocr($tiff_file_path, $item, $language, $preprocess, $deleteCWRC);
+    refresh_ocr($tiff_file_path, $item);
   }
   if ($refresh_images) {
     refresh_images($tiff_file_path, $item);
