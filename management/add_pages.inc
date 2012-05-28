@@ -290,7 +290,7 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
       $input->loadXML($xml_string);
       $path = drupal_get_path('module', 'islandora_bookviewer');
       $xsl = new DomDocument();
-      $test = $xsl->load($path . '/xslt/hocrToLowerhocr.xsl');
+      $test = $xsl->load($path . '/xsl/hocrToLowerhocr.xsl');
       if (!$test) {//can't run transform so leaving
         return;
       }
