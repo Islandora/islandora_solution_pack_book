@@ -150,7 +150,6 @@ function book_add_pages_form_submit($form, &$form_state) {
   $dirName = str_replace(':', '_', $pid);
   $tmpDir = file_directory_path() . '/' . $dirName . '/';
   $relationship = $form_state['values']['relation'];
-  $language = (isset($form_state['values']['language'])) ? $form_state['values']['language'] : 'eng';
   if ($pageCModel == 'islandora:pageCModel') {
     $file_list = get_page_files($pid);
     ibook_create_page_objects($pid, $file_list, $form_state['values']['page_cmodel'], $relationship, $tmpDir, $start_page, $language, $preprocess);
@@ -161,19 +160,20 @@ function book_add_pages_form_submit($form, &$form_state) {
 
 
     $book_title = $form_state['values']['book_title'];
-    $page_title = "$book_title - Page " . sprintf("%03d", $start_page);
+    $page_title = "$book_title - Sequence " . sprintf("%03d", $start_page);
     $parts = explode(':', $pid);
     $nextPid = FEDORA_ITEM::get_next_PID_in_namespace($parts[0]);
     $page_item = Fedora_Item::ingest_new_item($nextPid, 'A', $page_title);
     $page_item->add_relationship('hasModel', $pageCModel, FEDORA_MODEL_URI);
-    $page_item->add_relationship('isPageNumber', sprintf("%04d", $start_page), ISLANDORA_PAGE_URI);
-    $page_item->add_relationship('isPageOf', $pid, ISLANDORA_PAGE_URI);
+    $page_item->add_relationship('isSequenceNumber', $start_page, 'http://islandora.ca/ontology/relsext#', TRUE);
+    $page_item->add_relationship('isPageNumber', $start_page, 'http://islandora.ca/ontology/relsext#', TRUE);
+    $page_item->add_relationship('isSection', '1', 'http://islandora.ca/ontology/relsext#', TRUE);
+    $page_item->add_relationship('isPageOf', $pid, 'http://islandora.ca/ontology/relsext#');
     $page_item->add_relationship($relationship, $pid);
     $page_item->add_datastream_from_file($path . 'Borndigital_tn.png', 'TN', 'Thumbnail', 'image/png', 'M');
     $page_item->add_datastream_from_file($path . 'Borndigital_Fullsize.jpg', 'JPEG', 'JPEG Image', 'image/jpg', 'M');
-    $page_item->add_datastream_from_file($path . 'Borndigital.jp2', 'JP2', 'Compressed JP2', 'image/jp2', 'M');
     $page_item->add_datastream_from_string('Born digital - not yet edited', 'OCR', 'OCR', 'text/plain', 'M');
-    drupal_goto("fedora/repository/$nextPid");
+    drupal_goto("fedora/repository/$pid");
   }
 }
 
@@ -249,9 +249,12 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
   $nextPid = FEDORA_ITEM::get_next_PID_in_namespace($parts[0]);
   $page_item = Fedora_Item::ingest_new_item($nextPid, 'A', $page_title);
   $page_item->add_relationship('hasModel', $page_cmodel, FEDORA_MODEL_URI);
-  $page_item->add_relationship('isPageNumber', sprintf("%04d", $page_num), ISLANDORA_PAGE_URI);
-  $page_item->add_relationship('isPageOf', $book_pid, ISLANDORA_PAGE_URI);
-  $page_item->add_relationship($relation, $book_pid);
+  $page_item->add_relationship('isSequenceNumber', $page_num, 'http://islandora.ca/ontology/relsext#', TRUE);
+  $page_item->add_relationship('isPageNumber', $page_num, 'http://islandora.ca/ontology/relsext#', TRUE);
+  $page_item->add_relationship('isPageOf', $book_pid, 'http://islandora.ca/ontology/relsext#');
+  $page_item->add_relationship('isSection', '1', 'http://islandora.ca/ontology/relsext#', TRUE);
+  $page_item->add_relationship('isMemberOf', $book_pid, RELS_EXT_URI);
+
   // add original image
   $ext = pathinfo($page_file, PATHINFO_EXTENSION);
   module_load_include('inc', 'fedora_repository', 'MimeClass');
@@ -269,7 +272,6 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
       exec('kdu_compress -i "' . $page_file . '" -o "' . $page_file . '.jp2' . '" -rate 0.5 Clayers=1 Clevels=7 "Cprecincts={256,256},{256,256},{256,256},{128,128},{128,128},{64,64},{64,64},{32,32},{16,16}" "Corder=RPCL" "ORGgen_plt=yes" "ORGtparts=R" "Cblk={32,32}" Cuse_sop=yes', $output, $returnValue);
       if ($returnValue == '0') {
         $page_item->add_datastream_from_file("$page_file.jp2", 'JP2', "Compressed JP2", 'image/jp2', 'M');
-
       }
     }
     //add thumbnail image
@@ -283,14 +285,12 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
           $book_item->purge_datastream('TN');
         }
         $book_item->add_datastream_from_file("$page_file-tn.jpg", 'TN', 'Thumbnail', 'image/jpeg', 'M');
-
       }
     }
     //add medium jpeg
     exec("convert -resize 800 \"{$page_file}\" \"$page_file-med.jpg\"", $output, $returnValue);
     if ($returnValue == '0') {
       $page_item->add_datastream_from_file("$page_file-med.jpg", 'JPEG', "JPEG image", 'image/jpeg', 'M');
-
     }
   }
   //perform OCR using Tesseract, add text datastream

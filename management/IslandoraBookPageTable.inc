@@ -41,7 +41,7 @@ XML;
   );
 
   $table = array(
-    '#header' => array(theme('table_select_header_cell'), t('Page Pid'), 'Page Label'),
+    '#header' => array(theme('table_select_header_cell'), t('Page Pid'), 'Sequence Number'),
     '#theme' => 'islandora_book_page_table',
     '#tree' => TRUE,
     'rows' => array(),
