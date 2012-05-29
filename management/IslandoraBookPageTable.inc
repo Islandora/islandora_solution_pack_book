@@ -11,10 +11,11 @@
 function islandora_book_page_table($book_pid) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
   $query = <<<XML
-select \$object \$page from <#ri>
+  select \$object \$page from <#ri>
 where \$object <fedora-rels-ext:isMemberOf> <info:fedora/$book_pid>
 and \$object <fedora-model:state> <fedora-model:Active>
-and \$object <info:islandora/islandora-system:def/pageinfo#isPageNumber> \$page
+and (\$object <info:islandora/islandora-system:def/paged-item-info#sequenceNumber> \$page
+or \$object <http://islandora.ca/ontology/relsext#isSequenceNumber> \$page)
 order by \$page
 XML;
   $query = htmlentities(urlencode($query));
