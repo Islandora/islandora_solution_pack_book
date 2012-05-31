@@ -97,7 +97,8 @@ function update_datastreams(&$form_state, $pid) {
 
   $form['page_manage']['make_pdf'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Recreate PDF from scanned text')
+    '#title' => t('Generate a PDF of This Book',
+        '#decription' > t('File will be added to datastream list below'))
   );
 
 
