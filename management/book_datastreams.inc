@@ -36,13 +36,7 @@ function current_datastreams(&$form_state, $pid) {
     '#title' => t('View'),
     '#content' => $ds_list,
   );
-  if (count($add_datastreams_details) > 0) {
-    $form['current_datastreams']['datastream_candidates'] = array(
-      '#type' => 'tabpage',
-      '#title' => t('View'),
-      '#content' => $add_datastreams_details,
-    );
-  }
+
 
   return $form;
 }
