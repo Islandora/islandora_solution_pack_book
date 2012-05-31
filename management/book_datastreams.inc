@@ -59,6 +59,7 @@ function update_datastreams(&$form_state, $pid) {
     'spa' => t('Spanish'),
     'hin' => t('Hindi'),
     'jpn' => t('Japanese'),
+    'ita' => t('Italian')
   );
 
   $collection_key = $keys[0];
@@ -120,7 +121,7 @@ function update_datastreams_submit($form, &$form_state) {
   global $user;
   $book_pid = $form_state['values']['book_pid'];
   $item = new Fedora_Item($book_pid);
-  
+
   if ($form_state['clicked_button']['#id'] == 'refresh_datastreams') {
     if ($form_state['values']['do_ocr']) {
       $do_ocr = TRUE;
@@ -169,7 +170,7 @@ function update_individual_pages($page_pid, $do_ocr, $refresh_images, $language,
   $item = new Fedora_Item($page_pid);
   $stream = 'TIFF';
   $ext = ".tif";
-  if (!key_exists('TIFF', $item->datastreams)  &! key_exists('TIF', $item->datastreams)){
+  if (!key_exists('TIFF', $item->datastreams) & !key_exists('TIF', $item->datastreams)) {
     $stream = 'JPG';
     $ext = '.jpg';
   }

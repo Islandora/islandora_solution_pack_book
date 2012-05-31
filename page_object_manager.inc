@@ -23,13 +23,24 @@ function page_management_form(&$form_state, $pid) {
   module_load_include('inc', 'fedora_repository', 'plugins/FedoraObjectDetailedContent');
   module_load_include('inc', 'fedora_repository', 'ObjectHelper');
   global $base_url;
+
+  $languages = array(
+    'eng' => t('English'),
+    'deu-frak' => t('German'),
+    'por' => t('Portugese'),
+    'fra' => t('French'),
+    'spa' => t('Spanish'),
+    'hin' => t('Hindi'),
+    'jpn' => t('Japanese'),
+    'ita' => t('Italian')
+  );
   $edit_metadata_link = l(t('Edit Metadata'), $base_url . '/fedora/repository/editmetadata/' . $pid . '/metadata', array('attributes' => array('class' => 'islandora-repo-button')));
 
   $content_helper = new FedoraObjectDetailedContent($pid);
   $object_helper = new ObjectHelper();
   //$ds_list = datastream_display_builder($content_helper->pid, $content_helper->item);
-  $ds_list =  $object_helper->get_formatted_datastream_list($content_helper->pid, NULL, $content_helper->item);
-  
+  $ds_list = $object_helper->get_formatted_datastream_list($content_helper->pid, NULL, $content_helper->item);
+
   $dc_html = $object_helper->getFormattedDC($content_helper->item);
   $purge_form = drupal_get_form('fedora_repository_purge_object_form', $content_helper->pid, check_plain(substr(request_uri(), strlen(base_path()))));
   $form = array();
@@ -68,6 +79,20 @@ function page_management_form(&$form_state, $pid) {
     '#type' => 'checkbox',
     '#title' => t('Refresh OCR for this page')
   );
+
+  $form['page_manage']['preprocess'] = array(
+    '#title' => t('Preprocess as typetext?'),
+    '#description' => t('Will add additional processing for typewritten text.'),
+    '#type' => 'checkbox',
+  );
+
+  $form['page_manage']['language'] = array(
+    '#title' => t('Language'),
+    '#type' => 'select',
+    '#options' => $languages,
+    '#selected' => 'eng',
+  );
+
   $form['page_manage']['recreate_derivatives'] = array(
     '#type' => 'checkbox',
     '#title' => t('Refresh all derived images')
@@ -150,10 +175,13 @@ function page_management_form_submit($form, &$form_state) {
   $pages = get_sorted_pages($book_pid);
 
   $item = new Fedora_Item($pid);
+
   if ($form_state['clicked_button']['#id'] == 'refresh_datastreams') {
     $tiff_file_path = save_datastream_as_tempfile($pid, 'TIFF');
+    $language = $form_state['values']['language'];
+    $preprocess = $form_state['values']['preprocess'];
     if ($form_state['values']['do_ocr']) {
-      $success = refresh_ocr($tiff_file_path, $item);
+         $success = refresh_ocr($tiff_file_path, $item, $language, $preprocess);
       if ($success) {
         drupal_set_message(t("OCR refreshed for this page"));
       }
@@ -164,6 +192,8 @@ function page_management_form_submit($form, &$form_state) {
     }
     file_delete($tiff_file_path);
   }
+
+
   if ($form_state['clicked_button']['#id'] == 'delete_page') {
     $item->purge($pid . ' deleted by user identified as ' . $user->name);
     post_deletion_renumber_pages($book_pid);
@@ -175,19 +205,19 @@ function page_management_form_submit($form, &$form_state) {
     $item = new Fedora_Item($pid);
     //$item->purge_relationship('isPageNumber', sprintf("%04d", $current_page));
     //$item->add_relationship('isPageNumber', sprintf("%04d", $new_page), ISLANDORA_PAGE_URI);
-    $item->purge_relationship('isPageNumber', $current_page,ISLANDORA_RELS_EXT_URI, TRUE);
-      $item->purge_relationships('isSequenceNumber',$current_page,ISLANDORA_RELS_EXT_URI, TRUE);
-      $item->add_relationship('isPageNumber',  $new_page, ISLANDORA_RELS_EXT_URI, TRUE);
-      $item->add_relationship('isSequenceNumber',  $new_page, ISLANDORA_RELS_EXT_URI, TRUE);
+    $item->purge_relationship('isPageNumber', $current_page, ISLANDORA_RELS_EXT_URI, TRUE);
+    $item->purge_relationships('isSequenceNumber', $current_page, ISLANDORA_RELS_EXT_URI, TRUE);
+    $item->add_relationship('isPageNumber', $new_page, ISLANDORA_RELS_EXT_URI, TRUE);
+    $item->add_relationship('isSequenceNumber', $new_page, ISLANDORA_RELS_EXT_URI, TRUE);
     if ($new_page < $current_page) {
       for ($working_page = $new_page; $working_page < $current_page; $working_page++) {
         $item = new Fedora_Item($pages[$working_page]);
         //$item->purge_relationship('isPageNumber', sprintf("%04d", $working_page));
         //$item->add_relationship('isPageNumber', sprintf("%04d", $working_page + 1), ISLANDORA_PAGE_URI);
-         $item->purge_relationships('isPageNumber',  $working_page,ISLANDORA_RELS_EXT_URI, TRUE);
-      $item->purge_relationships('isSequenceNumber',$working_page,ISLANDORA_RELS_EXT_URI, TRUE);
-      $item->add_relationship('isPageNumber',  $working_page+1, ISLANDORA_RELS_EXT_URI, TRUE);
-      $item->add_relationship('isSequenceNumber',  $working_page+1, ISLANDORA_RELS_EXT_URI, TRUE);
+        $item->purge_relationships('isPageNumber', $working_page, ISLANDORA_RELS_EXT_URI, TRUE);
+        $item->purge_relationships('isSequenceNumber', $working_page, ISLANDORA_RELS_EXT_URI, TRUE);
+        $item->add_relationship('isPageNumber', $working_page + 1, ISLANDORA_RELS_EXT_URI, TRUE);
+        $item->add_relationship('isSequenceNumber', $working_page + 1, ISLANDORA_RELS_EXT_URI, TRUE);
       }
     }
 
@@ -196,10 +226,10 @@ function page_management_form_submit($form, &$form_state) {
         $item = new Fedora_Item($pages[$working_page]);
         //$item->purge_relationship('isPageNumber', sprintf("%04d", $working_page));
         //$item->add_relationship('isPageNumber', sprintf("%04d", $working_page - 1), ISLANDORA_PAGE_URI);
-           $item->purge_relationships('isPageNumber',  $working_page,ISLANDORA_RELS_EXT_URI, TRUE);
-      $item->purge_relationships('isSequenceNumber',$working_page,ISLANDORA_RELS_EXT_URI, TRUE);
-      $item->add_relationship('isPageNumber',  $working_page-1, ISLANDORA_RELS_EXT_URI, TRUE);
-      $item->add_relationship('isSequenceNumber',  $working_page-1, ISLANDORA_RELS_EXT_URI, TRUE);
+        $item->purge_relationships('isPageNumber', $working_page, ISLANDORA_RELS_EXT_URI, TRUE);
+        $item->purge_relationships('isSequenceNumber', $working_page, ISLANDORA_RELS_EXT_URI, TRUE);
+        $item->add_relationship('isPageNumber', $working_page - 1, ISLANDORA_RELS_EXT_URI, TRUE);
+        $item->add_relationship('isSequenceNumber', $working_page - 1, ISLANDORA_RELS_EXT_URI, TRUE);
       }
     }
 
