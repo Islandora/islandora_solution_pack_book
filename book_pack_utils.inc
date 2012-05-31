@@ -45,7 +45,6 @@ XML;
   if ($returnValue == '0') {
     if (array_key_exists('OCR', $datastreams)) {
       $item->purge_datastream('OCR');
-
     }
     $item->add_datastream_from_file("$tiff.txt", 'OCR', "Scanned Text", 'text/plain', 'M');
     file_delete("$tiff.txt");
@@ -147,6 +146,12 @@ function save_all_tiffs_in_tempdir($pid, $dsid) {
   $member_pids = get_page_pids($pid);
   foreach ($member_pids as $member_pid) {
     $item = new Fedora_Item($member_pid);
+    if (array_key_exists('TIFF', $item->datastreams)) {
+      $dsid = 'TIFF';
+    }
+    if (array_key_exists('TIF', $item->datastreams)) {
+      $dsid = 'TIF';
+    }
     $tmp_filename = preg_replace("/:|-/", '_', $member_pid) . '.tif';
     $url = variable_get('fedora_base_url', 'http://localhost:8080/fedora') . "/objects/$member_pid/datastreams/$dsid/content";
     $file_contents = do_curl($url);
