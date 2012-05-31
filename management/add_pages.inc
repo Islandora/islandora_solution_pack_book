@@ -273,7 +273,7 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
 
   //add compresed jp2 for viewer
   if (variable_get('islandora_book_create_images', TRUE)) {
-    if ($ext == 'tif' || $ext == 'tiff') {
+    if (strtolower($ext) == 'tif' || strtolower($ext) == 'tiff') {
       exec('kdu_compress -i "' . $page_file . '" -o "' . $page_file . '.jp2' . '" -rate 0.5 Clayers=1 Clevels=7 "Cprecincts={256,256},{256,256},{256,256},{128,128},{128,128},{64,64},{64,64},{32,32},{16,16}" "Corder=RPCL" "ORGgen_plt=yes" "ORGtparts=R" "Cblk={32,32}" Cuse_sop=yes', $output, $returnValue);
       if ($returnValue == '0') {
         $page_item->add_datastream_from_file("$page_file.jp2", 'JP2', "Compressed JP2", 'image/jp2', 'M');
