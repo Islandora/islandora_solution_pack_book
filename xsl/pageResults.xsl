@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"  >
   <xsl:variable name="OBJECTSPAGE">
-    <xsl:value-of select="$objectsPage"/>   
+    <xsl:value-of select="$objectsPage"/>
   </xsl:variable>
   <!--<xsl:variable name="ALLOWEDNAMESPACES" select="$allowedPidNameSpaces"/>-->
   <xsl:variable name="cellsPerRow" select="6"/>
   <xsl:variable name="USER" select="$userID"/>
-  
+
     <!--<xsl:variable name="count" select="count(//objects)"/>-->
 <!--<xsl:variable name="PATHTOMAKEIMAGE">
 		 	<xsl:value-of select="$pathToMakeImage"/>
 		</xsl:variable>-->
 
   <xsl:template match="gfindObjects">
-  
+
     <xsl:variable name="INDEXNAME" select="@indexName"/>
 
     <xsl:variable name="PREQUERY" select="substring-before(@query,':')"/>
@@ -23,10 +23,10 @@
     <xsl:variable name="HITPAGESIZE" select="@hitPageSize"/>
     <xsl:variable name="HITTOTAL" select="@hitTotal"/>
 
-   
+
     <xsl:variable name="TOKEN">
       <xsl:value-of select="$searchToken"/>
-      
+
     </xsl:variable>
     <xsl:variable name="HITPAGEEND">
       <xsl:choose>
@@ -44,7 +44,7 @@
     <xsl:variable name="HITPAGESTARTT" select="(($HITPAGENO - 1) * $HITPAGESIZE + 1)"/>
     <xsl:choose>
       <xsl:when test="$HITTOTAL > 0">
-     
+
 
 		Total Hits =
         <strong>
@@ -54,7 +54,7 @@
         <br />We have repeated your search within this book and found results on the following pages.
 		<!-- Current page = <xsl:value-of select="@hitPageStart"/>-->
         <br/>
-     
+
         <xsl:apply-templates select="objects">
           <xsl:with-param name="end" select="$HITTOTAL"/>
           </xsl:apply-templates>
@@ -83,7 +83,7 @@
       </div>
  </xsl:template>
 
-  <xsl:template match="object">                 
+  <xsl:template match="object">
             <xsl:variable name="PIDVALUE">
               <xsl:choose>
                 <xsl:when test="@PID">
@@ -99,10 +99,10 @@
             </xsl:variable>
             <xsl:call-template name="showResult">
             <xsl:with-param name="PIDVALUE" select="$PIDVALUE"/>
-           
-          </xsl:call-template>            
+
+          </xsl:call-template>
   </xsl:template>
-  
+
   <xsl:template name="showResult">
     <xsl:param name="PIDVALUE"/>
     <xsl:variable name="DCTITLE">
@@ -115,7 +115,7 @@
     <xsl:variable name="recordNo">
       <xsl:value-of select="position()"/>
     </xsl:variable>
-        <td valign="top" width="16%">      
+        <td valign="top" width="16%">
           <a>
             <xsl:attribute name="href">
               <xsl:copy-of select="$OBJECTSPAGE"/>fedora/book_viewer/<xsl:copy-of select="$PIDVALUE"/>
@@ -143,7 +143,7 @@
     <xsl:with-param name="cellCount" select="$cellsPerRow - position()"/>
    </xsl:call-template>
   </xsl:if>
-   
+
   </xsl:template>
 
 
