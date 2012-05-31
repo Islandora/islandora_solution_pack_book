@@ -258,7 +258,7 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
 
   // add original image
   $ext = pathinfo($page_file, PATHINFO_EXTENSION);
-  if ($ext == 'tif'){
+  if ($ext == strtollower('tif')){
     $ext == 'TIFF';
   }
   module_load_include('inc', 'fedora_repository', 'MimeClass');
