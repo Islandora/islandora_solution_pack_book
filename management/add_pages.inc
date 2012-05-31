@@ -150,6 +150,7 @@ function book_add_pages_form_submit($form, &$form_state) {
   $dirName = str_replace(':', '_', $pid);
   $tmpDir = file_directory_path() . '/' . $dirName . '/';
   $relationship = $form_state['values']['relation'];
+  $language = (isset($form_state['values']['language'])) ? $form_state['values']['language'] : 'eng';
   if ($pageCModel == 'islandora:pageCModel') {
     $file_list = get_page_files($pid);
     ibook_create_page_objects($pid, $file_list, $form_state['values']['page_cmodel'], $relationship, $tmpDir, $start_page, $language, $preprocess);
