@@ -37,6 +37,7 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
     'spa' => t('Spanish'),
     'hin' => t('Hindi'),
     'jpn' => t('Japanese'),
+    'ita' => t('Italian')
   );
   $item = new Fedora_Item($pid);
   $book_title = $item->objectProfile->objLabel;
@@ -258,9 +259,9 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
 
   // add original image
   $ext = pathinfo($page_file, PATHINFO_EXTENSION);
-  if (strtolower($ext) == 'tif'){
+  if (strtolower($ext) == 'tif') {
     $ext = 'TIFF';
- }
+  }
   module_load_include('inc', 'fedora_repository', 'MimeClass');
   $mime_helper = new MimeClass();
   $mimetype = $mime_helper->get_mimetype($page_file);
