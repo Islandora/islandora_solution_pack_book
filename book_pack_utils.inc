@@ -18,7 +18,7 @@ function get_page_pids($book_pid) {
  * @param fedora item $item
  * @return boolean
  */
-function refresh_ocr($tiff, &$item, $language, $preprocess = FALSE, $deleteCWRC = FALSE) {
+function refresh_ocr($tiff, &$item, $language, $preprocess = FALSE) {
   $label = $item->objectProfile->objLabel;
   $datastreams = $item->get_datastreams_list_as_array();
   $executable = variable_get('islandora_ocr_path', '/usr/bin/tesseract');
@@ -40,13 +40,12 @@ XML;
       }
     }
   }
-  exec("$executable $tiff $tiff -l $language", $output, $returnValue);
+  $command = "$executable $tiff $tiff -l $language";
+  exec($command, $output, $returnValue);
   if ($returnValue == '0') {
     if (array_key_exists('OCR', $datastreams)) {
       $item->purge_datastream('OCR');
-      if (array_key_exists('CWRC', $datastreams)) {
-        $item->purge_datastream('CWRC');
-      }
+
     }
     $item->add_datastream_from_file("$tiff.txt", 'OCR', "Scanned Text", 'text/plain', 'M');
     file_delete("$tiff.txt");
@@ -120,6 +119,12 @@ function refresh_images($tiff, &$item) {
 function save_datastream_as_tempfile($pid, $dsid, $ext = '.tif') {
   $tmp_filename = preg_replace("/:|-/", '_', $pid) . $ext;
   $item = new Fedora_Item($pid);
+  if (array_key_exists('TIFF', $item->datastreams)) {
+    $dsid = 'TIFF';
+  }
+  if (array_key_exists('TIF', $item->datastreams)) {
+    $dsid = 'TIF';
+  }
   $url = variable_get('fedora_base_url', 'http://localhost:8080/fedora') . "/objects/$pid/datastreams/$dsid/content";
   $file_contents = do_curl($url);
   $file_path = file_directory_path() . "/" . $tmp_filename;
@@ -345,7 +350,6 @@ XML;
   return $book_pids;
 }
 
-
 function get_page_progression($book_pid) {
   $query = <<<XML
 select \$pageProgression from <#ri> where <info:fedora/$book_pid> <fedora-rels-ext:hasPageProgression> \$pageProgression
@@ -371,7 +375,7 @@ function add_islandora_rdfs($book_pid) {
     $item = new Fedora_Item($pid);
     $relationships = $item->get_rdf_relationships();
     if (!array_key_exists('isPageNumber', $relationships)) {
-      $item->add_relationship('isSequenceNumber',  $page_num++, 'http://islandora.ca/ontology/relsext#');
+      $item->add_relationship('isSequenceNumber', $page_num++, 'http://islandora.ca/ontology/relsext#');
     }
     if (!array_key_exists('isPageOf', $relationships)) {
       $item->add_relationship('isPageOf', $book_pid, 'http://islandora.ca/ontology/relsext#');
@@ -458,7 +462,7 @@ function renumber_pages($insertion_point, $book_pid, $new_page_count) {
       $new_title = "$book_title - Page " . sprintf("%03d", $i + $new_page_count);
       $item->purge_relationship('isPageNumber', sprintf("%04d", $i));
       $item->purge_relationships('isPageNumber', sprintf("%04d", $i));
-      $item->purge_relationships('isSequenceNumber',sprintf("%04d",$i));
+      $item->purge_relationships('isSequenceNumber', sprintf("%04d", $i));
       $item->add_relationship('isPageNumber', sprintf("%04d", $i + $new_page_count), ISLANDORA_RELS_EXT_URI, TRUE);
       $item->add_relationship('isSequenceNumber', sprintf("%04d", $i + $new_page_count), ISLANDORA_RELS_EXT_URI, TRUE);
       $item->modify_object($label = "$new_title", $state = NULL, $ownerId = NULL, $logMessage = 'Modified by Islandora API');
@@ -481,7 +485,7 @@ function post_deletion_renumber_pages($book_pid) {
       if ($current_number != $i + 1) {
         $item->purge_relationship('isPageNumber', sprintf("%04d", $i));
         $item->purge_relationships('isPageNumber', sprintf("%04d", $i));
-        $item->purge_relationships('isSequenceNumber',sprintf("%04d",$i));
+        $item->purge_relationships('isSequenceNumber', sprintf("%04d", $i));
         $item->add_relationship('isPageNumber', sprintf("%04d", $i + $new_page_count), ISLANDORA_RELS_EXT_URI, TRUE);
         $item->add_relationship('isSequenceNumber', sprintf("%04d", $i + $new_page_count), ISLANDORA_RELS_EXT_URI, TRUE);
         $item->modify_object($label = "$book_title - Page " . sprintf("%03d", $i + 1), $state = NULL, $ownerId = NULL, $logMessage = 'Modified by Islandora API');
