@@ -131,9 +131,9 @@ function page_management_form(&$form_state, $pid) {
   $page_count = count(get_sorted_pages($book_pid));
   $form['renumber']['new_page'] = array(
     '#type' => 'textfield',
-    '#title' => t('New Page Number for page @num', array('@num' => $page_number)),
+    '#title' => t('New Sequence Number for page @num', array('@num' => $page_number)),
     '#size' => 5,
-    '#description' => t('New page number must be between 1 and  @page_count inclusive', array('@page_count' => $page_count)),
+    '#description' => t('New sequence number must be between 1 and  @page_count inclusive', array('@page_count' => $page_count)),
   );
   $form['renumber']['submit'] = array(
     '#type' => 'submit',
