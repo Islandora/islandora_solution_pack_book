@@ -11,9 +11,10 @@
 function islandora_book_page_table($book_pid) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
   $query = <<<XML
-  select \$object \$page from <#ri>
+  select \$object \$page \$title from <#ri>
 where \$object <fedora-rels-ext:isMemberOf> <info:fedora/$book_pid>
 and \$object <fedora-model:state> <fedora-model:Active>
+and \$object <dc:title> \$title
 and (\$object <info:islandora/islandora-system:def/paged-item-info#sequenceNumber> \$page
 or \$object <http://islandora.ca/ontology/relsext#isSequenceNumber> \$page)
 order by \$page
@@ -25,14 +26,14 @@ XML;
   $url .= "?type=tuples&flush=TRUE&format=csv&limit=$limit&offset=$offset&lang=itql&stream=on&query=" . $query;
   $content .= do_curl($url);
   $results = explode("\n", $content);
-  $lines = preg_replace('/info:fedora\/|"object","page"/', '', $results);
+  $lines = preg_replace('/info:fedora\/|"object","page","title"/', '', $results);
   $lines = array_values(array_filter($lines));
   $keys = array();
   $object = array();
   foreach ($lines as $line) {
     $line_parts = explode(',', $line);
 
-    $objects[$line_parts[0]] = $line_parts[1];
+    $objects[$line_parts[0]] = array($line_parts[1], $line_parts[2]);
     $keys[] = $line_parts[0];
   }
 
@@ -41,7 +42,7 @@ XML;
   );
 
   $table = array(
-    '#header' => array(theme('table_select_header_cell'), t('Page Pid'), 'Sequence Number'),
+    '#header' => array(theme('table_select_header_cell'), t('Page Pid'), 'Sequence Number', t('Page Label')),
     '#theme' => 'islandora_book_page_table',
     '#tree' => TRUE,
     'rows' => array(),
@@ -58,7 +59,8 @@ XML;
     $rows[] = array(
       '#pid' => $key,
       'pid' => array('#value' => l($key, 'fedora/repository/' . $key)),
-      'title' => array('#value' => $object),
+      'sequence' => array('#value' => $object[0]),
+      'label' => array('#value' => $object[1]),
     );
   }
 
