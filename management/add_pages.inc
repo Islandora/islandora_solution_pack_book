@@ -176,6 +176,8 @@ function book_add_pages_form_submit($form, &$form_state) {
     $page_item->add_relationship($relationship, $pid);
     $page_item->add_datastream_from_file($path . 'Borndigital_tn.png', 'TN', 'Thumbnail', 'image/png', 'M');
     $page_item->add_datastream_from_file($path . 'Borndigital_Fullsize.jpg', 'JPEG', 'JPEG Image', 'image/jpg', 'M');
+    $page_item->add_datastream_from_file($path . 'Borndigital.jp2', 'JP2', "Compressed JP2", 'image/jp2', 'M');
+    $page_item->add_datastream_from_file($path . 'Borndigital_Fullsize.tiff', 'TIFF', 'Archival Image', 'image/jpg', 'M');
     $page_item->add_datastream_from_string('Born digital - not yet edited', 'OCR', 'OCR', 'text/plain', 'M');
     drupal_goto("fedora/repository/$pid");
   }
