@@ -164,7 +164,7 @@ function book_add_pages_form_submit($form, &$form_state) {
 
 
     $book_title = $form_state['values']['book_title'];
-    $page_title = "$book_title - Sequence " . sprintf("%03d", $start_page);
+    $page_title = "$book_title - Page " . sprintf("%03d", $start_page);
     $parts = explode(':', $pid);
     $nextPid = FEDORA_ITEM::get_next_PID_in_namespace($parts[0]);
     $page_item = Fedora_Item::ingest_new_item($nextPid, 'A', $page_title);
