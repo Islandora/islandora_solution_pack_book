@@ -81,8 +81,10 @@ function page_management_form(&$form_state, $pid) {
   );
 
   $form['page_manage']['preprocess'] = array(
-    '#title' => t('Preprocess as typetext?'),
-    '#description' => t('Will add additional processing for typewritten text.'),
+    '#title' => t('Preprocessing for typescripts?'),
+    '#description' => t('Will add additional processing for typewritten text.  This script grayscales and sharpens an ingested .tiff before performing OCR processes. <br />
+        This has been shown to improve OCR results for some images. Use with caution. Process can be lengthly and is resource intensive. <br />
+        If your image is already gray, this script will not run'),
     '#type' => 'checkbox',
   );
 
@@ -181,7 +183,7 @@ function page_management_form_submit($form, &$form_state) {
     $language = $form_state['values']['language'];
     $preprocess = $form_state['values']['preprocess'];
     if ($form_state['values']['do_ocr']) {
-         $success = refresh_ocr($tiff_file_path, $item, $language, $preprocess);
+      $success = refresh_ocr($tiff_file_path, $item, $language, $preprocess);
       if ($success) {
         drupal_set_message(t("OCR refreshed for this page"));
       }
