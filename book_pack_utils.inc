@@ -459,18 +459,27 @@ function renumber_pages($insertion_point, $book_pid, $new_page_count) {
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   $page_pids = get_sorted_pages($book_pid);
-  $book_item = new Fedora_Item($book_pid);
-  $book_title = $book_item->objectProfile->objLabel;
+ 
+ 
   for ($i = $insertion_point; $i <= count($page_pids); ++$i) {
-    $item = new Fedora_Item($page_pids[$i]);
+    $pid = $page_pids[$i];
+    $item = new Fedora_Item($pid);
     if ($item->exists()) {
-      $new_title = "$book_title - Page " . sprintf("%03d", $i + $new_page_count);
-      $item->purge_relationship('isPageNumber', sprintf("%04d", $i));
-      $item->purge_relationships('isPageNumber', sprintf("%04d", $i));
-      $item->purge_relationships('isSequenceNumber', sprintf("%04d", $i));
-      $item->add_relationship('isPageNumber', sprintf("%04d", $i + $new_page_count), ISLANDORA_RELS_EXT_URI, TRUE);
-      $item->add_relationship('isSequenceNumber', sprintf("%04d", $i + $new_page_count), ISLANDORA_RELS_EXT_URI, TRUE);
-      $item->modify_object($label = "$new_title", $state = NULL, $ownerId = NULL, $logMessage = 'Modified by Islandora API');
+      $rdf_string = <<<RDF
+  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+<rdf:Description rdf:about="info:fedora/$pid">
+	<hasModel xmlns="info:fedora/fedora-system:def/model#" rdf:resource="info:fedora/islandora:pageCModel"></hasModel>
+	<isSequenceNumber xmlns="http://islandora.ca/ontology/relsext#">$i</isSequenceNumber>
+	<isMemberOf xmlns="info:fedora/fedora-system:def/relations-external#" rdf:resource="info:fedora/$book_pid"></isMemberOf>
+	<isSection xmlns="http://islandora.ca/ontology/relsext#">1</isSection>
+	<isPageOf xmlns="http://islandora.ca/ontology/relsext#" rdf:resource="inf:fedora/$book_pid"></isPageOf>
+  <isPageNumber xmlns="http://islandora.ca/ontology/relsext#">$i</isPageNumber>
+</rdf:Description>
+</rdf:RDF>
+RDF;
+  $value = $item->modify_datastream_by_value($rdf_string, 'RELS-EXT', 'RELS-EXT', 'text/xml', $force = FALSE, $logMessage = 'Modified by Drush using Islandora API', $quiet = FALSE);
+
+  $item->forget();
     }
   }
 }
