@@ -168,7 +168,7 @@ function book_add_pages_form_submit($form, &$form_state) {
     $parts = explode(':', $pid);
     $nextPid = FEDORA_ITEM::get_next_PID_in_namespace($parts[0]);
     $page_item = Fedora_Item::ingest_new_item($nextPid, 'A', $page_title);
-    $page_item->add_relationship('hasModel', $pageCModel, FEDORA_MODEL_URI);
+    $page_item->add_relationship('hasModel', 'islandora:pageCModel', FEDORA_MODEL_URI);
     $page_item->add_relationship('isSequenceNumber', $start_page, 'http://islandora.ca/ontology/relsext#', TRUE);
     $page_item->add_relationship('isPageNumber', $start_page, 'http://islandora.ca/ontology/relsext#', TRUE);
     $page_item->add_relationship('isSection', '1', 'http://islandora.ca/ontology/relsext#', TRUE);
