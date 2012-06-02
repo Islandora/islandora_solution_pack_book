@@ -459,28 +459,17 @@ function renumber_pages($insertion_point, $book_pid, $new_page_count) {
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   $page_pids = get_sorted_pages($book_pid);
-  
- 
+
+
   for ($i = $insertion_point; $i <= count($page_pids); ++$i) {
     $pid = $page_pids[$i];
-    $sequence = $i +1;
+    $sequence = $i + 1;
     $item = new Fedora_Item($pid);
     if ($item->exists()) {
-      $rdf_string = <<<RDF
-  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-<rdf:Description rdf:about="info:fedora/$pid">
-	<hasModel xmlns="info:fedora/fedora-system:def/model#" rdf:resource="info:fedora/islandora:pageCModel"></hasModel>
-	<isSequenceNumber xmlns="http://islandora.ca/ontology/relsext#">$sequence</isSequenceNumber>
-	<isMemberOf xmlns="info:fedora/fedora-system:def/relations-external#" rdf:resource="info:fedora/$book_pid"></isMemberOf>
-	<isSection xmlns="http://islandora.ca/ontology/relsext#">1</isSection>
-	<isPageOf xmlns="http://islandora.ca/ontology/relsext#" rdf:resource="inf:fedora/$book_pid"></isPageOf>
-  <isPageNumber xmlns="http://islandora.ca/ontology/relsext#">$sequence</isPageNumber>
-</rdf:Description>
-</rdf:RDF>
-RDF;
-  $value = $item->modify_datastream_by_value($rdf_string, 'RELS-EXT', 'RELS-EXT', 'text/xml', $force = FALSE, $logMessage = 'Modified by Drush using Islandora API', $quiet = FALSE);
+      $rdf_string = islandora_book_create_rdf($pid, $book_pid, $sequence);
+      $value = $item->modify_datastream_by_value($rdf_string, 'RELS-EXT', 'RELS-EXT', 'text/xml', $force = FALSE, $logMessage = 'Modified by Drush using Islandora API', $quiet = FALSE);
 
-  $item->forget();
+      $item->forget();
     }
   }
 }
@@ -494,16 +483,14 @@ function post_deletion_renumber_pages($book_pid) {
   $book_title = $book_item->objectProfile->objLabel;
 
   for ($i = 0; $i < count($page_pids); ++$i) {
-    $item = new Fedora_Item($page_pids[$i]);
+    $pid = $page_pids[$i];
+    $item = new Fedora_Item($pid);
     if ($item->exists()) {
       $current_number = get_page_number($page_pids[$i]);
+      $sequence = $i + 1;
       if ($current_number != $i + 1) {
-        $item->purge_relationship('isPageNumber', sprintf("%04d", $i));
-        $item->purge_relationships('isPageNumber', sprintf("%04d", $i));
-        $item->purge_relationships('isSequenceNumber', sprintf("%04d", $i));
-        $item->add_relationship('isPageNumber', sprintf("%04d", $i + $new_page_count), ISLANDORA_RELS_EXT_URI, TRUE);
-        $item->add_relationship('isSequenceNumber', sprintf("%04d", $i + $new_page_count), ISLANDORA_RELS_EXT_URI, TRUE);
-        $item->modify_object($label = "$book_title - Page " . sprintf("%03d", $i + 1), $state = NULL, $ownerId = NULL, $logMessage = 'Modified by Islandora API');
+        $rdf_string = islandora_book_create_rdf($pid, $book_pid, $sequence);
+        $value = $item->modify_datastream_by_value($rdf_string, 'RELS-EXT', 'RELS-EXT', 'text/xml', $force = FALSE, $logMessage = 'Modified by Drush using Islandora API', $quiet = FALSE);
       }
     }
   }
@@ -527,4 +514,20 @@ function get_page_number($page_pid) {
   $pid = preg_replace('/^info:fedora\/|"object"| /', '', $results);
   $pid = array_values(array_filter($pid));
   return intval($pid[0]);
+}
+
+function islandora_book_create_rdf($pid, $book_pid, $sequence) {
+  $rdf_string = <<<RDF
+  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+<rdf:Description rdf:about="info:fedora/$pid">
+	<hasModel xmlns="info:fedora/fedora-system:def/model#" rdf:resource="info:fedora/islandora:pageCModel"></hasModel>
+	<isSequenceNumber xmlns="http://islandora.ca/ontology/relsext#">$sequence</isSequenceNumber>
+	<isMemberOf xmlns="info:fedora/fedora-system:def/relations-external#" rdf:resource="info:fedora/$book_pid"></isMemberOf>
+	<isSection xmlns="http://islandora.ca/ontology/relsext#">1</isSection>
+	<isPageOf xmlns="http://islandora.ca/ontology/relsext#" rdf:resource="inf:fedora/$book_pid"></isPageOf>
+  <isPageNumber xmlns="http://islandora.ca/ontology/relsext#">$sequence</isPageNumber>
+</rdf:Description>
+</rdf:RDF>
+RDF;
+  return $rdf_string;
 }
