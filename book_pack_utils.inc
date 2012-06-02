@@ -459,21 +459,22 @@ function renumber_pages($insertion_point, $book_pid, $new_page_count) {
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   $page_pids = get_sorted_pages($book_pid);
- 
+  
  
   for ($i = $insertion_point; $i <= count($page_pids); ++$i) {
     $pid = $page_pids[$i];
+    $sequence = $i +1;
     $item = new Fedora_Item($pid);
     if ($item->exists()) {
       $rdf_string = <<<RDF
   <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
 <rdf:Description rdf:about="info:fedora/$pid">
 	<hasModel xmlns="info:fedora/fedora-system:def/model#" rdf:resource="info:fedora/islandora:pageCModel"></hasModel>
-	<isSequenceNumber xmlns="http://islandora.ca/ontology/relsext#">$i</isSequenceNumber>
+	<isSequenceNumber xmlns="http://islandora.ca/ontology/relsext#">$sequence</isSequenceNumber>
 	<isMemberOf xmlns="info:fedora/fedora-system:def/relations-external#" rdf:resource="info:fedora/$book_pid"></isMemberOf>
 	<isSection xmlns="http://islandora.ca/ontology/relsext#">1</isSection>
 	<isPageOf xmlns="http://islandora.ca/ontology/relsext#" rdf:resource="inf:fedora/$book_pid"></isPageOf>
-  <isPageNumber xmlns="http://islandora.ca/ontology/relsext#">$i</isPageNumber>
+  <isPageNumber xmlns="http://islandora.ca/ontology/relsext#">$sequence</isPageNumber>
 </rdf:Description>
 </rdf:RDF>
 RDF;

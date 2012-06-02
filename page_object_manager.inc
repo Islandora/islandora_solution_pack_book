@@ -38,7 +38,6 @@ function page_management_form(&$form_state, $pid) {
 
   $content_helper = new FedoraObjectDetailedContent($pid);
   $object_helper = new ObjectHelper();
-  //$ds_list = datastream_display_builder($content_helper->pid, $content_helper->item);
   $ds_list = $object_helper->get_formatted_datastream_list($content_helper->pid, NULL, $content_helper->item);
 
   $dc_html = $object_helper->getFormattedDC($content_helper->item);
@@ -205,8 +204,6 @@ function page_management_form_submit($form, &$form_state) {
   if ($form_state['clicked_button']['#id'] == 'renumber_page') {
     $new_page = $form_state['values']['new_page'];
     $item = new Fedora_Item($pid);
-    //$item->purge_relationship('isPageNumber', sprintf("%04d", $current_page));
-    //$item->add_relationship('isPageNumber', sprintf("%04d", $new_page), ISLANDORA_PAGE_URI);
     $item->purge_relationship('isPageNumber', $current_page, ISLANDORA_RELS_EXT_URI, TRUE);
     $item->purge_relationships('isSequenceNumber', $current_page, ISLANDORA_RELS_EXT_URI, TRUE);
     $item->add_relationship('isPageNumber', $new_page, ISLANDORA_RELS_EXT_URI, TRUE);
@@ -226,8 +223,6 @@ function page_management_form_submit($form, &$form_state) {
     if ($new_page > $current_page) {
       for ($working_page = $new_page; $working_page > $current_page; $working_page--) {
         $item = new Fedora_Item($pages[$working_page]);
-        //$item->purge_relationship('isPageNumber', sprintf("%04d", $working_page));
-        //$item->add_relationship('isPageNumber', sprintf("%04d", $working_page - 1), ISLANDORA_PAGE_URI);
         $item->purge_relationships('isPageNumber', $working_page, ISLANDORA_RELS_EXT_URI, TRUE);
         $item->purge_relationships('isSequenceNumber', $working_page, ISLANDORA_RELS_EXT_URI, TRUE);
         $item->add_relationship('isPageNumber', $working_page - 1, ISLANDORA_RELS_EXT_URI, TRUE);
