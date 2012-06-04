@@ -474,6 +474,10 @@ function renumber_pages($insertion_point, $book_pid, $new_page_count) {
   }
 }
 
+/**
+ * Removes gaps from sequencing
+ * @param pid $book_pid
+ */
 function post_deletion_renumber_pages($book_pid) {
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
@@ -499,7 +503,7 @@ function post_deletion_renumber_pages($book_pid) {
 /**
  * Returns page number associated wih page pid
  * @param string $page_pid
- * @return <type>
+ * @return int>
  */
 function get_page_number($page_pid) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
@@ -515,6 +519,14 @@ function get_page_number($page_pid) {
   $pid = array_values(array_filter($pid));
   return intval($pid[0]);
 }
+
+/**
+ * Returns RELS-EXT stream
+ * @param pid> $pid
+ * @param pid $book_pid
+ * @param int $sequence
+ * @return string>
+ */
 
 function islandora_book_create_rdf($pid, $book_pid, $sequence) {
   $rdf_string = <<<RDF

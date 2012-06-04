@@ -52,13 +52,12 @@ class IslandoraBook {
     }
     $class = new CollectionClass();
   $query = <<<XML
-select \$object \$title \$page from <#ri>
+select \$object \$title  from <#ri>
 where \$object <fedora-rels-ext:isMemberOf> <info:fedora/$this->pid>
-and \$object <dc:title> \$title
 and \$object <fedora-model:state> <fedora-model:Active>
-and (\$object <info:islandora/islandora-system:def/paged-item-info#sequenceNumber> \$page
-or \$object <http://islandora.ca/ontology/relsext#isSequenceNumber> \$page)
-order by \$page
+and (\$object <info:islandora/islandora-system:def/paged-item-info#sequenceNumber> \$title
+or \$object <http://islandora.ca/ontology/relsext#isSequenceNumber> \$title)
+order by \$title
 XML;
     $results = $class->getRelatedItems($this->pid, $query);
     $page_items = $class->renderCollection($results, $this->pid, NULL, NULL, $page_number);
