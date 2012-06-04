@@ -167,7 +167,7 @@ function book_add_pages_form_submit($form, &$form_state) {
     $page_title = "$book_title - Page " . sprintf("%03d", $start_page);
     $parts = explode(':', $pid);
     $nextPid = FEDORA_ITEM::get_next_PID_in_namespace($parts[0]);
-    $page_item = Fedora_Item::ingest_new_item($nextPid, 'A', $page_title);
+    $page_item = Fedora_Item::ingest_new_item($nextPid, 'A', t('Digital Page'));
     $page_item->add_relationship('hasModel', 'islandora:pageCModel', FEDORA_MODEL_URI);
     $page_item->add_relationship('isSequenceNumber', $start_page, 'http://islandora.ca/ontology/relsext#', TRUE);
     $page_item->add_relationship('isPageNumber', $start_page, 'http://islandora.ca/ontology/relsext#', TRUE);
@@ -252,8 +252,11 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
   module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   $parts = explode(':', $book_pid);
+  $base_file_name = pathinfo($page_file, PATHINFO_BASENAME);
+  $ext = pathinfo($page_file, PATHINFO_EXTENSION);
+  $base_file_name = str_replace(".$ext", "", $base_file_name);
   $nextPid = FEDORA_ITEM::get_next_PID_in_namespace($parts[0]);
-  $page_item = Fedora_Item::ingest_new_item($nextPid, 'A', $page_title);
+  $page_item = Fedora_Item::ingest_new_item($nextPid, 'A', $base_file_name);
   $page_item->add_relationship('hasModel', $page_cmodel, FEDORA_MODEL_URI);
   $page_item->add_relationship('isSequenceNumber', $page_num, 'http://islandora.ca/ontology/relsext#', TRUE);
   $page_item->add_relationship('isPageNumber', $page_num, 'http://islandora.ca/ontology/relsext#', TRUE);
@@ -262,7 +265,6 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
   $page_item->add_relationship('isMemberOf', $book_pid, RELS_EXT_URI);
 
   // add original image
-  $ext = pathinfo($page_file, PATHINFO_EXTENSION);
   if (strtolower($ext) == 'tif') {
     $ext = 'TIFF';
   }
