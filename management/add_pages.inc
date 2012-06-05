@@ -465,7 +465,7 @@ function page_delete_submit($form, &$form_state) {
     'operations' => array(),
     'file' => drupal_get_path('module', 'islandora_book') . '/management/add_pages.inc',
     'init_message' => t('Preparing data...'),
-    'progress_message' => t('@current of @total pages deleted.'),
+    'progress_message' => t('@current of @total tasks completed.'),
   );
 
   foreach ($page_pids as $page_pid) {
