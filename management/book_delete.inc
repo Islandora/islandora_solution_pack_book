@@ -7,21 +7,24 @@
  * @return array
  */
 function book_delete(&$form_state, $pid) {
-
+  module_load_include('inc', 'islandora_book', 'book_pack_utils');
+  $potential_collections = get_collections_as_option_array();
+  $current_collections = get_collection_relationships($pid);
 
   if (user_access('delete pages')) {
     $form['pid'] = array(
       '#type' => 'hidden',
       '#value' => $pid,
     );
-    $form['delete_page'] = array(
+    $form['delete_book'] = array(
       '#title' => "Permanently Delete this Book",
       '#type' => 'fieldset',
-      '#description' => t("Clicking this button will delete this book. <br /> <strong>This action cannot be undone.</strong>"),
+      '#description' => t("Clicking this button will delete this book. <br /> <strong>This action cannot be undone.</strong><br />
+          This book will be deleted from <strong>ALL</strong> collections of which it is a member"),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
     );
-    $form['delete_page']['confirm'] = array(
+    $form['delete_book']['confirm'] = array(
       '#title' => "Are you sure?",
       '#type' => 'fieldset',
       '#description' => t('<strong>Clicking the delete button will permanantly remove this book and all of its pages.</strong> <br />  <strong>This action cannot be undone.</strong> '),
@@ -29,7 +32,7 @@ function book_delete(&$form_state, $pid) {
       '#collapsed' => TRUE,
     );
 
-    $form['delete_page']['confirm']['submit'] = array(
+    $form['delete_book']['confirm']['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Delete this book'),
       '#id' => 'delete_page',
