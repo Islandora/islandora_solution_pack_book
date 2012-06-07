@@ -98,7 +98,7 @@ function islandora_book_perm() {
 
 function islandora_book_solution_pack_form() {
   module_load_include('inc', 'islandora_book', 'islandora_book.admin');
-  return islandora_book_admin_settings(&$form_state);
+  return islandora_book_admin_settings($form_state);
 }
 
 function islandora_book_islandora_tabs($content_models, $pid) {
@@ -314,7 +314,7 @@ function islandora_book_required_fedora_objects() {
   $form_xml = file_get_contents("$module_path/xml/mods_book.xml");
   solution_pack_add_form($form_name, $form_xml);
   solution_pack_add_form_association('islandora:bookCModel', $form_name);
-
+  solution_pack_add_form_association('islandora:iaBookCModel', $form_name);
   return array(
     'islandora_book' => array(
       'module' => 'islandora_book',

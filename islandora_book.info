@@ -6,6 +6,6 @@ dependencies[] = xml_forms
 dependencies[] = islandora_content_model_forms
 dependencies[] = islandora_collection_manager
 dependencies[] = islandora_bookviewer
-version = 11.3.1
+version = 6.x.dev
 
 core = 6.x

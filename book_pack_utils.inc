@@ -48,15 +48,20 @@ XML;
     }
     $item->add_datastream_from_file("$tiff.txt", 'OCR', "Scanned Text", 'text/plain', 'M');
     file_delete("$tiff.txt");
-    if ($tiff != $original) {
-      file_delete($tiff);
-    }
+   
     $success = TRUE;
   }
   if (!$success) {
     drupal_set_message(t('OCR replacement for @pid was unsuccessful', array('@pid' => $item->pid)));
   }
-
+  module_load_include('inc', 'islandora_book', 'management/add_pages');
+  $success = islandora_book_viewer_create_hocr($executable, $tiff, $language, $item, $datastreams);
+  if (!$success) {
+    drupal_set_message(t('ENCODED_OCR replacement for @pid was unsuccessful', array('@pid' => $item->pid)));
+  }
+   if ($tiff != $original) {
+      file_delete($tiff);
+    }
   return $success;
 }
 

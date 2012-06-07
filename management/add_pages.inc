@@ -31,13 +31,13 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   $languages = array(
     'eng' => t('English'),
-    'deu-frak' => t('German'),
-    'por' => t('Portugese'),
+    //'deu-frak' => t('German'),
+    //'por' => t('Portugese'),
     'fra' => t('French'),
-    'spa' => t('Spanish'),
-    'hin' => t('Hindi'),
-    'jpn' => t('Japanese'),
-    'ita' => t('Italian')
+    //'spa' => t('Spanish'),
+    //'hin' => t('Hindi'),
+    //'jpn' => t('Japanese'),
+    //'ita' => t('Italian')
   );
   $item = new Fedora_Item($pid);
   $book_title = $item->objectProfile->objLabel;
@@ -95,13 +95,13 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
     );
   }
   if ($page_cmodel == 'islandora:pageCModel') {
-    $form['page_add']['preprocess'] = array(
-      '#title' => t('Preprocessing for typescripts?'),
-      '#description' => t('Will add additional processing for typewritten text.  This script grayscales and sharpens an ingested .tiff before performing OCR processes. <br />
-        This has been shown to improve OCR results for some images. Use with caution. Process can be lengthly and is resource intensive. <br />
-        If your image is already gray, this script will not run'),
-      '#type' => 'checkbox',
-    );
+   // $form['page_add']['preprocess'] = array(
+   //   '#title' => t('Preprocessing for typescripts?'),
+   //   '#description' => t('Will add additional processing for typewritten text.  This script grayscales and sharpens an ingested .tiff before performing OCR processes. <br />
+   //     This has been shown to improve OCR results for some images. Use with caution. Process can be lengthly and is resource intensive. <br />
+    //    If your image is already gray, this script will not run'),
+    //  '#type' => 'checkbox',
+   // );
 
     $form['page_add']['language'] = array(
       '#title' => t('Language'),
@@ -325,7 +325,55 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
     else {
       $page_item->add_datastream_from_string('No OCR available', 'OCR', 'Scanned Text', 'text/plain', 'M');
     }
+    islandora_book_viewer_create_hocr($executable, $page_file, $language, &$page_item);
   }
+}
+
+/**
+ * creates hocr from a supplied image, also lowercase the text so it can
+ * be used for highlighting search results.
+ * @param string $executable
+ * @param string $page_file
+ * @param string $lang
+ * @return boolean
+ */
+function islandora_book_viewer_create_hocr($executable, $page_file, $lang, &$object) {
+  exec("$executable $page_file $page_file -l $lang hocr", $output, $returnValue);
+  $datastreams = $object->get_datastreams_list_as_array();
+  if ($returnValue == '0') {
+    $html_string = file_get_contents("$page_file.html");
+    if (empty($html_string)) {
+      return FALSE;
+    }
+    $object->add_datastream_from_file("$page_file.html", 'RAW_HOCR', "RAW_HOCR", 'text/xml', 'M');
+    $proc = new XsltProcessor();
+    //convert the hocr from html 4.01 transitional to xhtml and lower case the text
+    $doc_type = '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">';
+    $xml_string = str_replace($doc_type, '<?xml version="1.0" encoding="UTF-8"?>', $html_string);
+    $input = new DomDocument();
+    $input->loadXML($xml_string);
+    $path = drupal_get_path('module', 'islandora_bookviewer');
+    $xsl = new DomDocument();
+    $test = $xsl->load($path . '/xslt/hocrToLowerhocr.xsl');
+    if (!$test) {//can't run transform so leaving
+      return FALSE;
+    }
+    $xsl = $proc->importStylesheet($xsl);
+    $newdom = $proc->transformToDoc($input);
+    $content = $newdom->saveXML();
+    file_put_contents("$page_file.xml", $content);
+    if (array_key_exists('ENCODED_OCR', $datastreams)) {
+      $object->purge_datastream('ENCODED_OCR');
+    }
+    $object->add_datastream_from_file("$page_file.xml", 'ENCODED_OCR', "ENCODED_OCR", 'text/xml', 'M');
+    $datastreams = $object->get_datastreams_list_as_array();
+    if (array_key_exists('ENCODED_OCR', $datastreams)) {
+      $returnValue = TRUE;
+    }
+    file_delete("$page_file.xml");
+    return $returnValue;
+  }
+  return NULL;
 }
 
 /**
