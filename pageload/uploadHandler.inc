@@ -15,15 +15,18 @@ class UploadHandler {
 
   protected $options;
 
-  function __construct($options=null) {
-    $holder = "holder";
+  function __construct($flat_pid) {
+
+    $upload_dir = $_SERVER['DOCUMENT_ROOT'] . $base_path . file_directory_path() . "/$flat_pid/";
+    $upload_dir = str_replace('//', '/', $upload_dir);
+    $save_path =  file_directory_path() . "/$flat_pid/";
     $this->options = array(
       'script_url' => $this->getFullUrl() . '/',
-      'script_url' =>$_SESSION['script_url']. '/',
+      'script_url' => $_SESSION['script_url'] . '/',
       //
       //  'upload_dir' => dirname($_SERVER['SCRIPT_FILENAME']).'/files/',
-      'upload_dir' => $_SESSION['upload_dir'],
-      'upload_url' => $_SESSION['upload_url'],
+      'upload_dir' => $save_path,
+      'upload_url' => $save_path,
       //
       //'upload_url' => $this->getFullUrl().'/files/',
       'param_name' => 'files',
@@ -54,14 +57,14 @@ class UploadHandler {
           ),
          */
         'thumbnail' => array(
-          'upload_dir' => $_SESSION['upload_dir'] . '/thumbnails/',
-          'upload_url' => $_SESSION['upload_url'] . '/thumbnails/',
+          'upload_dir' => file_directory_path() . '/thumbnails/',
+          'upload_url' => file_directory_path() . '/thumbnails/',
           'max_width' => 80,
           'max_height' => 80
         )
       )
     );
-   
+
     if ($options) {
       $this->options = array_replace_recursive($this->options, $options);
     }

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @file 
+ * @file
  * Islandora book solution pack module
  */
 
@@ -54,6 +54,12 @@ function islandora_book_menu() {
     'file' => 'pageload/upload_frame.inc',
     'type' => MENU_CALLBACK,
   );
+  $items['islandora/book/borndigital'] = array(
+    'page callback' => 'create_borndigital',
+    'access arguments' => array('view fedora collection'),
+    'file' => 'management/born_digital.inc',
+    'type' => MENU_CALLBACK,
+  );
 
   $items['islandora/book/upload_setup'] = array(
     'page callback' => 'upload_setup',
@@ -92,7 +98,7 @@ function islandora_book_perm() {
 
 function islandora_book_solution_pack_form() {
   module_load_include('inc', 'islandora_book', 'islandora_book.admin');
-  return islandora_book_admin_settings(&$form_state);
+  return islandora_book_admin_settings($form_state);
 }
 
 function islandora_book_islandora_tabs($content_models, $pid) {
@@ -103,13 +109,13 @@ function islandora_book_islandora_tabs($content_models, $pid) {
   $content_model = $content_models[0]->pid;
   if ($content_model == 'islandora:pageCModel' && user_access('manage page object')) {
     $return_tabs = get_page_model_management_content($pid);
-    // $return_tabs['fedora_object_details'] = null;
+    $return_tabs['fedora_object_details'] = null;
     return $return_tabs;
   }
 
-  if ($content_model == 'islandora:bookCModel') {
+  if ($content_model == 'islandora:bookCModel' || $content_model == 'islandora:iaBookCModel') {
     $return_tabs = get_book_model_management_content($pid);
-    // $return_tabs['fedora_object_details'] = null;
+    $return_tabs['fedora_object_details'] = null;
     return $return_tabs;
   }
 }
@@ -229,7 +235,7 @@ function islandora_book_create_book_view($pid, $query = NULL) {
  * convert query to a page query
  * @param type $query
  * @param type $pid
- * @return string 
+ * @return string
  */
 function convert_query_to_page_query($query, $pid) {
   $newQuery = substr($query, 0, strlen($query) - 23);
@@ -240,7 +246,7 @@ function convert_query_to_page_query($query, $pid) {
 
 /**
  * Custom form element to do our nice images.
- * @return boolean 
+ * @return boolean
  */
 function islandora_book_elements() {
   $type['imagebutton'] = array(
@@ -256,7 +262,7 @@ function islandora_book_elements() {
 /**
  * theme imagebutton
  * @param type $element
- * @return type 
+ * @return type
  */
 function theme_imagebutton($element) {
   return '<input  style="background:url(\'\'); border:0px; width:10px; padding:0px,0px,0px,0px;" type="image" class="form-' . $element['#button_type'] . '" name="' . $element['#name'] . '" id="' . $element['#id'] . '" value="' . check_plain($element['#default_value']) . '" ' . drupal_attributes($element['#attributes']) . ' src="' . $element['#image'] . '" alt="' . $element['#title'] . '" title="' . $element['#title'] . "\" />\n";
@@ -264,8 +270,8 @@ function theme_imagebutton($element) {
 
 /**
  * Implementation of hook_theme() to register how to theme image buttons.
- * 
- * @return type 
+ *
+ * @return type
  */
 function islandora_book_theme() {
   return array(
@@ -277,14 +283,16 @@ function islandora_book_theme() {
     ),
     'islandora_book_simple_book_search_form' => array(
       'arguments' => array('form' => NULL),
+    ),
+    'islandora_book_page_table' => array(
+      'arguments' => array('element' => NULL),
+      'file' => 'management/IslandoraBookPageTable.inc',
     )
   );
 }
 
-
-
 /**
- * _islandora_book_viewer_available 
+ * _islandora_book_viewer_available
  * @return boolean
  */
 function _islandora_book_viewer_available() {
@@ -306,7 +314,7 @@ function islandora_book_required_fedora_objects() {
   $form_xml = file_get_contents("$module_path/xml/mods_book.xml");
   solution_pack_add_form($form_name, $form_xml);
   solution_pack_add_form_association('islandora:bookCModel', $form_name);
-
+  solution_pack_add_form_association('islandora:iaBookCModel', $form_name);
   return array(
     'islandora_book' => array(
       'module' => 'islandora_book',
@@ -315,6 +323,20 @@ function islandora_book_required_fedora_objects() {
         array(
           'foxml_file' => "$module_path/xml/islandora_pageCModel.xml",
           'pid' => 'islandora:pageCModel',
+          'dsid' => NULL,
+          'datastream_file' => NULL,
+          'dsversion' => NULL,
+        ),
+        array(
+          'foxml_file' => "$module_path/xml/islandora_bd_pageCModel.xml",
+          'pid' => 'islandora:bd_pageCModel',
+          'dsid' => NULL,
+          'datastream_file' => NULL,
+          'dsversion' => NULL,
+        ),
+        array(
+          'foxml_file' => "$module_path/xml/islandora_iaBookCModel.xml",
+          'pid' => 'islandora:iaBookCModel',
           'dsid' => NULL,
           'datastream_file' => NULL,
           'dsversion' => NULL,
@@ -499,7 +521,7 @@ function islandora_book_purge_pages_form_submit($form, &$form_state) {
  * implementaion of hook_help()
  * @param type $path
  * @param type $arg
- * @return type 
+ * @return type
  */
 function islandora_book_help($path, $arg) {
   switch ($path) {
@@ -519,7 +541,7 @@ function islandora_book_help($path, $arg) {
          TO create OCR streams on this server check <strong>Perform OCR on incoming TIFF images?</strong>. <br /><br />
 
 
-         
+
         ', array(
         '!microservices' => l("Fedora Microservices", 'https://github.com/Islandora/fedora_microservices'),
         '!mods' => l('MODS', 'http://www.loc.gov/standards/mods/'),

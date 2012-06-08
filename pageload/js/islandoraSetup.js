@@ -10,7 +10,7 @@ $(function () {
     return results[1] || 0;
   }
   var PID = $.urlParam('PID');
-;
+
   var here = window.location.toString();
   var splitter = here.indexOf('/sites/');
   if(splitter > 0){
@@ -36,7 +36,7 @@ $(function () {
   $('#back_to_book').click(function(e){
     e.preventDefault();
 
-    window.top.location.href = 'http://localhost/Development/fedora/repository/islandora:1912';
+    window.top.location.href = base + '/fedora/repository/' + PID;
   });
 
 });
