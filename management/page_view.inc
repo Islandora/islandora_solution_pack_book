@@ -1,5 +1,5 @@
 <?php
-
+//not yet implemented
 function show_pages($book_pid) {
   global $queryClass;
   islandora_solr_search_init();

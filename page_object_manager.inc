@@ -8,7 +8,7 @@ function page_management_wrapper($pid) {
 function get_page_model_management_content($pid) {
   $form['manage_page_tab'] = array(
     '#type' => 'tabpage',
-    '#title' => t('Manage This Page Object'),
+    '#title' => t('Manage'),
     '#content' => drupal_get_form('page_management_form', $pid),
     '#selected' => FALSE,
   );
@@ -21,10 +21,25 @@ function page_management_form(&$form_state, $pid) {
   }
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   module_load_include('inc', 'fedora_repository', 'plugins/FedoraObjectDetailedContent');
+  module_load_include('inc', 'fedora_repository', 'ObjectHelper');
+  global $base_url;
+
+  $languages = array(
+    'eng' => t('English'),
+    //'deu-frak' => t('German'),
+    //'por' => t('Portugese'),
+    'fra' => t('French'),
+    //'spa' => t('Spanish'),
+    //'hin' => t('Hindi'),
+    //'jpn' => t('Japanese'),
+    //'ita' => t('Italian')
+  );
+  $edit_metadata_link = l(t('Edit Metadata'), $base_url . '/fedora/repository/editmetadata/' . $pid . '/metadata', array('attributes' => array('class' => 'islandora-repo-button')));
+
   $content_helper = new FedoraObjectDetailedContent($pid);
   $object_helper = new ObjectHelper();
-  $ds_list = datastream_display_builder($content_helper->pid, $content_helper->item);
-  $add_datastreams_details = get_add_datastream_data($content_helper->pid);
+  $ds_list = $object_helper->get_formatted_datastream_list($content_helper->pid, NULL, $content_helper->item);
+
   $dc_html = $object_helper->getFormattedDC($content_helper->item);
   $purge_form = drupal_get_form('fedora_repository_purge_object_form', $content_helper->pid, check_plain(substr(request_uri(), strlen(base_path()))));
   $form = array();
@@ -38,7 +53,7 @@ function page_management_form(&$form_state, $pid) {
     '#type' => 'fieldset',
     '#collapsed' => TRUE,
     '#collapsible' => TRUE,
-    '#title' => t('View Metadata'),
+    '#title' => t('Metadata'),
   );
 
   $form['view_dc']['dublin_core'] = array(
@@ -46,9 +61,14 @@ function page_management_form(&$form_state, $pid) {
     '#title' => t('View'),
     '#content' => $dc_html,
   );
+
+  $form['view_dc']['edit'] = array(
+    '#type' => 'markup',
+    '#value' => $edit_metadata_link,
+  );
+
   $form['page_manage'] = array(
     '#type' => 'fieldset',
-
     '#collapsed' => TRUE,
     '#collapsible' => TRUE,
     '#title' => t('Update Derived Datastreams'),
@@ -58,6 +78,22 @@ function page_management_form(&$form_state, $pid) {
     '#type' => 'checkbox',
     '#title' => t('Refresh OCR for this page')
   );
+
+  //$form['page_manage']['preprocess'] = array(
+  //  '#title' => t('Preprocessing for typescripts?'),
+  //  '#description' => t('Will add additional processing for typewritten text.  This script grayscales and sharpens an ingested .tiff before performing OCR processes. <br />
+  //      This has been shown to improve OCR results for some images. Use with caution. Process can be lengthly and is resource intensive. <br />
+  //      If your image is already gray, this script will not run'),
+  //  '#type' => 'checkbox',
+  //);
+
+  $form['page_manage']['language'] = array(
+    '#title' => t('Language'),
+    '#type' => 'select',
+    '#options' => $languages,
+    '#selected' => 'eng',
+  );
+
   $form['page_manage']['recreate_derivatives'] = array(
     '#type' => 'checkbox',
     '#title' => t('Refresh all derived images')
@@ -70,7 +106,6 @@ function page_management_form(&$form_state, $pid) {
   );
   $form['current_datastreams'] = array(
     '#type' => 'fieldset',
-
     '#collapsed' => TRUE,
     '#collapsible' => TRUE,
     '#title' => t('Manage Current Datastreams'),
@@ -81,22 +116,33 @@ function page_management_form(&$form_state, $pid) {
     '#title' => t('View'),
     '#content' => $ds_list,
   );
-  $form['add_datastreams'] = array(
+
+  $form['renumber'] = array(
     '#type' => 'fieldset',
     '#collapsed' => TRUE,
     '#collapsible' => TRUE,
-    '#title' => t('Add Additional Datastreams'),
+    '#title' => t('Renumber Page'),
   );
-  if (count($add_datastreams_details) > 0) {
-    $form['add_datastreams']['datastream_candidates'] = array(
-      '#type' => 'tabpage',
-      '#title' => t('View'),
-      '#content' => $add_datastreams_details,
-    );
-  }
+  $book_pids = get_collection_from_pid($pid);
+  $page_number = get_page_number($pid);
+  $book_pid = $book_pids[0];
+
+  $page_count = count(get_sorted_pages($book_pid));
+  $form['renumber']['new_page'] = array(
+    '#type' => 'textfield',
+    '#title' => t('New Sequence Number for page @num', array('@num' => $page_number)),
+    '#size' => 5,
+    '#description' => t('New sequence number must be between 1 and  @page_count inclusive', array('@page_count' => $page_count)),
+  );
+  $form['renumber']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Update Number'),
+    '#id' => 'renumber_page',
+  );
+
   if (user_access('delete pages')) {
     $form['delete_page'] = array(
-      '#title' => t( "Permanently Delete This Page"),
+      '#title' => t("Permanently Delete This Page"),
       '#type' => 'fieldset',
       '#description' => t("Clicking this button will delete this page. <br /> <strong>This action cannot be undone.</strong>"),
       '#collapsible' => TRUE,
@@ -124,11 +170,19 @@ function page_management_form_submit($form, &$form_state) {
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   global $user;
   $pid = $form_state['values']['pid'];
+  $book_pids = get_collection_from_pid($pid);
+  $current_page = get_page_number($pid);
+  $book_pid = $book_pids[0];
+  $pages = get_sorted_pages($book_pid);
+
   $item = new Fedora_Item($pid);
+
   if ($form_state['clicked_button']['#id'] == 'refresh_datastreams') {
     $tiff_file_path = save_datastream_as_tempfile($pid, 'TIFF');
+    $language = $form_state['values']['language'];
+    $preprocess = $form_state['values']['preprocess'];
     if ($form_state['values']['do_ocr']) {
-      $success = refresh_ocr($tiff_file_path, $item);
+      $success = refresh_ocr($tiff_file_path, $item, $language, $preprocess);
       if ($success) {
         drupal_set_message(t("OCR refreshed for this page"));
       }
@@ -139,13 +193,44 @@ function page_management_form_submit($form, &$form_state) {
     }
     file_delete($tiff_file_path);
   }
+
+
   if ($form_state['clicked_button']['#id'] == 'delete_page') {
-    $book_pids = get_collection_from_pid($pid);
-    $page_number = get_page_number($pid);
-    $book_pid = $book_pids[0];
     $item->purge($pid . ' deleted by user identified as ' . $user->name);
-     post_deletion_renumber_pages($book_pid);
+    post_deletion_renumber_pages($book_pid);
     drupal_goto("fedora/repository/$book_pid");
+  }
+
+  if ($form_state['clicked_button']['#id'] == 'renumber_page') {
+    $new_page = $form_state['values']['new_page'];
+    $item = new Fedora_Item($pid);
+    $item->purge_relationship('isPageNumber', $current_page, ISLANDORA_RELS_EXT_URI, TRUE);
+    $item->purge_relationships('isSequenceNumber', $current_page, ISLANDORA_RELS_EXT_URI, TRUE);
+    $item->add_relationship('isPageNumber', $new_page, ISLANDORA_RELS_EXT_URI, TRUE);
+    $item->add_relationship('isSequenceNumber', $new_page, ISLANDORA_RELS_EXT_URI, TRUE);
+    if ($new_page < $current_page) {
+      for ($working_page = $new_page; $working_page < $current_page; $working_page++) {
+        $item = new Fedora_Item($pages[$working_page]);
+        //$item->purge_relationship('isPageNumber', sprintf("%04d", $working_page));
+        //$item->add_relationship('isPageNumber', sprintf("%04d", $working_page + 1), ISLANDORA_PAGE_URI);
+        $item->purge_relationships('isPageNumber', $working_page, ISLANDORA_RELS_EXT_URI, TRUE);
+        $item->purge_relationships('isSequenceNumber', $working_page, ISLANDORA_RELS_EXT_URI, TRUE);
+        $item->add_relationship('isPageNumber', $working_page + 1, ISLANDORA_RELS_EXT_URI, TRUE);
+        $item->add_relationship('isSequenceNumber', $working_page + 1, ISLANDORA_RELS_EXT_URI, TRUE);
+      }
+    }
+
+    if ($new_page > $current_page) {
+      for ($working_page = $new_page; $working_page > $current_page; $working_page--) {
+        $item = new Fedora_Item($pages[$working_page]);
+        $item->purge_relationships('isPageNumber', $working_page, ISLANDORA_RELS_EXT_URI, TRUE);
+        $item->purge_relationships('isSequenceNumber', $working_page, ISLANDORA_RELS_EXT_URI, TRUE);
+        $item->add_relationship('isPageNumber', $working_page - 1, ISLANDORA_RELS_EXT_URI, TRUE);
+        $item->add_relationship('isSequenceNumber', $working_page - 1, ISLANDORA_RELS_EXT_URI, TRUE);
+      }
+    }
+
+    drupal_goto("fedora/repository/$pid");
   }
 }
 

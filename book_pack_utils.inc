@@ -7,25 +7,7 @@
  * @return string
  */
 function get_page_pids($book_pid) {
-  $query = <<<XML
-select \$object \$title from <#ri>
-	where (\$object <dc:title> \$title
-		and \$object <fedora-rels-ext:isMemberOf> <info:fedora/$book_pid>
-		and \$object <fedora-model:state> <info:fedora/fedora-system:def/model#Active>)
-	order by \$title
-
-XML;
-
-  module_load_include('inc', 'fedora_repository', 'CollectionClass');
-  $collection = new CollectionClass($book_pid);
-  $contents = $collection->getRelatedItems($book_pid, $query);
-  $results_xml = simplexml_load_string($contents);
-  $resultsarray = array();
-  $book_pids = array();
-  foreach ($results_xml->results->result as $result) {
-    $book_pids[] = str_replace('info:fedora/', '', $result->object->attributes()->uri);
-  }
-  return $book_pids;
+  return get_sorted_pages($book_pid);
 }
 
 /**
@@ -36,23 +18,50 @@ XML;
  * @param fedora item $item
  * @return boolean
  */
-function refresh_ocr($tiff, &$item) {
+function refresh_ocr($tiff, &$item, $language, $preprocess = FALSE) {
   $label = $item->objectProfile->objLabel;
   $datastreams = $item->get_datastreams_list_as_array();
   $executable = variable_get('islandora_ocr_path', '/usr/bin/tesseract');
   $returnValue = "";
   $output = "";
   $success = FALSE;
-  exec("$executable $tiff $tiff -l eng", $output, $returnValue);
+  $original = $tiff;
+
+
+  if ($preprocess) {
+    $command = <<<XML
+  gimp -d -i -b "(munge-typeset-ocr \"$tiff\" \"$tiff.png\" 5.0 10.0 0.0 200.0 5.0)" -b "(gimp-quit 0)"
+XML;
+    exec($command, $output, $returnVal);
+
+    if ($returnVal == 0) {
+      if (file_exists($tiff . png)) {
+        $tiff = "$tiff.png";
+      }
+    }
+  }
+  $command = "$executable $tiff $tiff -l $language";
+  exec($command, $output, $returnValue);
   if ($returnValue == '0') {
     if (array_key_exists('OCR', $datastreams)) {
       $item->purge_datastream('OCR');
     }
     $item->add_datastream_from_file("$tiff.txt", 'OCR', "Scanned Text", 'text/plain', 'M');
     file_delete("$tiff.txt");
+   
     $success = TRUE;
   }
-
+  if (!$success) {
+    drupal_set_message(t('OCR replacement for @pid was unsuccessful', array('@pid' => $item->pid)));
+  }
+  module_load_include('inc', 'islandora_book', 'management/add_pages');
+  $success = islandora_book_viewer_create_hocr($executable, $tiff, $language, $item, $datastreams);
+  if (!$success) {
+    drupal_set_message(t('ENCODED_OCR replacement for @pid was unsuccessful', array('@pid' => $item->pid)));
+  }
+   if ($tiff != $original) {
+      file_delete($tiff);
+    }
   return $success;
 }
 
@@ -111,9 +120,15 @@ function refresh_images($tiff, &$item) {
  * @param string $dsid
  * @return string
  */
-function save_datastream_as_tempfile($pid, $dsid) {
-  $tmp_filename = preg_replace("/:|-/", '_', $pid) . '.tif';
+function save_datastream_as_tempfile($pid, $dsid, $ext = '.tif') {
+  $tmp_filename = preg_replace("/:|-/", '_', $pid) . $ext;
   $item = new Fedora_Item($pid);
+  if (array_key_exists('TIFF', $item->datastreams)) {
+    $dsid = 'TIFF';
+  }
+  if (array_key_exists('TIF', $item->datastreams)) {
+    $dsid = 'TIF';
+  }
   $url = variable_get('fedora_base_url', 'http://localhost:8080/fedora') . "/objects/$pid/datastreams/$dsid/content";
   $file_contents = do_curl($url);
   $file_path = file_directory_path() . "/" . $tmp_filename;
@@ -136,6 +151,12 @@ function save_all_tiffs_in_tempdir($pid, $dsid) {
   $member_pids = get_page_pids($pid);
   foreach ($member_pids as $member_pid) {
     $item = new Fedora_Item($member_pid);
+    if (array_key_exists('TIFF', $item->datastreams)) {
+      $dsid = 'TIFF';
+    }
+    if (array_key_exists('TIF', $item->datastreams)) {
+      $dsid = 'TIF';
+    }
     $tmp_filename = preg_replace("/:|-/", '_', $member_pid) . '.tif';
     $url = variable_get('fedora_base_url', 'http://localhost:8080/fedora') . "/objects/$member_pid/datastreams/$dsid/content";
     $file_contents = do_curl($url);
@@ -171,7 +192,7 @@ function datastream_display_builder($object_pid, &$fedoraItem) {
 
   if (user_access(ObjectHelper :: $VIEW_DETAILED_CONTENT_LIST)) {
     $current_datastreams = 'All Datastreams';
-    //$metaDataText='Description';
+//$metaDataText='Description';
     $mainStreamLabel = NULL;
     $object = $fedoraItem->get_datastreams_list_as_SimpleXML();
     if (!isset($object)) {
@@ -200,7 +221,7 @@ function datastream_display_builder($object_pid, &$fedoraItem) {
           if ($datastreamValue->ID == 'TN') {
             $hasTNStream = TRUE;
           }
-          //create the links to each datastream
+//create the links to each datastream
           $dataStreamBody .= $object_helper->create_link_for_ds($object_pid, $datastreamValue); //"<tr><td><b>$key :</b></td><td>$value</td></tr>\n";
         }
       }
@@ -210,7 +231,7 @@ function datastream_display_builder($object_pid, &$fedoraItem) {
 
 
 
-    //if they have access let them add a datastream
+//if they have access let them add a datastream
     if (user_access(ObjectHelper :: $ADD_FEDORA_STREAMS)) {
       $allow = TRUE;
       if (module_exists('fedora_fesl')) {
@@ -316,10 +337,11 @@ function islandora_recursive_directory_delete($dir) {
 
 function get_sorted_pages($book_pid) {
   $query = <<<XML
-select \$object \$page from <#ri>
+  select \$object \$page from <#ri>
 where \$object <fedora-rels-ext:isMemberOf> <info:fedora/$book_pid>
 and \$object <fedora-model:state> <fedora-model:Active>
-and \$object <info:islandora/islandora-system:def/pageinfo#isPageNumber> \$page
+and (\$object <info:islandora/islandora-system:def/paged-item-info#sequenceNumber> \$page
+or \$object <http://islandora.ca/ontology/relsext#isSequenceNumber> \$page)
 order by \$page
 XML;
 
@@ -331,11 +353,27 @@ XML;
   $book_pids = array();
   foreach ($results_xml->results->result as $result) {
     $page = str_replace('info:fedora/', '', $result->object->attributes()->uri);
-    $number = str_replace('info:fedora/', '', $result->page->attributes()->uri) + 0;
+    $number = (string) $result->page[0];
     $book_pids[$number] = $page;
   }
 
   return $book_pids;
+}
+
+function get_page_progression($book_pid) {
+  $query = <<<XML
+select \$pageProgression from <#ri> where <info:fedora/$book_pid> <fedora-rels-ext:hasPageProgression> \$pageProgression
+XML;
+
+  module_load_include('inc', 'fedora_repository', 'CollectionClass');
+  $collection = new CollectionClass($book_pid);
+  $contents = $collection->getRelatedItems($book_pid, $query);
+  $results_xml = simplexml_load_string($contents);
+  $res = $results_xml->results->result[0];
+  if (!empty($res)) {
+    return str_replace('info:fedora/', '', $res->pageProgression->attributes()->uri);
+  }
+  return "lr";
 }
 
 function add_islandora_rdfs($book_pid) {
@@ -347,12 +385,12 @@ function add_islandora_rdfs($book_pid) {
     $item = new Fedora_Item($pid);
     $relationships = $item->get_rdf_relationships();
     if (!array_key_exists('isPageNumber', $relationships)) {
-      $item->add_relationship('isPageNumber', sprintf("%04d", $page_num), ISLANDORA_PAGE_URI);
+      $item->add_relationship('isSequenceNumber', $page_num++, 'http://islandora.ca/ontology/relsext#');
     }
     if (!array_key_exists('isPageOf', $relationships)) {
-      $item->add_relationship('isPageOf', $book_pid, ISLANDORA_PAGE_URI);
+      $item->add_relationship('isPageOf', $book_pid, 'http://islandora.ca/ontology/relsext#');
     }
-    $page_num++;
+    //$page_num++;
   }
 }
 
@@ -363,7 +401,7 @@ function add_islandora_rdfs($book_pid) {
  */
 function get_files_from_zip($zip_file) {
   $file_dir = pathinfo($zip_file, PATHINFO_DIRNAME);
-  $tmpDir = $file_dir . '/tmpZip';
+  $tmpDir = $file_dir . '/tmpZip/';
   if (!is_dir($tmpDir)) {
     mkdir($tmpDir, 0766);
   }
@@ -403,7 +441,8 @@ function get_files_from_zip($zip_file) {
         }
 
         $ext = pathinfo($file_name, PATHINFO_EXTENSION);
-        if ($ext == 'tif' || $ext == 'tiff') {
+        $allowed_extentions = array('tif', 'tiff', 'jpg', 'jpeg');
+        if (in_array(strtolower($ext), $allowed_extentions)) {
           array_push($file_list, "$directory" . "/$file_name");
         }
       }
@@ -419,25 +458,31 @@ function get_files_from_zip($zip_file) {
  *
  * @param integer $insertion_point
  * @param string $book_pid
- * @param integer $new_page_count 
+ * @param integer $new_page_count
  */
 function renumber_pages($insertion_point, $book_pid, $new_page_count) {
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   $page_pids = get_sorted_pages($book_pid);
-  $book_item = new Fedora_Item($book_pid);
-  $book_title = $book_item->objectProfile->objLabel;
+
+
   for ($i = $insertion_point; $i <= count($page_pids); ++$i) {
-    $item = new Fedora_Item($page_pids[$i]);
+    $pid = $page_pids[$i];
+    $sequence = $i + 1;
+    $item = new Fedora_Item($pid);
     if ($item->exists()) {
-      $new_title = "$book_title - Page " . sprintf("%03d", $i + $new_page_count);
-      $item->purge_relationship('isPageNumber', sprintf("%04d", $i));
-      $item->add_relationship('isPageNumber', sprintf("%04d", $i + $new_page_count), ISLANDORA_PAGE_URI);
-      $item->modify_object($label = "$new_title", $state = NULL, $ownerId = NULL, $logMessage = 'Modified by Islandora API');
+      $rdf_string = islandora_book_create_rdf($pid, $book_pid, $sequence);
+      $value = $item->modify_datastream_by_value($rdf_string, 'RELS-EXT', 'RELS-EXT', 'text/xml', $force = FALSE, $logMessage = 'Modified by Drush using Islandora API', $quiet = FALSE);
+
+      $item->forget();
     }
   }
 }
 
+/**
+ * Removes gaps from sequencing
+ * @param pid $book_pid
+ */
 function post_deletion_renumber_pages($book_pid) {
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
@@ -447,13 +492,14 @@ function post_deletion_renumber_pages($book_pid) {
   $book_title = $book_item->objectProfile->objLabel;
 
   for ($i = 0; $i < count($page_pids); ++$i) {
-    $item = new Fedora_Item($page_pids[$i]);
+    $pid = $page_pids[$i];
+    $item = new Fedora_Item($pid);
     if ($item->exists()) {
       $current_number = get_page_number($page_pids[$i]);
+      $sequence = $i + 1;
       if ($current_number != $i + 1) {
-        $item->purge_relationship('isPageNumber', sprintf("%04d", $current_number));
-        $item->add_relationship('isPageNumber', sprintf("%04d", $i + 1), ISLANDORA_PAGE_URI);
-        $item->modify_object($label = "$book_title - Page " . sprintf("%03d", $i + 1), $state = NULL, $ownerId = NULL, $logMessage = 'Modified by Islandora API');
+        $rdf_string = islandora_book_create_rdf($pid, $book_pid, $sequence);
+        $value = $item->modify_datastream_by_value($rdf_string, 'RELS-EXT', 'RELS-EXT', 'text/xml', $force = FALSE, $logMessage = 'Modified by Drush using Islandora API', $quiet = FALSE);
       }
     }
   }
@@ -462,12 +508,12 @@ function post_deletion_renumber_pages($book_pid) {
 /**
  * Returns page number associated wih page pid
  * @param string $page_pid
- * @return <type>
+ * @return int>
  */
 function get_page_number($page_pid) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
   $query_string = "select \$object from <#ri>
-                   where <info:fedora/$page_pid> <info:islandora/islandora-system:def/pageinfo#isPageNumber> \$object";
+                   where <info:fedora/$page_pid> <http://islandora.ca/ontology/relsext#isSequenceNumber> \$object";
   $query_string = htmlentities(urlencode($query_string));
   $content = '';
   $url = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
@@ -477,4 +523,28 @@ function get_page_number($page_pid) {
   $pid = preg_replace('/^info:fedora\/|"object"| /', '', $results);
   $pid = array_values(array_filter($pid));
   return intval($pid[0]);
+}
+
+/**
+ * Returns RELS-EXT stream
+ * @param pid> $pid
+ * @param pid $book_pid
+ * @param int $sequence
+ * @return string>
+ */
+
+function islandora_book_create_rdf($pid, $book_pid, $sequence) {
+  $rdf_string = <<<RDF
+  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+<rdf:Description rdf:about="info:fedora/$pid">
+	<hasModel xmlns="info:fedora/fedora-system:def/model#" rdf:resource="info:fedora/islandora:pageCModel"></hasModel>
+	<isSequenceNumber xmlns="http://islandora.ca/ontology/relsext#">$sequence</isSequenceNumber>
+	<isMemberOf xmlns="info:fedora/fedora-system:def/relations-external#" rdf:resource="info:fedora/$book_pid"></isMemberOf>
+	<isSection xmlns="http://islandora.ca/ontology/relsext#">1</isSection>
+	<isPageOf xmlns="http://islandora.ca/ontology/relsext#" rdf:resource="inf:fedora/$book_pid"></isPageOf>
+  <isPageNumber xmlns="http://islandora.ca/ontology/relsext#">$sequence</isPageNumber>
+</rdf:Description>
+</rdf:RDF>
+RDF;
+  return $rdf_string;
 }

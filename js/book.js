@@ -3,6 +3,7 @@ Drupal.behaviors.book = function(context){
   $(".jumpmenu").change(function() {
     var val = ($('.jumpmenu :selected').attr('value'));
     if (val != '') {
+      alert ("jump");
       //location.href=val;
       window.open(val);
     }
