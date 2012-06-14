@@ -5,6 +5,6 @@ dependencies[] = fedora_repository
 dependencies[] = xml_forms
 dependencies[] = islandora_content_model_forms
 dependencies[] = islandora_collection_manager
-version = 6.x-12.2.0-RC1
+version = 6.x-12.2.0-RC2
 dependencies[] = islandora_bookviewer
 core = 6.x
