@@ -169,9 +169,9 @@ function book_add_pages_form_submit($form, &$form_state) {
     $nextPid = FEDORA_ITEM::get_next_PID_in_namespace($parts[0]);
     $page_item = Fedora_Item::ingest_new_item($nextPid, 'A', t('Digital Page'));
     $page_item->add_relationship('hasModel', 'islandora:pageCModel', FEDORA_MODEL_URI);
-    $page_item->add_relationship('isSequenceNumber', $start_page, 'http://islandora.ca/ontology/relsext#', TRUE);
-    $page_item->add_relationship('isPageNumber', $start_page, 'http://islandora.ca/ontology/relsext#', TRUE);
-    $page_item->add_relationship('isSection', '1', 'http://islandora.ca/ontology/relsext#', TRUE);
+    $page_item->add_relationship('isSequenceNumber', $start_page, 'http://islandora.ca/ontology/relsext#', 3);
+    $page_item->add_relationship('isPageNumber', $start_page, 'http://islandora.ca/ontology/relsext#', 3);
+    $page_item->add_relationship('isSection', '1', 'http://islandora.ca/ontology/relsext#', 3);
     $page_item->add_relationship('isPageOf', $pid, 'http://islandora.ca/ontology/relsext#');
     $page_item->add_relationship($relationship, $pid);
     $page_item->add_datastream_from_file($path . 'Borndigital_tn.png', 'TN', 'Thumbnail', 'image/png', 'M');
@@ -258,10 +258,10 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
   $nextPid = FEDORA_ITEM::get_next_PID_in_namespace($parts[0]);
   $page_item = Fedora_Item::ingest_new_item($nextPid, 'A', $base_file_name);
   $page_item->add_relationship('hasModel', $page_cmodel, FEDORA_MODEL_URI);
-  $page_item->add_relationship('isSequenceNumber', $page_num, 'http://islandora.ca/ontology/relsext#', TRUE);
-  $page_item->add_relationship('isPageNumber', $page_num, 'http://islandora.ca/ontology/relsext#', TRUE);
+  $page_item->add_relationship('isSequenceNumber', $page_num, 'http://islandora.ca/ontology/relsext#', 3);
+  $page_item->add_relationship('isPageNumber', $page_num, 'http://islandora.ca/ontology/relsext#', 3);
   $page_item->add_relationship('isPageOf', $book_pid, 'http://islandora.ca/ontology/relsext#');
-  $page_item->add_relationship('isSection', '1', 'http://islandora.ca/ontology/relsext#', TRUE);
+  $page_item->add_relationship('isSection', '1', 'http://islandora.ca/ontology/relsext#', 3);
   $page_item->add_relationship('isMemberOf', $book_pid, RELS_EXT_URI);
 
   // add original image
