@@ -206,8 +206,8 @@ function page_management_form_submit($form, &$form_state) {
     $item = new Fedora_Item($pid);
     $item->purge_relationship('isPageNumber', $current_page, ISLANDORA_RELS_EXT_URI, TRUE);
     $item->purge_relationships('isSequenceNumber', $current_page, ISLANDORA_RELS_EXT_URI, TRUE);
-    $item->add_relationship('isPageNumber', $new_page, ISLANDORA_RELS_EXT_URI, TRUE);
-    $item->add_relationship('isSequenceNumber', $new_page, ISLANDORA_RELS_EXT_URI, TRUE);
+    $item->add_relationship('isPageNumber', $new_page, ISLANDORA_RELS_EXT_URI, 3);
+    $item->add_relationship('isSequenceNumber', $new_page, ISLANDORA_RELS_EXT_URI, 3);
     if ($new_page < $current_page) {
       for ($working_page = $new_page; $working_page < $current_page; $working_page++) {
         $item = new Fedora_Item($pages[$working_page]);
@@ -215,8 +215,8 @@ function page_management_form_submit($form, &$form_state) {
         //$item->add_relationship('isPageNumber', sprintf("%04d", $working_page + 1), ISLANDORA_PAGE_URI);
         $item->purge_relationships('isPageNumber', $working_page, ISLANDORA_RELS_EXT_URI, TRUE);
         $item->purge_relationships('isSequenceNumber', $working_page, ISLANDORA_RELS_EXT_URI, TRUE);
-        $item->add_relationship('isPageNumber', $working_page + 1, ISLANDORA_RELS_EXT_URI, TRUE);
-        $item->add_relationship('isSequenceNumber', $working_page + 1, ISLANDORA_RELS_EXT_URI, TRUE);
+        $item->add_relationship('isPageNumber', $working_page + 1, ISLANDORA_RELS_EXT_URI, 3);
+        $item->add_relationship('isSequenceNumber', $working_page + 1, ISLANDORA_RELS_EXT_URI, 3);
       }
     }
 
@@ -225,8 +225,8 @@ function page_management_form_submit($form, &$form_state) {
         $item = new Fedora_Item($pages[$working_page]);
         $item->purge_relationships('isPageNumber', $working_page, ISLANDORA_RELS_EXT_URI, TRUE);
         $item->purge_relationships('isSequenceNumber', $working_page, ISLANDORA_RELS_EXT_URI, TRUE);
-        $item->add_relationship('isPageNumber', $working_page - 1, ISLANDORA_RELS_EXT_URI, TRUE);
-        $item->add_relationship('isSequenceNumber', $working_page - 1, ISLANDORA_RELS_EXT_URI, TRUE);
+        $item->add_relationship('isPageNumber', $working_page - 1, ISLANDORA_RELS_EXT_URI, 3);
+        $item->add_relationship('isSequenceNumber', $working_page - 1, ISLANDORA_RELS_EXT_URI, 3);
       }
     }
 
