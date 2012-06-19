@@ -37,8 +37,8 @@ function batch_process_book($collection_pid = null) {
     $condition = "and \$object <info:fedora/fedora-system:def/relations-external#isMemberOfCollection> <info:fedora/$collection_pid>";
   }
   $book_query = "select \$object from <#ri>
-    where \$object <fedora-model:hasModel> <info:fedora/islandora:bookCModel>
-    or \$object <fedora-model:hasModel> <info:fedora/islandora:iaBookCModel>
+    where (\$object <fedora-model:hasModel> <info:fedora/islandora:bookCModel>
+    or \$object <fedora-model:hasModel> <info:fedora/islandora:iaBookCModel>)
     $condition";
   $book_pids = process_book_query($book_query);
   $book_count = count($book_pids);
