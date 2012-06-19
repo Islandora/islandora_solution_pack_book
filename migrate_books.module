@@ -3,20 +3,112 @@
 function migrate_books_menu() {
   $items = array();
   $items['migrate/books'] = array(
-    'title' => t('Add Islandora RDF relatationships to existing books'),
+    'title' => t('Add new Islandora RDF relatationships to existing books'),
     'page callback' => 'batch_process_book',
     'type' => MENU_NORMAL_ITEM,
-    'access arguments' => array('migrate books'),
+    'access arguments' => array('migrate all books'),
   );
   return $items;
 }
 
+function migrate_books_islandora_collection_mangement($pid) {
+  global $user;
+  if (user_access('migrate books')) {
+    module_load_include('inc', 'migrate_books', 'migrate_books_form');
+    return drupal_get_form('migrate_books_form', $pid);
+  }
+}
+
 function migrate_books_perm() {
   return array(
-    'migrate books'
+    'migrate books',
+    'migrate all books'
   );
 }
 
+/**
+ * Retreives all book pids within a collection
+ * Each book is a added to a batch process to update the rels stream
+ * @param PID $collection_pid
+ */
+function batch_process_book($collection_pid = null) {
+  $condition = "";
+  if ($collection_pid) {
+    $condition = "and \$object <info:fedora/fedora-system:def/relations-external#isMemberOfCollection> <info:fedora/$collection_pid>";
+  }
+  $book_query = "select \$object from <#ri>
+    where \$object <fedora-model:hasModel> <info:fedora/islandora:bookCModel>
+    or \$object <fedora-model:hasModel> <info:fedora/islandora:iaBookCModel>
+    $condition";
+  $book_pids = process_book_query($book_query);
+  $book_count = count($book_pids);
+
+  $batch = array(
+    'title' => "Processing $book_count book objects.",
+    'operations' => array(),
+    'init_message' => t('Preparing data...'),
+    'progress_message' => t('@current of @total tasks completed.'),
+  );
+
+  foreach ($book_pids as $book_pid) {
+    $batch['operations'][] = array('update_islandora_rdfstreams', array($book_pid));
+    $page_num++;
+  }
+  batch_set($batch);
+  batch_process("fedora/repository/$collection_pid");
+}
+
+function update_islandora_rdfstreams($book_pid) {
+  $page_pids = islandora_update_book_rels_get_page_pids($book_pid);
+  $count = 1;
+  foreach ($page_pids as $page_pid) {
+    islandora_update_book_create_rels($book_pid, $page_pid, $count++);
+  }
+}
+
+function islandora_update_book_create_rels($book_pid, $pid, $page_number) {
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  $rdf_string = <<<RDF
+  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+<rdf:Description rdf:about="info:fedora/$pid">
+	<hasModel xmlns="info:fedora/fedora-system:def/model#" rdf:resource="info:fedora/islandora:pageCModel"></hasModel>
+	<isSequenceNumber xmlns="http://islandora.ca/ontology/relsext#">$page_number</isSequenceNumber>
+	<isMemberOf xmlns="info:fedora/fedora-system:def/relations-external#" rdf:resource="info:fedora/$book_pid"></isMemberOf>
+	<isSection xmlns="http://islandora.ca/ontology/relsext#">1</isSection>
+	<isPageOf xmlns="http://islandora.ca/ontology/relsext#" rdf:resource="inf:fedora/$book_pid"></isPageOf>
+  <isPageNumber xmlns="http://islandora.ca/ontology/relsext#">$page_number</isPageNumber>
+</rdf:Description>
+</rdf:RDF>
+RDF;
+
+  $item = new Fedora_Item($pid);
+  $value = $item->modify_datastream_by_value($rdf_string, 'RELS-EXT', 'RELS-EXT', 'text/xml', $force = FALSE, $logMessage = 'Modified by Islandora', $quiet = FALSE);
+
+  $item->forget();
+}
+
+function islandora_update_book_rels_get_page_pids($book_pid) {
+  //return get_sorted_pages($book_pid); //not sure why we have two different functions
+  $query = <<<XML
+select \$object \$title from <#ri>
+	where (\$object <dc:title> \$title
+		and \$object <fedora-rels-ext:isMemberOf> <info:fedora/$book_pid>
+		and \$object <fedora-model:state> <info:fedora/fedora-system:def/model#Active>)
+	order by \$title
+XML;
+
+
+  module_load_include('inc', 'fedora_repository', 'CollectionClass');
+  $collection = new CollectionClass($book_pid);
+  $contents = $collection->getRelatedItems($book_pid, $query);
+  $results_xml = simplexml_load_string($contents);
+  $resultsarray = array();
+  $book_pids = array();
+  foreach ($results_xml->results->result as $result) {
+    $page_pids[] = str_replace('info:fedora/', '', $result->object->attributes()->uri);
+  }
+  return $page_pids;
+}
 
 function process_book_query($query) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
@@ -28,48 +120,4 @@ function process_book_query($query) {
   $content .= do_curl($url);
   $results = explode("\n", $content);
   return array_filter(preg_replace('/^info:fedora\/|"object"/', '', $results));
-}
-
-function add_new_islandora_rdfs($book_pid) {
-  module_load_include('inc', 'islandora_book', 'book_pack_utils');
-  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
-  $page_pids = get_page_pids($book_pid);
-  $page_num = 1;
-
-  foreach ($page_pids as $pid) {
-    $item = new Fedora_Item($pid);
-    if ($item->exists()) {    //added  this to pass by badly broken objects
-      $relationships = $item->get_rdf_relationships();
-      if (!array_key_exists('isPageNumber', $relationships)) {
-        $item->add_relationship('isPageNumber', sprintf("%04d", $page_num), ISLANDORA_PAGE_URI);
-      }
-      if (!array_key_exists('isPageOf', $relationships)) {
-        $item->add_relationship('isPageOf', $book_pid, ISLANDORA_PAGE_URI);
-      }
-      $page_num++;
-    }
-  }
-}
-
-function batch_process_book() {
-
-  $book_query = "select \$object from <#ri>
-    where \$object <fedora-model:hasModel> <info:fedora/islandora:bookCModel>";
-  $book_pids = process_book_query($book_query);
-  $book_count = count($book_pids);
-
-  $batch = array(
-    'title' => "Processing $book_count book objects.",
-    'operations' => array(),
-    'init_message' => t('Preparing data...'),
-    'progress_message' => t('@current of @total tasks completed.'),
-  );
- 
-  foreach ($book_pids as $book_pid) {
-    $batch['operations'][] = array('add_new_islandora_rdfs', array($book_pid));
-    $page_num++;
-  }
-  batch_set($batch);
-  batch_process('/');
-
 }
