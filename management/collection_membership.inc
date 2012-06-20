@@ -5,24 +5,13 @@ function book_collection_management(&$form_state, $pid) {
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   $potential_collections = get_collections_as_option_array();
   $current_collections = get_collection_relationships($pid);
-
-  $values = array_values($current_collections);
-  $collection_value = $values[0];
   $keys = array_keys($current_collections);
-  $collection_key = $keys[0];
-
-
-  unset($potential_collections[$collection_key]);
-  $values = array_values($current_collections);
   $form = array();
   $form['pid'] = array(
     '#type' => 'hidden',
     '#value' => $pid,
   );
-  $form['current_collection'] = array(
-    '#type' => 'hidden',
-    '#value' => $collection_key,
-  );
+
   $form['collections'] = array(
     '#type' => 'fieldset',
     '#collapsed' => true,
@@ -30,46 +19,29 @@ function book_collection_management(&$form_state, $pid) {
     '#title' => t('Collection Membership'),
   );
 
-  $form['collections']['collection_add'] = array(
-    '#type' => 'fieldset',
-    '#collapsed' => true,
-    '#collapsible' => true,
-    '#title' => t('Add This Book to Another Collection'),
-  );
-  $form['collections']['collection_add']['new_collection'] = array(
-    '#title' => 'New Collection',
-    '#description' => t("Add book to new collection"),
-    '#type' => 'select',
+  $form['collections']['membership'] = array(
+    '#title' => 'Collection Membership',
+    '#description' => t("Books will belong to all selected collections"),
+    '#type' => 'checkboxes',
     '#options' => $potential_collections,
+    '#default_value' => $keys,
   );
 
-  $form['collections']['collection_add']['submit'] = array(
+  $form['collections']['submit'] = array(
     '#type' => 'submit',
     '#id' => 'add_collection',
-    '#value' => t('Add Book to New Collection'),
+    '#value' => t('Save Book Membership'),
   );
 
-  if (count($current_collections) > 1) {
-    $form['collections']['collection_remove'] = array(
-      '#type' => 'fieldset',
-      '#collapsed' => true,
-      '#collapsible' => true,
-      '#title' => t('Remove Book from Collection'),
-    );
-
-    $form['collections']['collection_remove']['current'] = array(
-      '#title' => 'Current Memberships',
-      '#type' => 'select',
-      '#options' => $current_collections,
-    );
-
-    $form['collections']['collection_remove']['submit'] = array(
-      '#type' => 'submit',
-      '#id' => 'remove_collection',
-      '#value' => t('Remove Book from This Collection'),
-    );
-  }
   return $form;
+}
+
+function book_collection_management_validate($form, &$form_state) {
+
+  if (count(array_unique(array_values($form_state['values']['membership']))) == 1) {
+    form_set_error('membership', "Object must be a member of at least one collection");
+    return;
+  }
 }
 
 /**
@@ -78,22 +50,28 @@ function book_collection_management(&$form_state, $pid) {
  * @param array $form_state
  */
 function book_collection_management_submit($form, &$form_state) {
+  module_load_include('inc', 'islandora_book', 'book_pack_utils');
   global $user;
   $book_pid = $form_state['values']['pid'];
-  $collection_pids = get_collection_from_pid($book_pid);
+  $current_collections = array_keys(get_collection_relationships($book_pid));
+  $new_collections = array_values(array_filter($form_state['values']['membership'], function($e) {
+                return ($e !== 0);
+              }));
+
+  $to_keep = array_intersect($current_collections, $new_collections);
+  $to_toss = array_diff($current_collections, $to_keep);
+  $to_add = array_diff($new_collections, $to_keep);
+
   $item = new Fedora_Item($book_pid);
-
-  if ($form_state['clicked_button']['#id'] == 'add_collection') {
-    $new_collection = $form_state['values']['new_collection'];
-    $item->add_relationship('isMemberOfCollection', $new_collection, RELS_EXT_URI);
-    drupal_goto("fedora/repository/$new_collection");
+  if (!empty($to_toss)) {
+    foreach ($to_toss as $relationship) {
+      $item->purge_relationship('isMemberOfCollection', $relationship);
+    }
   }
-
-  if ($form_state['clicked_button']['#id'] == 'remove_collection') {
-    $current = $form_state['values']['current'];
-    $item->purge_relationship('isMemberOfCollection', $current);
-    drupal_goto("fedora/repository/$book_pid");
+  if (!empty($to_add)) {
+    foreach ($to_add as $relationship) {
+      $item->add_relationship('isMemberOfCollection', $relationship, RELS_EXT_URI);
+    }
   }
-
-  drupal_goto('fedora/repository/' . $collection_pids[0]);
+  drupal_goto('fedora/repository/' . $book_pid);
 }
