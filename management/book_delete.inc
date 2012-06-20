@@ -7,33 +7,44 @@
  * @return array
  */
 function book_delete(&$form_state, $pid) {
-
+  module_load_include('inc', 'islandora_book', 'book_pack_utils');
+  $count = count(get_collection_relationships($pid));
+  $description = t('Clicking this button will delete this book. <br /> <strong>This action cannot be undone.</strong>');
+  if ($count > 1) {
+    $description = t("This book is a member of @count collections !break
+      Books with membership in multiple collections cannot be deleted. !break
+      Click on <strong>Collection Membership</strong> above to remove book from additional collections."
+            , array('@count' => $count, '!break' => '<br />'));
+    $multiple = TRUE;
+  }
 
   if (user_access('delete pages')) {
     $form['pid'] = array(
       '#type' => 'hidden',
       '#value' => $pid,
     );
-    $form['delete_page'] = array(
+    $form['delete_book'] = array(
       '#title' => "Permanently Delete this Book",
       '#type' => 'fieldset',
-      '#description' => t("Clicking this button will delete this book. <br /> <strong>This action cannot be undone.</strong>"),
+      '#description' => $description,
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
     );
-    $form['delete_page']['confirm'] = array(
-      '#title' => "Are you sure?",
-      '#type' => 'fieldset',
-      '#description' => t('<strong>Clicking the delete button will permanantly remove this book and all of its pages.</strong> <br />  <strong>This action cannot be undone.</strong> '),
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
-    );
+    if (!$multiple) {
+      $form['delete_book']['confirm'] = array(
+        '#title' => "Are you sure?",
+        '#type' => 'fieldset',
+        '#description' => t('<strong>Clicking the delete button will permanantly remove this book and all of its pages.</strong> <br />  <strong>This action cannot be undone.</strong> '),
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+      );
 
-    $form['delete_page']['confirm']['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Delete this book'),
-      '#id' => 'delete_page',
-    );
+      $form['delete_book']['confirm']['submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Delete this book'),
+        '#id' => 'delete_page',
+      );
+    }
   }
 
   return $form;
