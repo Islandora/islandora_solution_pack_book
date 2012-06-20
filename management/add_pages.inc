@@ -29,16 +29,7 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
   $file = (isset($form_state['values']['ingest-file-location']) ? $form_state['values']['ingest-file-location'] : '');
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
-  $languages = array(
-    'eng' => t('English'),
-    'deu-frak' => t('German'),
-    'por' => t('Portugese'),
-    'fra' => t('French'),
-    'spa' => t('Spanish'),
-    'hin' => t('Hindi'),
-    'jpn' => t('Japanese'),
-    'ita' => t('Italian')
-  );
+  $languages = islandora_book_get_tesseract_langauges();
   $item = new Fedora_Item($pid);
   $book_title = $item->objectProfile->objLabel;
 
@@ -95,13 +86,13 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
     );
   }
   if ($page_cmodel == 'islandora:pageCModel') {
-    $form['page_add']['preprocess'] = array(
-      '#title' => t('Preprocessing for typescripts?'),
-      '#description' => t('Will add additional processing for typewritten text.  This script grayscales and sharpens an ingested .tiff before performing OCR processes. <br />
-        This has been shown to improve OCR results for some images. Use with caution. Process can be lengthly and is resource intensive. <br />
-        If your image is already gray, this script will not run'),
-      '#type' => 'checkbox',
-    );
+//    $form['page_add']['preprocess'] = array(
+//      '#title' => t('Preprocessing for typescripts?'),
+//      '#description' => t('Will add additional processing for typewritten text.  This script grayscales and sharpens an ingested .tiff before performing OCR processes. <br />
+//        This has been shown to improve OCR results for some images. Use with caution. Process can be lengthly and is resource intensive. <br />
+//        If your image is already gray, this script will not run'),
+//      '#type' => 'checkbox',
+//    );
 
     $form['page_add']['language'] = array(
       '#title' => t('Language'),

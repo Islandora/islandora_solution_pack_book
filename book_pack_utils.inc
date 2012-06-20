@@ -550,3 +550,17 @@ function islandora_book_create_rdf($pid, $book_pid, $sequence) {
 RDF;
   return $rdf_string;
 }
+
+function islandora_book_get_tesseract_langauges(){
+    return array(
+    'eng' => t('English'),
+    'deu-frak' => t('German'),
+    'por' => t('Portugese'),
+    'fra' => t('French'),
+    'spa' => t('Spanish'),
+    'hin' => t('Hindi'),
+    'jpn' => t('Japanese'),
+    'ita' => t('Italian')
+  );
+
+}
