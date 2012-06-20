@@ -46,6 +46,9 @@ XML;
     if (array_key_exists('OCR', $datastreams)) {
       $item->purge_datastream('OCR');
     }
+    if (array_key_exists('CWRC', $datastreams)) {
+      $item->purge_datastream('CWRC');
+    }
     $item->add_datastream_from_file("$tiff.txt", 'OCR', "Scanned Text", 'text/plain', 'M');
     file_delete("$tiff.txt");
    
@@ -78,7 +81,9 @@ function refresh_images($tiff, &$item) {
   $datastreams = $item->get_datastreams_list_as_array();
   $returnValue = "";
   $success = 0;
-  exec('kdu_compress -i "' . $tiff . '" -o "' . $tiff . '.jp2' . '" -rate 0.5 Clayers=1 Clevels=7 "Cprecincts={256,256},{256,256},{256,256},{128,128},{128,128},{64,64},{64,64},{32,32},{16,16}" "Corder=RPCL" "ORGgen_plt=yes" "ORGtparts=R" "Cblk={32,32}" Cuse_sop=yes', $output, $returnValue);
+  $command = 'kdu_compress -i "' . $tiff . '" -o "' . $tiff . '.jp2' . '" -rate 0.5 Clayers=1 Clevels=7 "Cprecincts={256,256},{256,256},{256,256},{128,128},{128,128},{64,64},{64,64},{32,32},{16,16}" "Corder=RPCL" "ORGgen_plt=yes" "ORGtparts=R" "Cblk={32,32}" Cuse_sop=yes';
+
+  exec($command, $output, $returnValue);
   if ($returnValue == '0') {
     if (array_key_exists('JP2', $datastreams)) {
       $item->purge_datastream('JP2');
@@ -311,8 +316,11 @@ function get_collection_relationships($pid) {
   $collections = $item->get_relationships('isMemberOfCollection');
   foreach ($collections as $collection) {
     $collection_item = new fedora_item($collection['object']);
-    $current_relationships[$collection['object']] = $collection_item->objectProfile->objLabel . ' (' . $collection['object'] . ')';
+    if (is_string($collection['object'])) {
+      $current_relationships[$collection['object']] = $collection_item->objectProfile->objLabel . ' (' . $collection['object'] . ')';
+    }
   }
+
   return $current_relationships;
 }
 
@@ -532,7 +540,6 @@ function get_page_number($page_pid) {
  * @param int $sequence
  * @return string>
  */
-
 function islandora_book_create_rdf($pid, $book_pid, $sequence) {
   $rdf_string = <<<RDF
   <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
@@ -547,4 +554,18 @@ function islandora_book_create_rdf($pid, $book_pid, $sequence) {
 </rdf:RDF>
 RDF;
   return $rdf_string;
+}
+
+function islandora_book_get_tesseract_langauges(){
+    return array(
+    'eng' => t('English'),
+    'deu-frak' => t('German'),
+    'por' => t('Portugese'),
+    'fra' => t('French'),
+    'spa' => t('Spanish'),
+    'hin' => t('Hindi'),
+    'jpn' => t('Japanese'),
+    'ita' => t('Italian')
+  );
+
 }

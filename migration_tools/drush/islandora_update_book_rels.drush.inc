@@ -5,6 +5,7 @@
  * typical usage: drush -u 1 islandora_update_book_rels path_to_query_file TRUE
  * the above would give you an interactive update for each book.  If TRUE is changed to FALSE it will run against all
  * books returned from the query
+
  * 
  * If this is being run from a multi site env. you will probably have to use the --uri switch
  * 'drush -u 1 --uri=http://localhost islandora_update_book_rels /path/to/query.txt TRUE'.  You should also be in the subsites
@@ -49,6 +50,7 @@ function islandora_update_book_rels_drush_command() {
 
 /**
  * This is the drush command specified in the array create by the drush entry point.
+
  * 
  * This function checks to make sure parameters are supplied and if everything is ok
  * calls the doAction function and adds the delete parameter
@@ -72,6 +74,7 @@ function drush_islandora_remove_rels_statements($query_file, $interactive) {
 
 /**
  * This is the drush command specified in the array create by the drush entry point.
+
  * 
  * This function checks to make sure parameters are supplied and if everything is ok
  * calls the doAction function
@@ -95,11 +98,13 @@ function drush_islandora_update_book_rels($query_file, $interactive) {
 
 /**
  * Iterates through all the books returned by the itql query and updates the rels stream for the pages of each book
+
  * 
  * @param string $query_file
  * @param boolean $interactive
  * 
  */
+
 function islandora_update_book_rels_doAction($query_file, $interactive, $action = 'UPDATE') {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   $query = file_get_contents($query_file);
@@ -139,6 +144,7 @@ function islandora_update_book_rels_doAction($query_file, $interactive, $action 
 }
 
 /**
+
  * returns an array of pids 
  * @todo pull this up into an api
  * @param SimpleXMLElement $content
@@ -226,11 +232,13 @@ function islandora_update_book_rels_stream($book_pid, $action = 'UPDATE') {
         else {
           drush_print(dt('section did not exist so did not update for @pid', array('@pid' => $pid)));
         }
-       
+
+
       }
       $item->forget();
     }
-    
+
+
 
 //islandora_update_book_create_rels($book_pid, $pid, $page_num++);//used by UPEI only will overwrite existing rels
 
@@ -244,6 +252,7 @@ function islandora_update_book_rels_stream($book_pid, $action = 'UPDATE') {
  * Currently the Fedora API call getRelationships is reporting an uncaught
  * exception so we will parse the RELS-EXT ourselves and simulate the
  * documented behaviour.
+
  * @param Fedora_Item $item 
  * @param array $namespaces
  *   an array of namespaces used to match elements
@@ -347,6 +356,7 @@ XML;
  * @todo pull this function up into an api and remove from here
  * executes a supplied itql query
  * @param string $query
+
  * @return type 
  */
 function islandora_run_query($query) {
