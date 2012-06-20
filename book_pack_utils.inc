@@ -311,8 +311,11 @@ function get_collection_relationships($pid) {
   $collections = $item->get_relationships('isMemberOfCollection');
   foreach ($collections as $collection) {
     $collection_item = new fedora_item($collection['object']);
-    $current_relationships[$collection['object']] = $collection_item->objectProfile->objLabel . ' (' . $collection['object'] . ')';
+    if (is_string($collection['object'])) {
+      $current_relationships[$collection['object']] = $collection_item->objectProfile->objLabel . ' (' . $collection['object'] . ')';
+    }
   }
+
   return $current_relationships;
 }
 
