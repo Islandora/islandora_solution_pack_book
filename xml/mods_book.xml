@@ -12,49 +12,49 @@
     <form>
         <properties>
             <type>form</type>
-            <access>true</access>
-            <required>false</required>
-            <tree>true</tree>
+            <access>TRUE</access>
+            <required>FALSE</required>
+            <tree>TRUE</tree>
         </properties>
         <children>
             <element name="titleInfo">
                 <properties>
                     <type>markup</type>
-                    <access>true</access>
-                    <required>false</required>
-                    <tree>true</tree>
+                    <access>TRUE</access>
+                    <required>FALSE</required>
+                    <tree>TRUE</tree>
                     <actions>
                         <create>
                             <path>/mods:mods</path>
                             <context>document</context>
                             <schema/>
                             <type>element</type>
-                            <prefix/>
+                            <prefix>NULL</prefix>
                             <value>titleInfo</value>
                         </create>
                         <read>
                             <path>/mods:mods/mods:titleInfo</path>
                             <context>document</context>
                         </read>
-                        <update/>
-                        <delete/>
+                        <update>NULL</update>
+                        <delete>NULL</delete>
                     </actions>
                 </properties>
                 <children>
                     <element name="title">
                         <properties>
                             <type>textfield</type>
-                            <access>true</access>
-                            <required>false</required>
+                            <access>TRUE</access>
+                            <required>FALSE</required>
                             <title>Book Title</title>
-                            <tree>true</tree>
+                            <tree>TRUE</tree>
                             <actions>
                                 <create>
                                     <path>self::node()</path>
                                     <context>parent</context>
                                     <schema/>
                                     <type>element</type>
-                                    <prefix/>
+                                    <prefix>NULL</prefix>
                                     <value>title</value>
                                 </create>
                                 <read>
@@ -65,7 +65,7 @@
                                     <path>self::node()</path>
                                     <context>self</context>
                                 </update>
-                                <delete/>
+                                <delete>NULL</delete>
                             </actions>
                         </properties>
                         <children/>
@@ -73,17 +73,17 @@
                     <element name="subTitle">
                         <properties>
                             <type>textfield</type>
-                            <access>true</access>
-                            <required>false</required>
+                            <access>TRUE</access>
+                            <required>FALSE</required>
                             <title>Sub Title</title>
-                            <tree>true</tree>
+                            <tree>TRUE</tree>
                             <actions>
                                 <create>
                                     <path>self::node()</path>
                                     <context>parent</context>
                                     <schema/>
                                     <type>element</type>
-                                    <prefix/>
+                                    <prefix>NULL</prefix>
                                     <value>subTitle</value>
                                 </create>
                                 <read>
@@ -94,7 +94,7 @@
                                     <path>self::node()</path>
                                     <context>self</context>
                                 </update>
-                                <delete/>
+                                <delete>NULL</delete>
                             </actions>
                         </properties>
                         <children/>
@@ -104,55 +104,55 @@
             <element name="name">
                 <properties>
                     <type>tabs</type>
-                    <access>true</access>
-                    <required>false</required>
+                    <access>TRUE</access>
+                    <required>FALSE</required>
                     <title>Name</title>
-                    <tree>true</tree>
+                    <tree>TRUE</tree>
                 </properties>
                 <children>
                     <element name="0">
                         <properties>
                             <type>tabpanel</type>
-                            <access>true</access>
-                            <required>false</required>
-                            <tree>true</tree>
+                            <access>TRUE</access>
+                            <required>FALSE</required>
+                            <tree>TRUE</tree>
                             <actions>
                                 <create>
                                     <path>/mods:mods</path>
                                     <context>document</context>
                                     <schema/>
                                     <type>element</type>
-                                    <prefix/>
+                                    <prefix>NULL</prefix>
                                     <value>name</value>
                                 </create>
                                 <read>
                                     <path>mods:name</path>
                                     <context>document</context>
                                 </read>
-                                <update/>
-                                <delete/>
+                                <update>NULL</update>
+                                <delete>NULL</delete>
                             </actions>
                         </properties>
                         <children>
                             <element name="type">
                                 <properties>
                                     <type>select</type>
-                                    <access>true</access>
+                                    <access>TRUE</access>
                                     <default_value>personal</default_value>
                                     <options>
-                                        <option key="corporate">corporate</option>
-                                        <option key="personal">personal</option>
+                                        <corporate>corporate</corporate>
+                                        <personal>personal</personal>
                                     </options>
-                                    <required>false</required>
+                                    <required>FALSE</required>
                                     <title>Type</title>
-                                    <tree>true</tree>
+                                    <tree>TRUE</tree>
                                     <actions>
                                         <create>
                                             <path>self::node()</path>
                                             <context>parent</context>
                                             <schema/>
                                             <type>attribute</type>
-                                            <prefix/>
+                                            <prefix>NULL</prefix>
                                             <value>type</value>
                                         </create>
                                         <read>
@@ -163,7 +163,7 @@
                                             <path>self::node()</path>
                                             <context>self</context>
                                         </update>
-                                        <delete/>
+                                        <delete>NULL</delete>
                                     </actions>
                                 </properties>
                                 <children/>
@@ -171,17 +171,17 @@
                             <element name="namePart">
                                 <properties>
                                     <type>textfield</type>
-                                    <access>true</access>
-                                    <required>false</required>
+                                    <access>TRUE</access>
+                                    <required>FALSE</required>
                                     <title>Name</title>
-                                    <tree>true</tree>
+                                    <tree>TRUE</tree>
                                     <actions>
                                         <create>
                                             <path>self::node()</path>
                                             <context>parent</context>
                                             <schema/>
                                             <type>xml</type>
-                                            <prefix/>
+                                            <prefix>NULL</prefix>
                                             <value>&lt;namePart&gt;%value%&lt;/namePart&gt;</value>
                                         </create>
                                         <read>
@@ -192,7 +192,7 @@
                                             <path>self::node()</path>
                                             <context>self</context>
                                         </update>
-                                        <delete/>
+                                        <delete>NULL</delete>
                                     </actions>
                                 </properties>
                                 <children/>
@@ -200,20 +200,19 @@
                             <element name="role">
                                 <properties>
                                     <type>textfield</type>
-                                    <access>true</access>
+                                    <access>TRUE</access>
                                     <description>marcrelator</description>
-                                    <required>false</required>
+                                    <required>FALSE</required>
                                     <title>Role</title>
-                                    <tree>true</tree>
+                                    <tree>TRUE</tree>
                                     <actions>
                                         <create>
                                             <path>self::node()</path>
                                             <context>parent</context>
                                             <schema/>
                                             <type>xml</type>
-                                            <prefix/>
-                                            <value>&lt;role&gt;&lt;roleTerm authority="marcrelator"
-                                                type="text"&gt;%value%&lt;/roleTerm&gt;&lt;/role&gt;</value>
+                                            <prefix>NULL</prefix>
+                                            <value>&lt;role&gt;&lt;roleTerm authority="marcrelator" type="text"&gt;%value%&lt;/roleTerm&gt;&lt;/role&gt;</value>
                                         </create>
                                         <read>
                                             <path>mods:role/mods:roleTerm</path>
@@ -223,7 +222,7 @@
                                             <path>self::node()</path>
                                             <context>self</context>
                                         </update>
-                                        <delete/>
+                                        <delete>NULL</delete>
                                     </actions>
                                 </properties>
                                 <children/>
@@ -235,24 +234,24 @@
             <element name="typeOfResource">
                 <properties>
                     <type>hidden</type>
-                    <access>true</access>
-                    <required>false</required>
-                    <tree>true</tree>
+                    <access>TRUE</access>
+                    <required>FALSE</required>
+                    <tree>TRUE</tree>
                     <actions>
                         <create>
                             <path>/mods:mods</path>
                             <context>document</context>
                             <schema/>
                             <type>xml</type>
-                            <prefix/>
+                            <prefix>NULL</prefix>
                             <value>&lt;typeOfResource&gt;text&lt;/typeOfResource&gt;</value>
                         </create>
                         <read>
                             <path>/mods:mods/mods:typeOfResource</path>
                             <context>document</context>
                         </read>
-                        <update/>
-                        <delete/>
+                        <update>NULL</update>
+                        <delete>NULL</delete>
                     </actions>
                 </properties>
                 <children/>
@@ -260,17 +259,18 @@
             <element name="genre">
                 <properties>
                     <type>textfield</type>
-                    <access>true</access>
+                    <access>TRUE</access>
                     <description>marcgt</description>
+                    <required>FALSE</required>
                     <title>Genre</title>
-                    <tree>true</tree>
+                    <tree>TRUE</tree>
                     <actions>
                         <create>
                             <path>/mods:mods</path>
                             <context>document</context>
                             <schema/>
                             <type>xml</type>
-                            <prefix/>
+                            <prefix>NULL</prefix>
                             <value>&lt;genre authority="marcgt"&gt;%value%&lt;/genre&gt;</value>
                         </create>
                         <read>
@@ -281,7 +281,7 @@
                             <path>self::node()</path>
                             <context>self</context>
                         </update>
-                        <delete/>
+                        <delete>NULL</delete>
                     </actions>
                 </properties>
                 <children/>
@@ -289,17 +289,17 @@
             <element name="tableOfContents">
                 <properties>
                     <type>textarea</type>
-                    <access>true</access>
-                    <required>false</required>
+                    <access>TRUE</access>
+                    <required>FALSE</required>
                     <title>Table of Contents</title>
-                    <tree>true</tree>
+                    <tree>TRUE</tree>
                     <actions>
                         <create>
                             <path>/mods:mods</path>
                             <context>document</context>
                             <schema/>
                             <type>element</type>
-                            <prefix/>
+                            <prefix>NULL</prefix>
                             <value>tableOfContents</value>
                         </create>
                         <read>
@@ -321,42 +321,43 @@
             <element name="originInfo">
                 <properties>
                     <type>fieldset</type>
-                    <access>true</access>
+                    <access>TRUE</access>
+                    <required>FALSE</required>
                     <title>Origin Information</title>
-                    <tree>true</tree>
+                    <tree>TRUE</tree>
                     <actions>
                         <create>
                             <path>/mods:mods</path>
                             <context>document</context>
                             <schema/>
                             <type>element</type>
-                            <prefix/>
+                            <prefix>NULL</prefix>
                             <value>originInfo</value>
                         </create>
                         <read>
                             <path>/mods:mods/mods:originInfo</path>
                             <context>document</context>
                         </read>
-                        <update/>
-                        <delete/>
+                        <update>NULL</update>
+                        <delete>NULL</delete>
                     </actions>
                 </properties>
                 <children>
                     <element name="dateIssued">
                         <properties>
                             <type>textfield</type>
-                            <access>true</access>
+                            <access>TRUE</access>
                             <description>The date this book was issued. YYYY-MM-DD</description>
-                            <required>false</required>
+                            <required>FALSE</required>
                             <title>Date Issued</title>
-                            <tree>true</tree>
+                            <tree>TRUE</tree>
                             <actions>
                                 <create>
                                     <path>self::node()</path>
                                     <context>parent</context>
                                     <schema/>
                                     <type>element</type>
-                                    <prefix/>
+                                    <prefix>NULL</prefix>
                                     <value>dateIssued</value>
                                 </create>
                                 <read>
@@ -367,7 +368,7 @@
                                     <path>self::node()</path>
                                     <context>self</context>
                                 </update>
-                                <delete/>
+                                <delete>NULL</delete>
                             </actions>
                         </properties>
                         <children/>
@@ -375,18 +376,18 @@
                     <element name="copyrightDate">
                         <properties>
                             <type>textfield</type>
-                            <access>true</access>
+                            <access>TRUE</access>
                             <description>Copyright date of book. YYYY-MM-DD</description>
-                            <required>false</required>
+                            <required>FALSE</required>
                             <title>Copyright Date</title>
-                            <tree>true</tree>
+                            <tree>TRUE</tree>
                             <actions>
                                 <create>
                                     <path>self::node()</path>
                                     <context>parent</context>
                                     <schema/>
                                     <type>element</type>
-                                    <prefix/>
+                                    <prefix>NULL</prefix>
                                     <value>copyrightDate</value>
                                 </create>
                                 <read>
@@ -397,7 +398,7 @@
                                     <path>self::node()</path>
                                     <context>self</context>
                                 </update>
-                                <delete/>
+                                <delete>NULL</delete>
                             </actions>
                         </properties>
                         <children/>
@@ -405,24 +406,25 @@
                     <element name="issuance">
                         <properties>
                             <type>hidden</type>
-                            <access>true</access>
+                            <access>TRUE</access>
                             <default_value>monographic</default_value>
-                            <tree>true</tree>
+                            <required>FALSE</required>
+                            <tree>TRUE</tree>
                             <actions>
                                 <create>
                                     <path>self::node()</path>
                                     <context>parent</context>
                                     <schema/>
                                     <type>element</type>
-                                    <prefix/>
+                                    <prefix>NULL</prefix>
                                     <value>issuance</value>
                                 </create>
                                 <read>
                                     <path>mods:issuance</path>
                                     <context>parent</context>
                                 </read>
-                                <update/>
-                                <delete/>
+                                <update>NULL</update>
+                                <delete>NULL</delete>
                             </actions>
                         </properties>
                         <children/>
@@ -430,16 +432,17 @@
                     <element name="edition">
                         <properties>
                             <type>textfield</type>
-                            <access>true</access>
+                            <access>TRUE</access>
+                            <required>FALSE</required>
                             <title>Edition</title>
-                            <tree>true</tree>
+                            <tree>TRUE</tree>
                             <actions>
                                 <create>
                                     <path>self::node()</path>
                                     <context>parent</context>
                                     <schema/>
                                     <type>element</type>
-                                    <prefix/>
+                                    <prefix>NULL</prefix>
                                     <value>edition</value>
                                 </create>
                                 <read>
@@ -450,7 +453,7 @@
                                     <path>self::node()</path>
                                     <context>self</context>
                                 </update>
-                                <delete/>
+                                <delete>NULL</delete>
                             </actions>
                         </properties>
                         <children/>
@@ -458,17 +461,17 @@
                     <element name="publisher">
                         <properties>
                             <type>textfield</type>
-                            <access>true</access>
-                            <required>false</required>
+                            <access>TRUE</access>
+                            <required>FALSE</required>
                             <title>Publisher</title>
-                            <tree>true</tree>
+                            <tree>TRUE</tree>
                             <actions>
                                 <create>
                                     <path>self::node()</path>
                                     <context>parent</context>
                                     <schema/>
                                     <type>element</type>
-                                    <prefix/>
+                                    <prefix>NULL</prefix>
                                     <value>publisher</value>
                                 </create>
                                 <read>
@@ -479,7 +482,7 @@
                                     <path>self::node()</path>
                                     <context>self</context>
                                 </update>
-                                <delete/>
+                                <delete>NULL</delete>
                             </actions>
                         </properties>
                         <children/>
@@ -487,19 +490,18 @@
                     <element name="country">
                         <properties>
                             <type>textfield</type>
-                            <access>true</access>
-                            <required>false</required>
+                            <access>TRUE</access>
+                            <required>FALSE</required>
                             <title>Country</title>
-                            <tree>true</tree>
+                            <tree>TRUE</tree>
                             <actions>
                                 <create>
                                     <path>self::node()</path>
                                     <context>parent</context>
                                     <schema/>
                                     <type>xml</type>
-                                    <prefix/>
-                                    <value>&lt;place&gt;&lt;placeTerm
-                                        authority='marccountry'&gt;%value%&lt;/placeTerm&gt;&lt;/place&gt;</value>
+                                    <prefix>NULL</prefix>
+                                    <value>&lt;place&gt;&lt;placeTerm authority='marccountry'&gt;%value%&lt;/placeTerm&gt;&lt;/place&gt;</value>
                                 </create>
                                 <read>
                                     <path>mods:place/mods:placeTerm[@type = 'code']</path>
@@ -509,7 +511,7 @@
                                     <path>self::node()</path>
                                     <context>self</context>
                                 </update>
-                                <delete/>
+                                <delete>NULL</delete>
                             </actions>
                         </properties>
                         <children/>
@@ -517,19 +519,18 @@
                     <element name="place">
                         <properties>
                             <type>textfield</type>
-                            <access>true</access>
-                            <required>false</required>
+                            <access>TRUE</access>
+                            <required>FALSE</required>
                             <title>Place</title>
-                            <tree>true</tree>
+                            <tree>TRUE</tree>
                             <actions>
                                 <create>
                                     <path>self::node()</path>
                                     <context>parent</context>
                                     <schema/>
                                     <type>xml</type>
-                                    <prefix/>
-                                    <value>&lt;place&gt;&lt;placeTerm
-                                        type="text"&gt;%value%&lt;/placeTerm&gt;&lt;/place&gt;</value>
+                                    <prefix>NULL</prefix>
+                                    <value>&lt;place&gt;&lt;placeTerm type="text"&gt;%value%&lt;/placeTerm&gt;&lt;/place&gt;</value>
                                 </create>
                                 <read>
                                     <path>mods:place/mods:placeTerm[@type = 'text']</path>
@@ -539,7 +540,7 @@
                                     <path>self::node()</path>
                                     <context>self</context>
                                 </update>
-                                <delete/>
+                                <delete>NULL</delete>
                             </actions>
                         </properties>
                         <children/>
@@ -549,20 +550,19 @@
             <element name="language">
                 <properties>
                     <type>textfield</type>
-                    <access>true</access>
+                    <access>TRUE</access>
                     <description>iso639-2b</description>
-                    <required>false</required>
+                    <required>FALSE</required>
                     <title>Language</title>
-                    <tree>true</tree>
+                    <tree>TRUE</tree>
                     <actions>
                         <create>
                             <path>/mods:mods</path>
                             <context>document</context>
                             <schema/>
                             <type>xml</type>
-                            <prefix/>
-                            <value> &lt;language&gt;&lt;languageTerm authority="iso639-2b"
-                                type="code"&gt;%value%&lt;/languageTerm&gt;&lt;/language&gt;</value>
+                            <prefix>NULL</prefix>
+                            <value>&lt;language&gt;&lt;languageTerm authority="iso639-2b" type="code"&gt;%value%&lt;/languageTerm&gt;&lt;/language&gt;</value>
                         </create>
                         <read>
                             <path>/mods:mods/mods:language/mods:languageTerm</path>
@@ -572,7 +572,7 @@
                             <path>self::node()</path>
                             <context>self</context>
                         </update>
-                        <delete/>
+                        <delete>NULL</delete>
                     </actions>
                 </properties>
                 <children/>
@@ -580,16 +580,17 @@
             <element name="abstract">
                 <properties>
                     <type>textarea</type>
-                    <access>true</access>
+                    <access>TRUE</access>
+                    <required>FALSE</required>
                     <title>Abstract</title>
-                    <tree>true</tree>
+                    <tree>TRUE</tree>
                     <actions>
                         <create>
                             <path>/mods:mods</path>
                             <context>document</context>
                             <schema/>
                             <type>element</type>
-                            <prefix/>
+                            <prefix>NULL</prefix>
                             <value>abstract</value>
                         </create>
                         <read>
@@ -600,7 +601,7 @@
                             <path>self::node()</path>
                             <context>self</context>
                         </update>
-                        <delete/>
+                        <delete>NULL</delete>
                     </actions>
                 </properties>
                 <children/>
@@ -608,16 +609,17 @@
             <element name="identifier">
                 <properties>
                     <type>textfield</type>
-                    <access>true</access>
+                    <access>TRUE</access>
+                    <required>FALSE</required>
                     <title>ISBN</title>
-                    <tree>true</tree>
+                    <tree>TRUE</tree>
                     <actions>
                         <create>
                             <path>/mods:mods</path>
                             <context>document</context>
                             <schema/>
                             <type>xml</type>
-                            <prefix/>
+                            <prefix>NULL</prefix>
                             <value>&lt;identifier type="isbn"&gt;%value%&lt;/identifier&gt;</value>
                         </create>
                         <read>
@@ -628,7 +630,7 @@
                             <path>self::node()</path>
                             <context>self</context>
                         </update>
-                        <delete/>
+                        <delete>NULL</delete>
                     </actions>
                 </properties>
                 <children/>
@@ -636,44 +638,44 @@
             <element name="physicalDescription">
                 <properties>
                     <type>fieldset</type>
-                    <access>true</access>
-                    <required>false</required>
+                    <access>TRUE</access>
+                    <required>FALSE</required>
                     <title>Physical Description</title>
-                    <tree>true</tree>
+                    <tree>TRUE</tree>
                     <actions>
                         <create>
                             <path>/mods:mods</path>
                             <context>document</context>
                             <schema/>
                             <type>element</type>
-                            <prefix/>
+                            <prefix>NULL</prefix>
                             <value>physicalDescription</value>
                         </create>
                         <read>
                             <path>/mods:mods/mods:physicalDescription</path>
                             <context>document</context>
                         </read>
-                        <update/>
-                        <delete/>
+                        <update>NULL</update>
+                        <delete>NULL</delete>
                     </actions>
                 </properties>
                 <children>
                     <element name="form">
                         <properties>
                             <type>textfield</type>
-                            <access>true</access>
+                            <access>TRUE</access>
                             <description>marcform</description>
+                            <required>FALSE</required>
                             <title>Form</title>
-                            <tree>true</tree>
+                            <tree>TRUE</tree>
                             <actions>
                                 <create>
                                     <path>self::node()</path>
                                     <context>parent</context>
                                     <schema/>
                                     <type>xml</type>
-                                    <prefix/>
-                                    <value>&lt;form
-                                        authority="marcform"&gt;%value%&lt;/form&gt;</value>
+                                    <prefix>NULL</prefix>
+                                    <value>&lt;form authority="marcform"&gt;%value%&lt;/form&gt;</value>
                                 </create>
                                 <read>
                                     <path>mods:form</path>
@@ -683,7 +685,7 @@
                                     <path>self::node()</path>
                                     <context>self</context>
                                 </update>
-                                <delete/>
+                                <delete>NULL</delete>
                             </actions>
                         </properties>
                         <children/>
@@ -691,16 +693,17 @@
                     <element name="extent">
                         <properties>
                             <type>textfield</type>
-                            <access>true</access>
+                            <access>TRUE</access>
+                            <required>FALSE</required>
                             <title>Extent</title>
-                            <tree>true</tree>
+                            <tree>TRUE</tree>
                             <actions>
                                 <create>
                                     <path>self::node()</path>
                                     <context>parent</context>
                                     <schema/>
                                     <type>element</type>
-                                    <prefix/>
+                                    <prefix>NULL</prefix>
                                     <value>extent</value>
                                 </create>
                                 <read>
@@ -711,7 +714,7 @@
                                     <path>self::node()</path>
                                     <context>self</context>
                                 </update>
-                                <delete/>
+                                <delete>NULL</delete>
                             </actions>
                         </properties>
                         <children/>
@@ -721,18 +724,18 @@
             <element name="statementOfResponsibility">
                 <properties>
                     <type>textarea</type>
-                    <access>true</access>
+                    <access>TRUE</access>
+                    <required>FALSE</required>
                     <title>Statement of Responsibility</title>
-                    <tree>true</tree>
+                    <tree>TRUE</tree>
                     <actions>
                         <create>
                             <path>/mods:mods</path>
                             <context>document</context>
                             <schema/>
                             <type>xml</type>
-                            <prefix/>
-                            <value>&lt;note type="statement of
-                                responsibility"&gt;%value%&lt;/note&gt;</value>
+                            <prefix>NULL</prefix>
+                            <value>&lt;note type="statement of responsibility"&gt;%value%&lt;/note&gt;</value>
                         </create>
                         <read>
                             <path>/mods:mods/mods:note[@type='statement of responsibility']</path>
@@ -742,7 +745,7 @@
                             <path>self::node()</path>
                             <context>self</context>
                         </update>
-                        <delete/>
+                        <delete>NULL</delete>
                     </actions>
                 </properties>
                 <children/>
@@ -750,16 +753,17 @@
             <element name="note">
                 <properties>
                     <type>textarea</type>
-                    <access>true</access>
+                    <access>TRUE</access>
+                    <required>FALSE</required>
                     <title>Note</title>
-                    <tree>true</tree>
+                    <tree>TRUE</tree>
                     <actions>
                         <create>
                             <path>/mods:mods</path>
                             <context>document</context>
                             <schema/>
                             <type>element</type>
-                            <prefix/>
+                            <prefix>NULL</prefix>
                             <value>note</value>
                         </create>
                         <read>
@@ -770,7 +774,7 @@
                             <path>self::node()</path>
                             <context>self</context>
                         </update>
-                        <delete/>
+                        <delete>NULL</delete>
                     </actions>
                 </properties>
                 <children/>
@@ -778,56 +782,50 @@
             <element name="subject">
                 <properties>
                     <type>fieldset</type>
-                    <access>true</access>
-                    <required>false</required>
+                    <access>TRUE</access>
+                    <required>FALSE</required>
                     <title>Subject</title>
-                    <tree>true</tree>
+                    <tree>TRUE</tree>
                     <actions>
                         <create>
                             <path>/mods:mods</path>
                             <context>document</context>
                             <schema/>
                             <type>element</type>
-                            <prefix/>
+                            <prefix>NULL</prefix>
                             <value>subject</value>
                         </create>
                         <read>
                             <path>/mods:mods/mods:subject</path>
                             <context>document</context>
                         </read>
-                        <update/>
-                        <delete/>
+                        <update>NULL</update>
+                        <delete>NULL</delete>
                     </actions>
                 </properties>
                 <children>
                     <element name="topic">
                         <properties>
                             <type>tags</type>
-                            <access>true</access>
-                            <required>false</required>
+                            <access>TRUE</access>
+                            <required>FALSE</required>
                             <title>Topic</title>
-                            <tree>true</tree>
-                            <actions>
-                                <create/>
-                                <read/>
-                                <update/>
-                                <delete/>
-                            </actions>
+                            <tree>TRUE</tree>
                         </properties>
                         <children>
                             <element name="0">
                                 <properties>
                                     <type>tag</type>
-                                    <access>true</access>
-                                    <required>false</required>
-                                    <tree>true</tree>
+                                    <access>TRUE</access>
+                                    <required>FALSE</required>
+                                    <tree>TRUE</tree>
                                     <actions>
                                         <create>
                                             <path>/mods:mods/mods:subject</path>
                                             <context>document</context>
                                             <schema/>
                                             <type>element</type>
-                                            <prefix/>
+                                            <prefix>NULL</prefix>
                                             <value>topic</value>
                                         </create>
                                         <read>
@@ -851,31 +849,25 @@
                     <element name="geographic">
                         <properties>
                             <type>tags</type>
-                            <access>true</access>
-                            <required>false</required>
+                            <access>TRUE</access>
+                            <required>FALSE</required>
                             <title>Geographic</title>
-                            <tree>true</tree>
-                            <actions>
-                                <create/>
-                                <read/>
-                                <update/>
-                                <delete/>
-                            </actions>
+                            <tree>TRUE</tree>
                         </properties>
                         <children>
                             <element name="0">
                                 <properties>
                                     <type>tag</type>
-                                    <access>true</access>
-                                    <required>false</required>
-                                    <tree>true</tree>
+                                    <access>TRUE</access>
+                                    <required>FALSE</required>
+                                    <tree>TRUE</tree>
                                     <actions>
                                         <create>
                                             <path>/mods:mods/mods:subject</path>
                                             <context>document</context>
                                             <schema/>
                                             <type>element</type>
-                                            <prefix/>
+                                            <prefix>NULL</prefix>
                                             <value>geographic</value>
                                         </create>
                                         <read>
@@ -899,31 +891,25 @@
                     <element name="temporal">
                         <properties>
                             <type>tags</type>
-                            <access>true</access>
-                            <required>false</required>
+                            <access>TRUE</access>
+                            <required>FALSE</required>
                             <title>Temporal</title>
-                            <tree>true</tree>
-                            <actions>
-                                <create/>
-                                <read/>
-                                <update/>
-                                <delete/>
-                            </actions>
+                            <tree>TRUE</tree>
                         </properties>
                         <children>
                             <element name="0">
                                 <properties>
                                     <type>tag</type>
-                                    <access>true</access>
-                                    <required>false</required>
-                                    <tree>true</tree>
+                                    <access>TRUE</access>
+                                    <required>FALSE</required>
+                                    <tree>TRUE</tree>
                                     <actions>
                                         <create>
                                             <path>/mods:mods/mods:subject</path>
                                             <context>document</context>
                                             <schema/>
                                             <type>element</type>
-                                            <prefix/>
+                                            <prefix>NULL</prefix>
                                             <value>temporal</value>
                                         </create>
                                         <read>
@@ -947,17 +933,17 @@
                     <element name="hierarchicalGeographic">
                         <properties>
                             <type>fieldset</type>
-                            <access>true</access>
-                            <required>false</required>
+                            <access>TRUE</access>
+                            <required>FALSE</required>
                             <title>Geographic Information</title>
-                            <tree>true</tree>
+                            <tree>TRUE</tree>
                             <actions>
                                 <create>
                                     <path>/mods:mods/mods:subject</path>
                                     <context>document</context>
                                     <schema/>
                                     <type>element</type>
-                                    <prefix/>
+                                    <prefix>NULL</prefix>
                                     <value>hierarchicalGeographic</value>
                                 </create>
                                 <read>
@@ -968,32 +954,32 @@
                                     <path>self::node()</path>
                                     <context>self</context>
                                 </update>
-                                <delete/>
+                                <delete>NULL</delete>
                             </actions>
                         </properties>
                         <children>
                             <element name="continent">
                                 <properties>
                                     <type>select</type>
-                                    <access>true</access>
+                                    <access>TRUE</access>
                                     <default_value>North America</default_value>
                                     <options>
-                                        <option key="Asia">Asia</option>
-                                        <option key="Africa">Africa</option>
-                                        <option key="Europe">Europe</option>
-                                        <option key="North America">North America</option>
-                                        <option key="South America">South America</option>
+                                        <Asia>Asia</Asia>
+                                        <Africa>Africa</Africa>
+                                        <Europe>Europe</Europe>
+                                        <index key="North America">North America</index>
+                                        <index key="South America">South America</index>
                                     </options>
-                                    <required>false</required>
+                                    <required>FALSE</required>
                                     <title>Continent</title>
-                                    <tree>true</tree>
+                                    <tree>TRUE</tree>
                                     <actions>
                                         <create>
                                             <path>self::node()</path>
                                             <context>parent</context>
                                             <schema/>
                                             <type>element</type>
-                                            <prefix/>
+                                            <prefix>NULL</prefix>
                                             <value>continent</value>
                                         </create>
                                         <read>
@@ -1004,7 +990,7 @@
                                             <path>self::node()</path>
                                             <context>self</context>
                                         </update>
-                                        <delete/>
+                                        <delete>NULL</delete>
                                     </actions>
                                 </properties>
                                 <children/>
@@ -1012,19 +998,18 @@
                             <element name="country">
                                 <properties>
                                     <type>textfield</type>
-                                    <access>true</access>
-                                    <description>Name of a country, i.e. a political entity
-                                        considered a country.</description>
-                                    <required>false</required>
+                                    <access>TRUE</access>
+                                    <description>Name of a country, i.e. a political entity considered a country.</description>
+                                    <required>FALSE</required>
                                     <title>Country</title>
-                                    <tree>true</tree>
+                                    <tree>TRUE</tree>
                                     <actions>
                                         <create>
                                             <path>self::node()</path>
                                             <context>parent</context>
                                             <schema/>
                                             <type>element</type>
-                                            <prefix/>
+                                            <prefix>NULL</prefix>
                                             <value>country</value>
                                         </create>
                                         <read>
@@ -1035,7 +1020,7 @@
                                             <path>self::node()</path>
                                             <context>self</context>
                                         </update>
-                                        <delete/>
+                                        <delete>NULL</delete>
                                     </actions>
                                 </properties>
                                 <children/>
@@ -1043,19 +1028,18 @@
                             <element name="province">
                                 <properties>
                                     <type>textfield</type>
-                                    <access>true</access>
-                                    <description>Includes first order political divisions called
-                                        provinces within a country, e.g. in Canada.</description>
-                                    <required>false</required>
+                                    <access>TRUE</access>
+                                    <description>Includes first order political divisions called provinces within a country, e.g. in Canada.</description>
+                                    <required>FALSE</required>
                                     <title>Province</title>
-                                    <tree>true</tree>
+                                    <tree>TRUE</tree>
                                     <actions>
                                         <create>
                                             <path>self::node()</path>
                                             <context>parent</context>
                                             <schema/>
                                             <type>element</type>
-                                            <prefix/>
+                                            <prefix>NULL</prefix>
                                             <value>province</value>
                                         </create>
                                         <read>
@@ -1066,7 +1050,7 @@
                                             <path>self::node()</path>
                                             <context>self</context>
                                         </update>
-                                        <delete/>
+                                        <delete>NULL</delete>
                                     </actions>
                                 </properties>
                                 <children/>
@@ -1074,20 +1058,18 @@
                             <element name="region">
                                 <properties>
                                     <type>textfield</type>
-                                    <access>true</access>
-                                    <description>Includes regions that have status as a
-                                        jurisdiction, usually incorporating more than one first
-                                        level jurisdiction.</description>
-                                    <required>false</required>
+                                    <access>TRUE</access>
+                                    <description>Includes regions that have status as a jurisdiction, usually incorporating more than one first level jurisdiction.</description>
+                                    <required>FALSE</required>
                                     <title>Region</title>
-                                    <tree>true</tree>
+                                    <tree>TRUE</tree>
                                     <actions>
                                         <create>
                                             <path>self::node()</path>
                                             <context>parent</context>
                                             <schema/>
                                             <type>element</type>
-                                            <prefix/>
+                                            <prefix>NULL</prefix>
                                             <value>region</value>
                                         </create>
                                         <read>
@@ -1098,7 +1080,7 @@
                                             <path>self::node()</path>
                                             <context>self</context>
                                         </update>
-                                        <delete/>
+                                        <delete>NULL</delete>
                                     </actions>
                                 </properties>
                                 <children/>
@@ -1106,19 +1088,18 @@
                             <element name="county">
                                 <properties>
                                     <type>textfield</type>
-                                    <access>true</access>
-                                    <description>Name of the largest local administrative unit in
-                                        various countries, e.g. England.</description>
-                                    <required>false</required>
+                                    <access>TRUE</access>
+                                    <description>Name of the largest local administrative unit in various countries, e.g. England.</description>
+                                    <required>FALSE</required>
                                     <title>County</title>
-                                    <tree>true</tree>
+                                    <tree>TRUE</tree>
                                     <actions>
                                         <create>
                                             <path>self::node()</path>
                                             <context>parent</context>
                                             <schema/>
                                             <type>element</type>
-                                            <prefix/>
+                                            <prefix>NULL</prefix>
                                             <value>county</value>
                                         </create>
                                         <read>
@@ -1129,7 +1110,7 @@
                                             <path>self::node()</path>
                                             <context>self</context>
                                         </update>
-                                        <delete/>
+                                        <delete>NULL</delete>
                                     </actions>
                                 </properties>
                                 <children/>
@@ -1137,19 +1118,18 @@
                             <element name="city">
                                 <properties>
                                     <type>textfield</type>
-                                    <access>true</access>
-                                    <description>Name of an inhabited place incorporated as a city,
-                                        town, etc.</description>
-                                    <required>false</required>
+                                    <access>TRUE</access>
+                                    <description>Name of an inhabited place incorporated as a city, town, etc.</description>
+                                    <required>FALSE</required>
                                     <title>City</title>
-                                    <tree>true</tree>
+                                    <tree>TRUE</tree>
                                     <actions>
                                         <create>
                                             <path>self::node()</path>
                                             <context>parent</context>
                                             <schema/>
                                             <type>element</type>
-                                            <prefix/>
+                                            <prefix>NULL</prefix>
                                             <value>city</value>
                                         </create>
                                         <read>
@@ -1160,7 +1140,7 @@
                                             <path>self::node()</path>
                                             <context>self</context>
                                         </update>
-                                        <delete/>
+                                        <delete>NULL</delete>
                                     </actions>
                                 </properties>
                                 <children/>
@@ -1168,19 +1148,18 @@
                             <element name="citySection">
                                 <properties>
                                     <type>textfield</type>
-                                    <access>true</access>
-                                    <description>Name of a smaller unit within a populated place,
-                                        e.g., neighborhoods, parks, or streets.</description>
-                                    <required>false</required>
+                                    <access>TRUE</access>
+                                    <description>Name of a smaller unit within a populated place, e.g., neighborhoods, parks, or streets.</description>
+                                    <required>FALSE</required>
                                     <title>City Section</title>
-                                    <tree>true</tree>
+                                    <tree>TRUE</tree>
                                     <actions>
                                         <create>
                                             <path>self::node()</path>
                                             <context>parent</context>
                                             <schema/>
                                             <type>element</type>
-                                            <prefix/>
+                                            <prefix>NULL</prefix>
                                             <value>citySection</value>
                                         </create>
                                         <read>
@@ -1191,7 +1170,7 @@
                                             <path>self::node()</path>
                                             <context>self</context>
                                         </update>
-                                        <delete/>
+                                        <delete>NULL</delete>
                                     </actions>
                                 </properties>
                                 <children/>
@@ -1201,17 +1180,17 @@
                     <element name="cartographics">
                         <properties>
                             <type>fieldset</type>
-                            <access>true</access>
-                            <required>false</required>
+                            <access>TRUE</access>
+                            <required>FALSE</required>
                             <title>Cartographics</title>
-                            <tree>true</tree>
+                            <tree>TRUE</tree>
                             <actions>
                                 <create>
                                     <path>/mods:mods/mods:subject</path>
                                     <context>document</context>
                                     <schema/>
                                     <type>element</type>
-                                    <prefix/>
+                                    <prefix>NULL</prefix>
                                     <value>cartographics</value>
                                 </create>
                                 <read>
@@ -1222,26 +1201,25 @@
                                     <path>self::node()</path>
                                     <context>self</context>
                                 </update>
-                                <delete/>
+                                <delete>NULL</delete>
                             </actions>
                         </properties>
                         <children>
                             <element name="coordinates">
                                 <properties>
                                     <type>textfield</type>
-                                    <access>true</access>
-                                    <description>Contains a statement of coordinates covered by the
-                                        resource.</description>
-                                    <required>false</required>
+                                    <access>TRUE</access>
+                                    <description>Contains a statement of coordinates covered by the resource.</description>
+                                    <required>FALSE</required>
                                     <title>Coordinates</title>
-                                    <tree>true</tree>
+                                    <tree>TRUE</tree>
                                     <actions>
                                         <create>
                                             <path>self::node()</path>
                                             <context>parent</context>
                                             <schema/>
                                             <type>element</type>
-                                            <prefix/>
+                                            <prefix>NULL</prefix>
                                             <value>coordinates</value>
                                         </create>
                                         <read>
@@ -1252,7 +1230,7 @@
                                             <path>self::node()</path>
                                             <context>self</context>
                                         </update>
-                                        <delete/>
+                                        <delete>NULL</delete>
                                     </actions>
                                 </properties>
                                 <children/>
@@ -1264,18 +1242,18 @@
             <element name="lcc_classification">
                 <properties>
                     <type>textfield</type>
-                    <access>true</access>
+                    <access>TRUE</access>
+                    <required>FALSE</required>
                     <title>Classification (lcc)</title>
-                    <tree>true</tree>
+                    <tree>TRUE</tree>
                     <actions>
                         <create>
                             <path>/mods:mods</path>
                             <context>document</context>
                             <schema/>
                             <type>xml</type>
-                            <prefix/>
-                            <value>&lt;classification
-                                authority="lcc"&gt;%value%&lt;/classification&gt;</value>
+                            <prefix>NULL</prefix>
+                            <value>&lt;classification authority="lcc"&gt;%value%&lt;/classification&gt;</value>
                         </create>
                         <read>
                             <path>/mods:mods/mods:classification[@authority='lcc']</path>
@@ -1285,7 +1263,7 @@
                             <path>self::node()</path>
                             <context>self</context>
                         </update>
-                        <delete/>
+                        <delete>NULL</delete>
                     </actions>
                 </properties>
                 <children/>
@@ -1293,18 +1271,18 @@
             <element name="ddc_classification">
                 <properties>
                     <type>textfield</type>
-                    <access>true</access>
+                    <access>TRUE</access>
+                    <required>FALSE</required>
                     <title>Classification (ddc)</title>
-                    <tree>true</tree>
+                    <tree>TRUE</tree>
                     <actions>
                         <create>
                             <path>/mods:mods</path>
                             <context>document</context>
                             <schema/>
                             <type>xml</type>
-                            <prefix/>
-                            <value>&lt;classification edition="21"
-                                authority="ddc"&gt;%value%&lt;/classification&gt;</value>
+                            <prefix>NULL</prefix>
+                            <value>&lt;classification edition="21" authority="ddc"&gt;%value%&lt;/classification&gt;</value>
                         </create>
                         <read>
                             <path>/mods:mods/mods:classification[@authority='ddc']</path>
@@ -1314,7 +1292,7 @@
                             <path>self::node()</path>
                             <context>self</context>
                         </update>
-                        <delete/>
+                        <delete>NULL</delete>
                     </actions>
                 </properties>
                 <children/>
@@ -1322,8 +1300,8 @@
             <element name="submit">
                 <properties>
                     <type>submit</type>
-                    <access>true</access>
-                    <tree>true</tree>
+                    <access>TRUE</access>
+                    <tree>TRUE</tree>
                     <value>Submit</value>
                 </properties>
                 <children/>
@@ -1331,30 +1309,30 @@
             <element name="module">
                 <properties>
                     <type>hidden</type>
-                    <access>true</access>
+                    <access>TRUE</access>
                     <default_value>islandora_book</default_value>
-                    <required>false</required>
-                    <tree>true</tree>
+                    <required>FALSE</required>
+                    <tree>TRUE</tree>
                 </properties>
                 <children/>
             </element>
             <element name="thumbnail_file">
                 <properties>
                     <type>hidden</type>
-                    <access>true</access>
+                    <access>TRUE</access>
                     <default_value>book_module_TN.png</default_value>
-                    <required>false</required>
-                    <tree>true</tree>
+                    <required>FALSE</required>
+                    <tree>TRUE</tree>
                 </properties>
                 <children/>
             </element>
             <element name="image_directory">
                 <properties>
                     <type>hidden</type>
-                    <access>true</access>
+                    <access>TRUE</access>
                     <default_value>images</default_value>
-                    <required>false</required>
-                    <tree>true</tree>
+                    <required>FALSE</required>
+                    <tree>TRUE</tree>
                 </properties>
                 <children/>
             </element>
