@@ -61,6 +61,7 @@ function batch_process_book($collection_pid = null) {
 function update_islandora_rdfstreams($book_pid) {
   $page_pids = islandora_update_book_rels_get_page_pids($book_pid);
   $count = 1;
+
   if (!empty($page_pids)) {
     foreach ($page_pids as $page_pid) {
       islandora_update_book_create_rels($book_pid, $page_pid, $count++);

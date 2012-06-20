@@ -24,7 +24,9 @@ function page_management_form(&$form_state, $pid) {
   module_load_include('inc', 'fedora_repository', 'ObjectHelper');
   global $base_url;
 
+
   $languages = islandora_book_get_tesseract_langauges();
+
   $edit_metadata_link = l(t('Edit Metadata'), $base_url . '/fedora/repository/editmetadata/' . $pid . '/metadata', array('attributes' => array('class' => 'islandora-repo-button')));
 
   $content_helper = new FedoraObjectDetailedContent($pid);
@@ -70,13 +72,15 @@ function page_management_form(&$form_state, $pid) {
     '#title' => t('Refresh OCR for this page')
   );
 
-//  $form['page_manage']['preprocess'] = array(
-//    '#title' => t('Preprocessing for typescripts?'),
-//    '#description' => t('Will add additional processing for typewritten text.  This script grayscales and sharpens an ingested .tiff before performing OCR processes. <br />
-//        This has been shown to improve OCR results for some images. Use with caution. Process can be lengthly and is resource intensive. <br />
-//        If your image is already gray, this script will not run'),
-//    '#type' => 'checkbox',
-//  );
+
+  //$form['page_manage']['preprocess'] = array(
+  //  '#title' => t('Preprocessing for typescripts?'),
+  //  '#description' => t('Will add additional processing for typewritten text.  This script grayscales and sharpens an ingested .tiff before performing OCR processes. <br />
+  //      This has been shown to improve OCR results for some images. Use with caution. Process can be lengthly and is resource intensive. <br />
+  //      If your image is already gray, this script will not run'),
+  //  '#type' => 'checkbox',
+  //);
+
 
   $form['page_manage']['language'] = array(
     '#title' => t('Language'),
@@ -197,8 +201,8 @@ function page_management_form_submit($form, &$form_state) {
     $item = new Fedora_Item($pid);
     $item->purge_relationship('isPageNumber', $current_page, ISLANDORA_RELS_EXT_URI, TRUE);
     $item->purge_relationships('isSequenceNumber', $current_page, ISLANDORA_RELS_EXT_URI, TRUE);
-    $item->add_relationship('isPageNumber', $new_page, ISLANDORA_RELS_EXT_URI, TRUE);
-    $item->add_relationship('isSequenceNumber', $new_page, ISLANDORA_RELS_EXT_URI, TRUE);
+    $item->add_relationship('isPageNumber', $new_page, ISLANDORA_RELS_EXT_URI, 3);
+    $item->add_relationship('isSequenceNumber', $new_page, ISLANDORA_RELS_EXT_URI, 3);
     if ($new_page < $current_page) {
       for ($working_page = $new_page; $working_page < $current_page; $working_page++) {
         $item = new Fedora_Item($pages[$working_page]);
@@ -206,8 +210,8 @@ function page_management_form_submit($form, &$form_state) {
         //$item->add_relationship('isPageNumber', sprintf("%04d", $working_page + 1), ISLANDORA_PAGE_URI);
         $item->purge_relationships('isPageNumber', $working_page, ISLANDORA_RELS_EXT_URI, TRUE);
         $item->purge_relationships('isSequenceNumber', $working_page, ISLANDORA_RELS_EXT_URI, TRUE);
-        $item->add_relationship('isPageNumber', $working_page + 1, ISLANDORA_RELS_EXT_URI, TRUE);
-        $item->add_relationship('isSequenceNumber', $working_page + 1, ISLANDORA_RELS_EXT_URI, TRUE);
+        $item->add_relationship('isPageNumber', $working_page + 1, ISLANDORA_RELS_EXT_URI, 3);
+        $item->add_relationship('isSequenceNumber', $working_page + 1, ISLANDORA_RELS_EXT_URI, 3);
       }
     }
 
@@ -216,8 +220,8 @@ function page_management_form_submit($form, &$form_state) {
         $item = new Fedora_Item($pages[$working_page]);
         $item->purge_relationships('isPageNumber', $working_page, ISLANDORA_RELS_EXT_URI, TRUE);
         $item->purge_relationships('isSequenceNumber', $working_page, ISLANDORA_RELS_EXT_URI, TRUE);
-        $item->add_relationship('isPageNumber', $working_page - 1, ISLANDORA_RELS_EXT_URI, TRUE);
-        $item->add_relationship('isSequenceNumber', $working_page - 1, ISLANDORA_RELS_EXT_URI, TRUE);
+        $item->add_relationship('isPageNumber', $working_page - 1, ISLANDORA_RELS_EXT_URI, 3);
+        $item->add_relationship('isSequenceNumber', $working_page - 1, ISLANDORA_RELS_EXT_URI, 3);
       }
     }
 

@@ -48,10 +48,10 @@ function current_datastreams(&$form_state, $pid) {
  * @return array
  */
 function update_datastreams(&$form_state, $pid) {
+
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   $languages = islandora_book_get_tesseract_langauges();
 
-  $collection_key = $keys[0];
 
   $form = array();
   $form['book_pid'] = array(
@@ -71,13 +71,15 @@ function update_datastreams(&$form_state, $pid) {
     '#title' => t('Refresh OCR for this book')
   );
 
-//  $form['page_manage']['preprocess'] = array(
-//    '#title' => t('Preprocessing for typescripts?'),
-//    '#description' => t('Will add additional processing for typewritten text.  This script grayscales and sharpens an ingested .tiff before performing OCR processes. <br />
-//        This has been shown to improve OCR results for some images. Use with caution. Process can be lengthly and is resource intensive. <br />
-//        If your image is already gray, this script will not run'),
-//    '#type' => 'checkbox',
-//  );
+
+  //$form['page_manage']['preprocess'] = array(
+  //  '#title' => t('Preprocessing for typescripts?'),
+  //  '#description' => t('Will add additional processing for typewritten text.  This script grayscales and sharpens an ingested .tiff before performing OCR processes. <br />
+  //      This has been shown to improve OCR results for some images. Use with caution. Process can be lengthly and is resource intensive. <br />
+  //      If your image is already gray, this script will not run'),
+  //  '#type' => 'checkbox',
+  //);
+
   $form['page_manage']['language'] = array(
     '#title' => t('Language'),
     '#type' => 'select',
