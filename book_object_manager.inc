@@ -25,8 +25,10 @@ function get_book_model_management_content($pid) {
   module_load_include('inc', 'islandora_book', 'management/book_datastreams');
   module_load_include('inc', 'islandora_book', 'management/book_delete');
   module_load_include('inc', 'islandora_book', 'management/add_pages');
+  module_load_include('inc', 'islandora_book', 'management/reorder_pages');
   $content = drupal_get_form('book_add_pages', $pid);
   $content .= drupal_get_form('book_collection_management', $pid);
+  $content .= drupal_get_form('page_reorder', $pid);
   $content .= drupal_get_form('view_metadata', $pid);
   $content .= drupal_get_form('update_datastreams', $pid);
   $content .= drupal_get_form('current_datastreams', $pid);

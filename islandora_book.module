@@ -287,6 +287,10 @@ function islandora_book_theme() {
     'islandora_book_page_table' => array(
       'arguments' => array('element' => NULL),
       'file' => 'management/IslandoraBookPageTable.inc',
+    ),
+    'islandora_book_page_reorder_table' => array(
+      'arguments' => array('element' => NULL),
+      'file' => 'management/IslandoraPageReorderTable.inc',
     )
   );
 }
