@@ -73,13 +73,13 @@ function page_management_form(&$form_state, $pid) {
   );
 
 
-  //$form['page_manage']['preprocess'] = array(
-  //  '#title' => t('Preprocessing for typescripts?'),
-  //  '#description' => t('Will add additional processing for typewritten text.  This script grayscales and sharpens an ingested .tiff before performing OCR processes. <br />
-  //      This has been shown to improve OCR results for some images. Use with caution. Process can be lengthly and is resource intensive. <br />
-  //      If your image is already gray, this script will not run'),
-  //  '#type' => 'checkbox',
-  //);
+  $form['page_manage']['preprocess'] = array(
+    '#title' => t('Preprocessing for typescripts?'),
+    '#description' => t('Will add additional processing for typewritten text.  This script grayscales and sharpens an ingested .tiff before performing OCR processes. <br />
+        This has been shown to improve OCR results for some images. Use with caution. Process can be lengthly and is resource intensive. <br />
+        If your image is already gray, this script will not run'),
+    '#type' => 'checkbox',
+  );
 
 
   $form['page_manage']['language'] = array(

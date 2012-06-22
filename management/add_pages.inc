@@ -30,7 +30,7 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
 
-  $languages = islandora_book_get_tesseract_langauges();
+  $languages = islandora_book_get_available_tesseract_languages();
 
   $item = new Fedora_Item($pid);
   $book_title = $item->objectProfile->objLabel;
@@ -89,13 +89,13 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
   }
   if ($page_cmodel == 'islandora:pageCModel') {
 
-   // $form['page_add']['preprocess'] = array(
-   //   '#title' => t('Preprocessing for typescripts?'),
-   //   '#description' => t('Will add additional processing for typewritten text.  This script grayscales and sharpens an ingested .tiff before performing OCR processes. <br />
-   //     This has been shown to improve OCR results for some images. Use with caution. Process can be lengthly and is resource intensive. <br />
-    //    If your image is already gray, this script will not run'),
-    //  '#type' => 'checkbox',
-   // );
+    $form['page_add']['preprocess'] = array(
+      '#title' => t('Preprocessing for typescripts?'),
+      '#description' => t('Will add additional processing for typewritten text.  This script grayscales and sharpens an ingested .tiff before performing OCR processes. <br />
+     This has been shown to improve OCR results for some images. Use with caution. Process can be lengthly and is resource intensive. <br />
+    If your image is already gray, this script will not run'),
+      '#type' => 'checkbox',
+    );
 
 
     $form['page_add']['language'] = array(
@@ -274,7 +274,7 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
 
   //add compresed jp2 for viewer
   if (variable_get('islandora_book_create_images', TRUE)) {
-    if (strtolower($ext) == 'tif' || strtolower($ext) == 'tiff' ||strtolower($ext) == 'jpg' ||strtolower($ext) == 'jpeg') {
+    if (strtolower($ext) == 'tif' || strtolower($ext) == 'tiff' || strtolower($ext) == 'jpg' || strtolower($ext) == 'jpeg') {
       exec('kdu_compress -i "' . $page_file . '" -o "' . $page_file . '.jp2' . '" -rate 0.5 Clayers=1 Clevels=7 "Cprecincts={256,256},{256,256},{256,256},{128,128},{128,128},{64,64},{64,64},{32,32},{16,16}" "Corder=RPCL" "ORGgen_plt=yes" "ORGtparts=R" "Cblk={32,32}" Cuse_sop=yes', $output, $returnValue);
       if ($returnValue == '0') {
         $page_item->add_datastream_from_file("$page_file.jp2", 'JP2', "Compressed JP2", 'image/jp2', 'M');
