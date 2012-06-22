@@ -50,7 +50,7 @@ function current_datastreams(&$form_state, $pid) {
 function update_datastreams(&$form_state, $pid) {
 
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
-  $languages = islandora_book_get_tesseract_langauges();
+  $languages = islandora_book_get_available_tesseract_languages();
 
 
   $form = array();

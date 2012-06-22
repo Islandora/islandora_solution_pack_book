@@ -51,7 +51,7 @@ XML;
     }
     $item->add_datastream_from_file("$tiff.txt", 'OCR', "Scanned Text", 'text/plain', 'M');
     file_delete("$tiff.txt");
-   
+
     $success = TRUE;
   }
   if (!$success) {
@@ -62,9 +62,9 @@ XML;
   if (!$success) {
     drupal_set_message(t('ENCODED_OCR replacement for @pid was unsuccessful', array('@pid' => $item->pid)));
   }
-   if ($tiff != $original) {
-      file_delete($tiff);
-    }
+  if ($tiff != $original) {
+    file_delete($tiff);
+  }
   return $success;
 }
 
@@ -556,16 +556,22 @@ RDF;
   return $rdf_string;
 }
 
-function islandora_book_get_tesseract_langauges(){
-    return array(
+function islandora_book_get_tesseract_langauges() {
+  return array(
     'eng' => t('English'),
+    'fra' => t('French'),
     'deu-frak' => t('German'),
     'por' => t('Portugese'),
-    'fra' => t('French'),
     'spa' => t('Spanish'),
     'hin' => t('Hindi'),
     'jpn' => t('Japanese'),
     'ita' => t('Italian')
   );
+}
 
+function islandora_book_get_available_tesseract_languages() {
+  $languages = variable_get('islandora_book_ocr_languages', array('eng'));
+  return array_values(array_filter($languages, function($e) {
+            return ($e !== 0);
+          }));
 }

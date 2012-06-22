@@ -25,7 +25,7 @@ function page_management_form(&$form_state, $pid) {
   global $base_url;
 
 
-  $languages = islandora_book_get_tesseract_langauges();
+  $languages = islandora_book_get_available_tesseract_languages();
 
   $edit_metadata_link = l(t('Edit Metadata'), $base_url . '/fedora/repository/editmetadata/' . $pid . '/metadata', array('attributes' => array('class' => 'islandora-repo-button')));
 
