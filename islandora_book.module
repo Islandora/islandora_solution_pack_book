@@ -580,5 +580,13 @@ function islandora_book_help($path, $arg) {
  */
 function islandora_book_islandora_tabs_alter(&$tabs, $params) {
   //Turn off object details
-  $tabs['fedora_object_details'] = null;
+  $models = array(
+    'islandora:pageCModel',
+    'islandora:bookCModel',
+    'islandora:iaBookCModel'
+  );
+
+  if (in_array($params['content_models'][0]->pid, $models)) {
+    $tabs['fedora_object_details'] = null;
+  }
 }

@@ -62,11 +62,9 @@ function book_delete_submit($form, &$form_state) {
     $page_pids = get_page_pids($book_pid);
     foreach ($page_pids as $page_pid) {
       $item = new Fedora_Item($page_pid);
-      //$item->purge($pid . ' deleted by user identified as ' . $user->name);
       $item->modify_object($item->objLabel, 'I', $user->uid, 'Set to inactive');
     }
     $item = new Fedora_Item($book_pid);
-   // $item->purge($book_pid . ' deleted by user identified as ' . $user->name);
     $item->modify_object($item->objLabel, 'I', $user->uid, 'Set to inactive');
   }
   drupal_goto('fedora/repository/' . $collection_pids[0]);
