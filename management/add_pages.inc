@@ -415,7 +415,7 @@ function makePDF($book_pid, $file_list, $tmpDir) {
     $book_item->add_datastream_from_file($outputFile, 'PDF', "PDF of Book", 'application/pdf', 'M');
   }
 }
-
+//deprecated - to be deleted on approval
 function page_delete(&$form_state, $pid) {
   module_load_include('inc', 'islandora_book', 'management/IslandoraBookPageTable');
   $table = islandora_book_page_table($pid);
@@ -497,6 +497,8 @@ function get_page_files($pid) {
   return $ordered_files;
 }
 
+
+//deprecated - to be deleted on approval
 function page_delete_submit($form, &$form_state) {
 
   module_load_include('inc', 'islandora_book', 'book_pack_utils');

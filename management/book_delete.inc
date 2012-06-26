@@ -24,7 +24,7 @@ function book_delete(&$form_state, $pid) {
       '#value' => $pid,
     );
     $form['delete_book'] = array(
-      '#title' => "Permanently Delete this Book",
+      '#title' => "Delete this Book",
       '#type' => 'fieldset',
       '#description' => $description,
       '#collapsible' => TRUE,
@@ -34,7 +34,7 @@ function book_delete(&$form_state, $pid) {
       $form['delete_book']['confirm'] = array(
         '#title' => "Are you sure?",
         '#type' => 'fieldset',
-        '#description' => t('<strong>Clicking the delete button will permanantly remove this book and all of its pages.</strong> <br />  <strong>This action cannot be undone.</strong> '),
+        '#description' => t('<strong>Clicking the delete button will remove this book and all of its pages.</strong> <br />  <strong>This action can only be undone by an administrator.</strong> '),
         '#collapsible' => TRUE,
         '#collapsed' => TRUE,
       );
@@ -62,10 +62,12 @@ function book_delete_submit($form, &$form_state) {
     $page_pids = get_page_pids($book_pid);
     foreach ($page_pids as $page_pid) {
       $item = new Fedora_Item($page_pid);
-      $item->purge($pid . ' deleted by user identified as ' . $user->name);
+      //$item->purge($pid . ' deleted by user identified as ' . $user->name);
+      $item->modify_object($item->objLabel, 'I', $user->uid, 'Set to inactive');
     }
     $item = new Fedora_Item($book_pid);
-    $item->purge($book_pid . ' deleted by user identified as ' . $user->name);
+   // $item->purge($book_pid . ' deleted by user identified as ' . $user->name);
+    $item->modify_object($item->objLabel, 'I', $user->uid, 'Set to inactive');
   }
   drupal_goto('fedora/repository/' . $collection_pids[0]);
 }

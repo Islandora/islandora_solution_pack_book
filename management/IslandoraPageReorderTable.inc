@@ -35,16 +35,18 @@ XML;
     $keys[] = $line_parts[0];
   }
 
-  $form['list'] = array(
-    '#value' => $list,
-  );
+
 
   $table = array(
-    '#header' => array( t('Page Pid'), 'Current Sequence Number', 'Position', t('Page Label')),
+    '#header' => array(theme('table_select_header_cell'), t("Page Pid - Unique Identifier"), 'Current Sequence Number', t('Page Label')),
     '#theme' => 'islandora_book_page_reorder_table',
     '#tree' => TRUE,
     '#id' => 'page_weight_table',
     'rows' => array(),
+    'selections' => array(
+      '#type' => 'checkboxes',
+      '#options' => array_fill_keys($keys, ''),
+    ),
   );
   $rows = &$table['rows'];
   if (empty($objects)) {
@@ -52,11 +54,11 @@ XML;
   }
   foreach ($objects as $key => $object) {
     $cells = array();
+    $cells['#pid'] = $key;
     $cells['pid'] = array('#value' => l($key, 'fedora/repository/' . $key));
     $cells['sequence'] = array(
       '#type' => 'item',
       '#value' => $object[0],
-
     );
     $cells['pos'] = array(
       '#type' => 'textfield',
@@ -66,9 +68,9 @@ XML;
       '#attributes' => array('class' => 'sequence_weight'),
     );
 
-    $cells['label'] = array('#type' => 'item','#value' => $object[1]);
-    $cells['page_pid'] = array('#type' => 'hidden','#value' => $key);
-    $cells['current_sequence'] = array('#type' => 'hidden','#value' => $object[0]);
+    $cells['label'] = array('#type' => 'item', '#value' => $object[1]);
+    $cells['page_pid'] = array('#type' => 'hidden', '#value' => $key);
+    $cells['current_sequence'] = array('#type' => 'hidden', '#value' => $object[0]);
     $rows[] = $cells;
   }
 
@@ -85,7 +87,10 @@ function theme_islandora_book_page_reorder_table(array $element) {
   $rows = array();
   foreach (element_children($element['rows']) as $child) {
     $setting = $element['rows'][$child];
-    $fields = array();
+    $pid = $setting['#pid'];
+    $fields = array(
+      drupal_render($element['selections'][$pid]) // First field is a checkbox
+    );
     foreach (element_children($setting) as $property) {
       $cell_array = array();
       $field = $setting[$property];
@@ -100,7 +105,7 @@ function theme_islandora_book_page_reorder_table(array $element) {
       'class' => 'draggable',
     );
   }
-  $headers = array( t('Page Pid'), 'Current Sequence Number', t('Page Label'));
+  
   drupal_add_tabledrag('page_weight_table', 'order', 'sibling', 'sequence_weight');
-  return theme('table',$headers, $rows,array('id' => 'page_weight_table'));
+  return theme('table', $element['#header'], $rows, array('id' => 'page_weight_table'));
 }

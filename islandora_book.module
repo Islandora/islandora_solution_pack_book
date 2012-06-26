@@ -17,6 +17,15 @@ function islandora_book_menu() {
     'type' => MENU_CALLBACK,
     'access arguments' => array('view fedora collection'),
   );
+  $items['restore/books'] = array(
+    'title' => t('Deleted Books'),
+    'file' => 'management/book_undelete.inc',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('book_undelete_form'),
+    'type' => MENU_NORMAL_ITEM,
+    'access arguments' => array('manage deleted books'),
+  );
+
   $items['fedora/book_viewer'] = array(
     'title' => t('Book viewer'),
     'page callback' => 'islandora_book_book_viewer',
@@ -93,6 +102,7 @@ function islandora_book_perm() {
     'delete pages',
     'manage book object',
     'manage page object',
+    'manage deleted books',
   );
 }
 
@@ -291,6 +301,10 @@ function islandora_book_theme() {
     'islandora_book_page_reorder_table' => array(
       'arguments' => array('element' => NULL),
       'file' => 'management/IslandoraPageReorderTable.inc',
+    ),
+    'islandora_book_undelete_table' => array(
+      'arguments' => array('element' => NULL),
+      'file' => 'management/IslandoraBookUndelete.inc',
     )
   );
 }
@@ -554,3 +568,17 @@ function islandora_book_help($path, $arg) {
   }
 }
 
+/**
+ * Implementation of hook_islandora_tabs_alter().
+ *
+ * @param &$tabs array
+ *   The array of tabs/tabset to alter.
+ * @param $params array
+ *   An associative array containing the parameters with which the original
+ *   hook was called.
+ * @see fedora_repository_get_items()
+ */
+function islandora_book_islandora_tabs_alter(&$tabs, $params) {
+  //Turn off object details
+  $tabs['fedora_object_details'] = null;
+}

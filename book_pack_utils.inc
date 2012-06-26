@@ -343,11 +343,11 @@ function islandora_recursive_directory_delete($dir) {
   return rmdir($dir);
 }
 
-function get_sorted_pages($book_pid) {
+function get_sorted_pages($book_pid, $state = 'Active') {
   $query = <<<XML
   select \$object \$page from <#ri>
 where \$object <fedora-rels-ext:isMemberOf> <info:fedora/$book_pid>
-and \$object <fedora-model:state> <fedora-model:Active>
+and \$object <fedora-model:state> <fedora-model:$state>
 and (\$object <info:islandora/islandora-system:def/paged-item-info#sequenceNumber> \$page
 or \$object <http://islandora.ca/ontology/relsext#isSequenceNumber> \$page)
 order by \$page
@@ -574,4 +574,25 @@ function islandora_book_get_available_tesseract_languages() {
   return array_values(array_filter($languages, function($e) {
             return ($e !== 0);
           }));
+}
+
+function islandora_book_get_inactive_books() {
+  module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
+  $query = <<<STRING
+select \$subject \$title from <#ri>
+where(\$subject<info:fedora/fedora-system:def/model#hasModel> <info:fedora/islandora:bookCModel>
+or \$subject<info:fedora/fedora-system:def/model#hasModel> <info:fedora/islandora:iaBookCModel>)
+and \$subject <info:fedora/fedora-system:def/model#state> <info:fedora/fedora-system:def/model#Inactive>
+and \$subject <dc:title> \$title
+STRING;
+
+  $query_string = htmlentities(urlencode($query));
+  $url = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
+  $url .= '?type=tuples&flush=true&format=csv&limit=13000&lang=itql&stream=on&query=' . $query_string;
+  $content = do_curl($url, TRUE);
+  $results = explode("\n", $content);
+  array_shift($results);
+  $object_pids = preg_replace('/^info:fedora\//', '', $results);
+  $object_pids = array_values(array_filter($object_pids));
+  return $object_pids;
 }
