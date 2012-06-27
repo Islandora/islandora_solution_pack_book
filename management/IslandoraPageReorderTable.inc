@@ -7,6 +7,7 @@
  * @return array
  */
 function islandora_book_page_reorder_table($book_pid) {
+  global $base_url;
   module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
   $query = <<<XML
   select \$object \$page \$title from <#ri>
@@ -35,10 +36,13 @@ XML;
     $keys[] = $line_parts[0];
   }
 
-
+  $alink_options = array(
+    'attributes' => array('target' => '_blank', 'class' => 'fedora_image'),
+    'html' => TRUE,
+  );
 
   $table = array(
-    '#header' => array(theme('table_select_header_cell'), t("Page Pid - Unique Identifier"), 'Current Sequence Number', t('Page Label')),
+    '#header' => array(theme('table_select_header_cell'), t("Page"), 'Current<br />Sequence #', t('Label')),
     '#theme' => 'islandora_book_page_reorder_table',
     '#tree' => TRUE,
     '#id' => 'page_weight_table',
@@ -53,13 +57,17 @@ XML;
     return;
   }
   foreach ($objects as $key => $object) {
+    $img = "<img src='$base_url/fedora/repository/$key/TN' width='28' height='42' title = '$key'>";
+    $img = theme_image("$base_url/fedora/repository/$key/TN", '', $key, array('width' => '20'), FALSE);
     $cells = array();
     $cells['#pid'] = $key;
-    $cells['pid'] = array('#value' => l($key, 'fedora/repository/' . $key));
+    $cells['pid'] = array('#value' => l($img, 'fedora/repository/' . $key, $alink_options));
+
     $cells['sequence'] = array(
       '#type' => 'item',
       '#value' => $object[0],
     );
+
     $cells['pos'] = array(
       '#type' => 'textfield',
       '#default_value' => $object[0],
@@ -98,6 +106,9 @@ function theme_islandora_book_page_reorder_table(array $element) {
       if ($property == 'pos') {
         $cell_array['class'] = 'sequence_weight';
       }
+      if ($property == 'pid') {
+        $cell_array['class'] = 'fedora_link';
+      }
       $fields[] = $cell_array;
     }
     $rows[] = array(
@@ -105,7 +116,7 @@ function theme_islandora_book_page_reorder_table(array $element) {
       'class' => 'draggable',
     );
   }
-  
+
   drupal_add_tabledrag('page_weight_table', 'order', 'sibling', 'sequence_weight');
   return theme('table', $element['#header'], $rows, array('id' => 'page_weight_table'));
 }

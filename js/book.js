@@ -1,12 +1,9 @@
 Drupal.behaviors.book = function(context){
-  $('.cwrc_submit').hide();
-  $(".jumpmenu").change(function() {
-    var val = ($('.jumpmenu :selected').attr('value'));
-    if (val != '') {
-      alert ("jump");
-      //location.href=val;
-      window.open(val);
-    }
+  $("a.fedora_image img ").hover(function() {
+    $(this).attr("width","120");
+  }, function() {
+    $(this).attr("width","20");
   });
+
 };
 

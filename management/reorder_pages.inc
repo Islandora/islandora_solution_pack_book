@@ -11,7 +11,7 @@ function page_reorder(&$form_state, $pid) {
     );
     $form['reorder_pages'] = array(
       '#title' => t("Manage Book Pages"),
-      '#description' => t("Checked pages will be deleted. <strong>THIS CANNOT BE UNDONE!</strong><br />Drag individual pages to resequence book."),
+      '#description' => t("Checked pages will be deleted. <strong>THIS CANNOT BE UNDONE!</strong><br />Drag individual pages to resequence book.<br />Clicking on the page image will open the page object in new tab."),
       '#type' => 'fieldset',
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
