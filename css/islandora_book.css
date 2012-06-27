@@ -1,6 +1,6 @@
 
 .fedora_detailed_list {
-    display: none;
+  display: none;
 }
 #fedora-repository-purge-object-form{
   display: none;
@@ -9,3 +9,12 @@
 .sequence_weight{
   display: none;
 }
+#thumbnail{
+  position:absolute;
+  border:1px solid #ccc;
+  background:#333;
+  padding:5px;
+  display:none;
+  color:#fff;
+}
+img{border:none;}

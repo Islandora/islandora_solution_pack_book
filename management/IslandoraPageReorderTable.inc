@@ -36,10 +36,7 @@ XML;
     $keys[] = $line_parts[0];
   }
 
-  $alink_options = array(
-    'attributes' => array('target' => '_blank', 'class' => 'fedora_image'),
-    'html' => TRUE,
-  );
+
 
   $table = array(
     '#header' => array(theme('table_select_header_cell'), t("Page"), 'Current<br />Sequence #', t('Label')),
@@ -57,11 +54,15 @@ XML;
     return;
   }
   foreach ($objects as $key => $object) {
-    $img = "<img src='$base_url/fedora/repository/$key/TN' width='28' height='42' title = '$key'>";
-    $img = theme_image("$base_url/fedora/repository/$key/TN", '', $key, array('width' => '20'), FALSE);
+    $alink_options = array(
+      'attributes' => array('target' => '_blank', 'class' => 'fedora_image', 'title' => $key),
+      'html' => TRUE,
+    );
+    $img = "<img src='$base_url/fedora/repository/$key/TN' width='28' height='42'>";
+    $img = theme_image("$base_url/fedora/repository/$key/TN", '', NULL, array('width' => '20'), FALSE);
     $cells = array();
     $cells['#pid'] = $key;
-    $cells['pid'] = array('#value' => l($img, 'fedora/repository/' . $key, $alink_options));
+    $cells['pid'] = array('#value' => l($img, 'fedora/repository/' . $key , $alink_options));
 
     $cells['sequence'] = array(
       '#type' => 'item',
