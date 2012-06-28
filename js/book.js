@@ -26,6 +26,7 @@ Drupal.behaviors.book = function(context){
       this.title = this.t;
       $("#thumbnail").remove();
     });
+
     $("a.fedora_image").mousemove(function(e){
       $("#thumbnail")
       .css("top",(e.pageY - xOffset) + "px")

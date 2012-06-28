@@ -9,7 +9,7 @@
 function book_delete(&$form_state, $pid) {
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   $count = count(get_collection_relationships($pid));
-  $description = t('Clicking this button will delete this book. <br /> <strong>This action cannot be undone.</strong>');
+  $description = t('Clicking this button will delete this book. <br /> <strong>This action cannot be undone without administrative priveleges.</strong>');
   if ($count > 1) {
     $description = t("This book is a member of @count collections !break
       Books with membership in multiple collections cannot be deleted. !break

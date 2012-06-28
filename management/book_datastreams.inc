@@ -51,6 +51,7 @@ function update_datastreams(&$form_state, $pid) {
 
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   $languages = islandora_book_get_available_tesseract_languages();
+  $warning = NULL;
 
 
   $form = array();
@@ -68,6 +69,7 @@ function update_datastreams(&$form_state, $pid) {
   );
   $form['page_manage']['do_ocr'] = array(
     '#type' => 'checkbox',
+    '#description' => t('Refreshing the OCR will remove all edits to the previous OCR stream, including TEI and entity markup.'),
     '#title' => t('Refresh OCR for this book')
   );
 

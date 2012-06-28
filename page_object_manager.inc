@@ -69,7 +69,8 @@ function page_management_form(&$form_state, $pid) {
   );
   $form['page_manage']['do_ocr'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Refresh OCR for this page')
+    '#title' => t('Refresh OCR for this page'),
+    '#description' => t('Refreshing the OCR will remove all edits to the previous OCR stream, including TEI and entity markup.'),
   );
 
 
