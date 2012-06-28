@@ -62,9 +62,7 @@ function book_collection_management_submit($form, &$form_state) {
   global $user;
   $book_pid = $form_state['values']['pid'];
   $current_collections = array_keys(get_collection_relationships($book_pid));
-  $new_collections = array_values(array_filter($form_state['values']['membership'], function($e) {
-                return ($e !== 0);
-              }));
+  $new_collections = array_values(array_filter($form_state['values']['membership']));
 
   $to_keep = array_intersect($current_collections, $new_collections);
   $to_toss = array_diff($current_collections, $to_keep);
