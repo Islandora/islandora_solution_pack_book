@@ -50,17 +50,12 @@ xsi:schemaLocation="info:fedora/fedora-system:def/foxml# http://www.fedora.info/
           </mimetypes>
           <ingest_rules></ingest_rules>
           <datastreams>
-            <datastream dsid="ABBYY"></datastream>
             <datastream dsid="TEI"></datastream>
             <datastream dsid="DC"></datastream>
             <datastream dsid="RELS-EXT"></datastream>
             <datastream dsid="PDF"></datastream>
             <datastream dsid="OCR"></datastream>
             <datastream dsid="TN"></datastream>
-            <datastream dsid="IMT-JPG"></datastream>
-            <datastream dsid="IMT-HTML">
-              <display_method class="IMTViewer" file="imt.inc" method="showIMT" module="islandora_book"></display_method>
-            </datastream>
           </datastreams>
           <ingest_form dsid="QDC" hide_file_chooser="true" page="2">
             <form_builder_method class="" file="" handler="" method="" module=""></form_builder_method>
