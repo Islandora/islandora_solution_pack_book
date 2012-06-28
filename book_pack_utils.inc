@@ -571,9 +571,9 @@ function islandora_book_get_tesseract_langauges() {
 
 function islandora_book_get_available_tesseract_languages() {
   $languages = variable_get('islandora_book_ocr_languages', array('eng'));
-  return array_values(array_filter($languages, function($e) {
-            return ($e !== 0);
-          }));
+  $languages = array_filter($languages);
+
+  return $languages;
 }
 
 function islandora_book_get_inactive_books() {
