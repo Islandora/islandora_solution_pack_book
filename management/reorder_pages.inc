@@ -24,53 +24,44 @@ function page_reorder(&$form_state, $pid) {
     $form['reorder_pages']['reorder_pages']['submit'] = array(
       '#id' => 'reorder',
       '#type' => 'submit',
-      '#value' => t('Save Page Reordering'),
-    );
-
-    $form['reorder_pages']['confirm']['submit'] = array(
-      '#id' => 'delete_pages',
-      '#type' => 'submit',
-      '#value' => t('Delete Selected Pages'),
+      '#value' => t('Save Changes'),
     );
   }
   return $form;
 }
 
 function page_reorder_submit($form, &$form_state) {
+  $book_pid = $form_state['values']['pid'];
+  $pids_to_delete = @array_filter($form_state['values']['table']['selections']);
+  $pages = $form_state['values']['table']['rows'];
 
-  module_load_include('inc', 'islandora_book', 'book_pack_utils');
-  if ($form_state['clicked_button']['#id'] == 'reorder_pages') {
-    $pages = $form_state['values']['table']['rows'];
-    foreach ($pages as $page) {
+  $batch = array(
+    'title' => t("Processing @page_count pages", array('@page_count' => $count)),
+    'operations' => array(),
+    'file' => drupal_get_path('module', 'islandora_book') . '/management/reorder_pages.inc',
+    'init_message' => t('Preparing data...'),
+    'progress_message' => t('@current of @total tasks completed.'),
+  );
+
+
+  //reorder pages first
+  foreach ($pages as $page) {
+    $new_sequence = $page['current_sequence'];
+    if ($page['pos'] != $page['current_sequence']) {
       $new_sequence = ($page['pos'] + 1) / 2;
-      if ($new_sequence != $page['current_sequence']) {
-        $item = new Fedora_Item($page['page_pid']);
-        $item->purge_relationships('isSequenceNumber', $page['current_sequence'], ISLANDORA_RELS_EXT_URI, RELS_TYPE_PLAIN_LITERAL);
-        $item->add_relationship('isSequenceNumber', $new_sequence, ISLANDORA_RELS_EXT_URI, RELS_TYPE_PLAIN_LITERAL);
-      }
+    }
+    if ($new_sequence != $page['current_sequence']) {
+      $batch['operations'][] = array('reorder_dragged_pages', array($page['page_pid'], $page['current_sequence'], $new_sequence));
     }
   }
-  if ($form_state['clicked_button']['#id'] == 'delete_pages') {
-    $book_pid = $form_state['values']['pid'];
-    $page_pids = @array_filter($form_state['values']['table']['selections']);
-    $count = count($page_pids);
-    $batch = array(
-      'title' => t("Deleting @page_count pages", array('@page_count' => $count)),
-      'operations' => array(),
-      'file' => drupal_get_path('module', 'islandora_book') . '/management/add_pages.inc',
-      'init_message' => t('Preparing data...'),
-      'progress_message' => t('@current of @total tasks completed.'),
-    );
-
-    foreach ($page_pids as $page_pid) {
-      $batch['operations'][] = array('islandora_book_delete_single_page', array($page_pid));
-    }
-    $batch['operations'][] = array('post_deletion_renumber_pages_wrapper', array($book_pid));
-    batch_set($batch);
-    batch_process("fedora/repository/$book_pid");
-
-    $path = drupal_get_path('module', 'islandora_book');
+  // delete selected pages
+  
+  foreach ($pids_to_delete as $page_pid) {
+    $batch['operations'][] = array('islandora_book_delete_single_page_wrapper', array($page_pid));
   }
+  $batch['operations'][] = array('post_deletion_renumber_pages_wrapper', array($book_pid));
+   batch_set($batch);
+  
 }
 
 /**
@@ -81,4 +72,16 @@ function page_reorder_submit($form, &$form_state) {
 function post_deletion_renumber_pages_wrapper($book_pid) {
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   post_deletion_renumber_pages($book_pid);
+}
+
+function islandora_book_delete_single_page_wrapper($page_pid) {
+  module_load_include('inc', 'islandora_book', 'management/add_pages');
+  islandora_book_delete_single_page($page_pid);
+}
+
+function reorder_dragged_pages($pid, $old_sequence, $new_sequence) {
+  module_load_include('inc' , 'fedora_repository', 'api/fedora_item');
+  $item = new Fedora_Item($pid);
+  $item->purge_relationships('isSequenceNumber', $old_sequence, ISLANDORA_RELS_EXT_URI, RELS_TYPE_PLAIN_LITERAL);
+  $item->add_relationship('isSequenceNumber', $new_sequence, ISLANDORA_RELS_EXT_URI, RELS_TYPE_PLAIN_LITERAL);
 }
