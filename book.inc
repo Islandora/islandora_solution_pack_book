@@ -38,7 +38,7 @@ class IslandoraBook {
     $path = drupal_get_path('module', 'islandora_book');
     drupal_add_css($path . '/css/islandora_book.css');
     drupal_add_js($path . '/js/jquery.selectboxes.min.js');
-    drupal_add_js($path . '/js/book.js');
+    drupal_add_js($path . '/js/book.js?stopcache');
     global $base_url;
     $show_purge_tab = (!empty($_POST['form_id']) && ($_POST['form_id'] == 'islandora_book_purge_pages_form'));
     $page_number = 1;

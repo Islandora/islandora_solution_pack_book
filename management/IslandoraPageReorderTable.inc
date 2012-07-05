@@ -77,9 +77,10 @@ XML;
       '#attributes' => array('class' => 'sequence_weight'),
     );
 
-    $cells['label'] = array('#type' => 'item', '#value' => $object[1]);
+    $cells['label'] = array('#type' => 'textfield', '#default_value' => $object[1]);
     $cells['page_pid'] = array('#type' => 'hidden', '#value' => $key);
     $cells['current_sequence'] = array('#type' => 'hidden', '#value' => $object[0]);
+    $cells['current_label'] = array('#type' => 'hidden', '#value' => $object[1]);
     $rows[] = $cells;
   }
 

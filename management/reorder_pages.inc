@@ -53,15 +53,17 @@ function page_reorder_submit($form, &$form_state) {
     if ($new_sequence != $page['current_sequence']) {
       $batch['operations'][] = array('reorder_dragged_pages', array($page['page_pid'], $page['current_sequence'], $new_sequence));
     }
+    if ($page['label'] != $page['current_label']) {
+      $batch['operations'][] = array('relabel_pages', array($page['page_pid'], $page['label']));
+    }
   }
   // delete selected pages
-  
+
   foreach ($pids_to_delete as $page_pid) {
     $batch['operations'][] = array('islandora_book_delete_single_page_wrapper', array($page_pid));
   }
   $batch['operations'][] = array('post_deletion_renumber_pages_wrapper', array($book_pid));
-   batch_set($batch);
-  
+  batch_set($batch);
 }
 
 /**
@@ -80,8 +82,33 @@ function islandora_book_delete_single_page_wrapper($page_pid) {
 }
 
 function reorder_dragged_pages($pid, $old_sequence, $new_sequence) {
-  module_load_include('inc' , 'fedora_repository', 'api/fedora_item');
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   $item = new Fedora_Item($pid);
   $item->purge_relationships('isSequenceNumber', $old_sequence, ISLANDORA_RELS_EXT_URI, RELS_TYPE_PLAIN_LITERAL);
   $item->add_relationship('isSequenceNumber', $new_sequence, ISLANDORA_RELS_EXT_URI, RELS_TYPE_PLAIN_LITERAL);
+}
+
+function relabel_pages($pid, $label) {
+  global $user;
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  $item = new Fedora_Item($pid);
+
+  // update dc stream with new label
+  $dc = $item->get_datastream_dissemination('DC');
+  $xml = simplexml_load_string($dc);
+  $xml->title[0] = $label;
+  $dc = $xml->asXML();
+  $item->modify_datastream($dc, 'DC', 'DC', 'text/xml');
+
+  // if MODS stream exits, update it
+  if (key_exists('MODS', $item->datastreams)) {
+    $mods = $item->get_datastream_dissemination('MODS');
+    $modsxml = simplexml_load_string($mods);
+    $modsxml->titleInfo->title = $label;
+    $mods = $modsxml->asXML();
+    $item->modify_datastream($mods, 'MODS', 'MODS', 'text/xml');
+  }
+
+  // update object label
+  $item->modify_object($label, 'A', $uer->uid);
 }
