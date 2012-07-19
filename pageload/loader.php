@@ -35,13 +35,17 @@
       <form id="fileupload" action="server/php/" method="POST" enctype="multipart/form-data">
         <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
         <div class="row fileupload-buttonbar">
-          <div class="span7">
+          <div class="span">
             <!-- The fileinput-button span is used to style the file input field as button -->
             <span class="btn btn-success fileinput-button">
               <i class="icon-plus icon-white"></i>
               <span>Add files to upload queue</span>
               <input type="file" name="files[]" multiple>
             </span>
+            <button type="submit" class="btn btn-success fileinput-button">
+              <i class="icon-upload icon-white"></i>
+              <span>Upload All</span>
+            </button>
             <button id="add_page" type="button" class="btn btn-primary">
               <i class="icon-upload icon-white"></i>
               <span>Ingest Uploaded files</span>
@@ -50,7 +54,7 @@
               <i class="icon-trash icon-white"></i>
               <span>Empty upload queue</span>
             </button>
-            
+
           </div>
           <div class="span5">
             <!-- The global progress bar -->

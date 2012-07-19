@@ -36,13 +36,5 @@ Drupal.behaviors.book = function(context){
 
 	imagePreview();
 
-//  $("a.fedora_image img").hover(function() {
-//    $(this).attr("width","120");
-//  }, function() {
-//    $(this).attr("width","20");
-//  });
-
-
-
 };
 
