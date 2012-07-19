@@ -44,7 +44,7 @@
             </span>
             <button type="submit" class="btn btn-success fileinput-button">
               <i class="icon-upload icon-white"></i>
-              <span>Upload All</span>
+              <span>Start all Ingests</span>
             </button>
             <button id="add_page" type="button" class="btn btn-primary">
               <i class="icon-upload icon-white"></i>
