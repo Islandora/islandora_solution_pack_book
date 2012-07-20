@@ -90,12 +90,12 @@ function restore_inactive_book($book_pid) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   $item = new Fedora_Item($book_pid);
-  $item->modify_object($item->objLabel, 'A', $user->uid, 'State restored by Admin');
+  $item->modify_object($item->objectProfile->objLabel, 'A', $user->uid, 'State restored by Admin');
   $page_pids = get_sorted_pages($book_pid, 'Inactive');
   if (!empty($page_pids)) {
     foreach ($page_pids as $page_pid) {
       $item = new Fedora_Item($page_pid);
-      $item->modify_object($item->objLabel, 'A', $user->uid, 'State restored by Admin');
+      $item->modify_object($item->objectProfile->objLabel, 'A', $user->uid, 'State restored by Admin');
       $item->forget();
     }
   }
