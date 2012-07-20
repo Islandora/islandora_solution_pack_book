@@ -416,6 +416,27 @@ function islandora_book_required_fedora_objects() {
           'dsversion' => NULL,
         ),
         array(
+          'foxml_file' => "$module_path/xml/islandora_organization-entityCmodel.xml",
+          'pid' => 'islandora:organization-entityCModel',
+          'dsid' => NULL,
+          'datastream_file' => NULL,
+          'dsversion' => NULL,
+        ),
+        array(
+          'foxml_file' => "$module_path/xml/islandora_place-entityCmodel.xml",
+          'pid' => 'islandora:place-entityCModel',
+          'dsid' => NULL,
+          'datastream_file' => NULL,
+          'dsversion' => NULL,
+        ),
+        array(
+          'foxml_file' => "$module_path/xml/islandora_person-entityCmodel.xml",
+          'pid' => 'islandora:person-entityCModel',
+          'dsid' => NULL,
+          'datastream_file' => NULL,
+          'dsversion' => NULL,
+        ),
+        array(
           'foxml_file' => "$module_path/xml/islandora_jp2Sdep-pageCModel.xml",
           'pid' => 'islandora:jp2Sdep-pageCModel',
           'dsid' => NULL,
