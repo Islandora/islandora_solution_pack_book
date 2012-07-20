@@ -42,10 +42,10 @@
               <span>Add files to upload queue</span>
               <input type="file" name="files[]" multiple>
             </span>
-            <button type="submit" class="btn btn-success fileinput-button">
-              <i class="icon-upload icon-white"></i>
-              <span>Start all Ingests</span>
-            </button>
+                <button type="submit" class="btn btn-primary start">
+                    <i class="icon-upload icon-white"></i>
+                    <span>Start all Ingests</span>
+                </button>
             <button id="add_page" type="button" class="btn btn-primary">
               <i class="icon-upload icon-white"></i>
               <span>Ingest Uploaded files</span>
