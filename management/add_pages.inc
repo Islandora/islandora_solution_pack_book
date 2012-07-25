@@ -1,18 +1,21 @@
 <?php
 
 function book_add_pages(&$form_state, $pid) {
+  $list = array(
+    l(t("Append or Insert Pages"), "islandora/book/upload/$pid"),
+    l(t("Create Digital Page"), "islandora/book/borndigital/$pid")
+  );
+
   $form['page_add'] = array(
     '#attributes' => array('class' => 'page_fieldset'),
     '#type' => 'fieldset',
     '#collapsed' => FALSE,
     '#collapsible' => true,
   );
-  $form['page_add']['link'] = array(
-    '#value' => l(t("Append or Insert Pages"), "islandora/book/upload/$pid") . '<br />',
+  $form['page_add']['links'] = array(
+    '#value' => theme_item_list($list),
   );
-  $form['page_add']['bd_link'] = array(
-    '#value' => l(t("Create Digital Page"), "islandora/book/borndigital/$pid"),
-  );
+
 
   return $form;
 }
@@ -139,6 +142,7 @@ function book_add_pages_form_validate($form, &$form_state) {
  * @param array $form_state
  */
 function book_add_pages_form_submit($form, &$form_state) {
+
   global $base_path;
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   $pageCModel = $form_state['values']['page_cmodel'];
@@ -163,7 +167,7 @@ function book_add_pages_form_submit($form, &$form_state) {
     $parts = explode(':', $pid);
     $nextPid = FEDORA_ITEM::get_next_PID_in_namespace($parts[0]);
     $page_item = Fedora_Item::ingest_new_item($nextPid, 'A', t('Digital Page'));
-    $page_item->add_relationship('hasModel', 'islandora:pageCModel', FEDORA_MODEL_URI);
+    $page_item->add_relationship('hasModel', 'islandora:bd_pageCModel', FEDORA_MODEL_URI);
     $page_item->add_relationship('isSequenceNumber', $start_page, 'http://islandora.ca/ontology/relsext#', 3);
     $page_item->add_relationship('isPageNumber', $start_page, 'http://islandora.ca/ontology/relsext#', 3);
     $page_item->add_relationship('isSection', '1', 'http://islandora.ca/ontology/relsext#', 3);
@@ -281,7 +285,8 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
       }
     }
     //add thumbnail image
-    exec("convert {$page_file}[0] -colorspace RGB -thumbnail 120x $page_file-tn.jpg", $output, $returnValue);
+    $cmd = "convert {$page_file}[0] -colorspace RGB -thumbnail 120x $page_file-tn.jpg";
+    exec($cmd, $output, $returnValue);
     if ($returnValue == '0') {
       $page_item->add_datastream_from_file("$page_file-tn.jpg", 'TN', 'Thumbnail', 'image/jpeg', 'M');
       if ($page_num == 1) {
@@ -415,6 +420,7 @@ function makePDF($book_pid, $file_list, $tmpDir) {
     $book_item->add_datastream_from_file($outputFile, 'PDF', "PDF of Book", 'application/pdf', 'M');
   }
 }
+
 //deprecated - to be deleted on approval
 function page_delete(&$form_state, $pid) {
   module_load_include('inc', 'islandora_book', 'management/IslandoraBookPageTable');
@@ -496,7 +502,6 @@ function get_page_files($pid) {
 
   return $ordered_files;
 }
-
 
 //deprecated - to be deleted on approval
 function page_delete_submit($form, &$form_state) {
