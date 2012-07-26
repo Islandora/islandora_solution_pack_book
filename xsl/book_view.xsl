@@ -78,6 +78,7 @@
             </table>
           </div>
         </td>
+       
         <td valign="top">
           <xsl:if test="$INGESTED = 'true'">
             <div><a><xsl:attribute name="href"><xsl:copy-of select="$OBJECTSPAGE"/>fedora/book_viewer/<xsl:value-of select="$PID"/></xsl:attribute>Read</a></div>

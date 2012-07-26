@@ -31,8 +31,9 @@ function book_add_pages(&$form_state, $pid) {
 function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageCModel', $relation = 'isMemberOf') {
   $file = (isset($form_state['values']['ingest-file-location']) ? $form_state['values']['ingest-file-location'] : '');
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
+  module_load_include('inc', 'islandora_book', 'management/IslandoraFileReorderTable');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
-
+  $table = islandora_file_reorder_table($pid);
   $languages = islandora_book_get_available_tesseract_languages();
 
   $item = new Fedora_Item($pid);
@@ -51,7 +52,9 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
   }
   $message = t("This sequence currently has @count pages. Additional pages will be appended at the end of the sequence by default. !break", array("@count" => $current_page_count, '!break' => '<br />'));
   $message .= t("Choose a number lower than @count to insert page(s) at a specific location in the sequence.", array("@count" => $current_page_count, '!break' => '<br />'));
-
+  $form['table'] = array(
+    'table' => $table,
+  );
   $form['page_add'] = array(
     '#type' => 'fieldset',
     '#collapsed' => true,
@@ -144,17 +147,23 @@ function book_add_pages_form_validate($form, &$form_state) {
 function book_add_pages_form_submit($form, &$form_state) {
 
   global $base_path;
+
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   $pageCModel = $form_state['values']['page_cmodel'];
   $pid = $form_state['values']['pid'];
   $preprocess = $form_state['values']['preprocess'];
   $start_page = (isset($form_state['values']['insertion_point'])) ? $form_state['values']['insertion_point'] + 1 : 1;
   $dirName = str_replace(':', '_', $pid);
-  $tmpDir = file_directory_path() . '/' . $dirName . '/';
+  // $tmpDir = file_directory_path() . '/' . $dirName . '/';
   $relationship = $form_state['values']['relation'];
   $language = (isset($form_state['values']['language'])) ? $form_state['values']['language'] : 'eng';
   if ($pageCModel == 'islandora:pageCModel') {
-    $file_list = get_page_files($pid);
+
+    $file_list = array();
+    foreach ($form_state['values']['table']['rows'] as $row) {
+      $file_list[$row['pos']] = $row['file'];
+    }
+    ksort($file_list);
     ibook_create_page_objects($pid, $file_list, $form_state['values']['page_cmodel'], $relationship, $tmpDir, $start_page, $language, $preprocess);
   }
   if ($pageCModel == 'islandora:bd_pageCModel') {
@@ -452,57 +461,6 @@ function page_delete(&$form_state, $pid) {
   return $form;
 }
 
-/**
- * retrieves all files from temporary directory, including zipped files, and ordering by mtime
- * @param string $pid
- * @return array
- */
-function get_page_files($pid) {
-  module_load_include('inc', 'islandora_book', 'management/add_pages');
-  $flat_pid = str_replace(':', '_', $pid);
-  module_load_include('inc', 'islandora_book', 'book_pack_utils');
-  $file_dir = file_directory_path() . "/$flat_pid/";
-  $files = scandir($file_dir);
-
-//clean and order array input array
-
-  $temp_process = array();
-  foreach ($files as $file) {
-    if ($file != '.' && $file != '..') {
-      $filename = $file_dir . $file;
-      $temp_process[$filename] = filemtime($filename);
-    }
-  }
-  asort($temp_process);
-  $sorted_files = array_keys($temp_process);
-// unzip files and add them to array in the correct order
-// spaces are rmoved from file names in the interest of consistency
-
-  $ordered_files = array();
-  foreach ($sorted_files as $candidate) {
-    $old_filename = pathinfo($candidate, PATHINFO_FILENAME);
-    $ext = pathinfo($candidate, PATHINFO_EXTENSION);
-    $new_file_name = preg_replace("/[^a-z\.\d]/i", "", $old_filename);
-    if ($new_file_name != $old_filename) {
-      $new_fullname = str_replace($old_filename, $new_file_name, $candidate);
-      $success = rename("$candidate", "$new_fullname");
-      $candidate = $new_fullname;
-    }
-    $allowed_extentions = array('tif', 'tiff', 'jpg', 'jpeg');
-    if (in_array(strtolower($ext), $allowed_extentions)) {
-      $ordered_files[] = $candidate;
-    }
-
-    if ($ext == 'zip') {
-      $unzipped_files = get_files_from_zip($candidate);
-      $ordered_files = array_merge($ordered_files, $unzipped_files);
-    }
-  }
-  // ordered files now has all the information we need to do a sucessful page ingest
-
-  return $ordered_files;
-}
-
 //deprecated - to be deleted on approval
 function page_delete_submit($form, &$form_state) {
 
@@ -542,3 +500,4 @@ function wrap_post_deletion_renumber_pages($book_pid) {
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   post_deletion_renumber_pages($book_pid);
 }
+

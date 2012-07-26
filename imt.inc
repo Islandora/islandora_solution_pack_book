@@ -16,8 +16,6 @@ class IMTViewer {
     global $base_url;
     module_load_include('inc', 'fedora_repository', 'api/fedora_item');
     module_load_include('inc', 'islandora_book', 'book_pack_utils');
-    // hook added to allow support modules to additional links to page.
-    $links = module_invoke_all('islandora_book_get_pageview_links', $this->pid);
     $books = get_collection_from_pid($this->pid);
     $book = $books[0];
     $item = new fedora_item($this->pid);
@@ -38,12 +36,12 @@ class IMTViewer {
     $viewTag = l(t('View Full Size'), 'fedora/repository/' . $this->pid . '/JPEG/');
     $returnTag = l(t('Return to Book View'), "fedora/repository/$book");
 
+    $links = array($viewTag, $returnTag);
+    // hook added to allow support modules to additional links to page.
 
-    $htmlstr = "<div>$viewTag</div>";
-    $htmlstr .= "<div>$returnTag</div>";
-    foreach($links as $link){
-      $htmlstr .= "<div>$link</div>";
-    }
+    $links = array_merge($links, module_invoke_all('islandora_book_get_pageview_links', $this->pid));
+    $htmlstr = theme_item_list($links);
+
     $htmlstr .= '<div><a href="' . $base_url . '/fedora/repository/' . $this->pid . '"><img src="' . $base_url . '/fedora/repository/' . $this->pid . '/JPEG/' . '" /></a></div>';
 
 
