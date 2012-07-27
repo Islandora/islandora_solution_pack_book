@@ -23,7 +23,7 @@ function islandora_book_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('book_undelete_form'),
     'type' => MENU_NORMAL_ITEM,
-    'access arguments' => array('manage deleted books'),
+    'access arguments' => array('manage deleted books', 'purge objects and datastreams'),
   );
 
   $items['fedora/book_viewer'] = array(

@@ -9,7 +9,7 @@ function book_undelete_form(&$form_state) {
     '#value' => t("There are no inactive books in this repository"),
   );
 
-  if (user_access('undelete books') && $table) {
+  if (user_access('manage deleted books') && $table) {
     $form['pid'] = array(
       '#type' => 'hidden',
       '#value' => $pid,

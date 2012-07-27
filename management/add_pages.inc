@@ -52,9 +52,16 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
   }
   $message = t("This sequence currently has @count pages. Additional pages will be appended at the end of the sequence by default. !break", array("@count" => $current_page_count, '!break' => '<br />'));
   $message .= t("Choose a number lower than @count to insert page(s) at a specific location in the sequence.", array("@count" => $current_page_count, '!break' => '<br />'));
-  $form['table'] = array(
-    'table' => $table,
-  );
+  if ($table) {
+    $form['intro'] = array(
+      '#type' => 'item',
+      '#title' => t('Files to ingest'),
+      '#description' => t("Reorder files by dragging handles")
+    );
+    $form['table'] = array(
+      'table' => $table,
+    );
+  }
   $form['page_add'] = array(
     '#type' => 'fieldset',
     '#collapsed' => true,
