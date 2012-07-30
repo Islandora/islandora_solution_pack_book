@@ -34,7 +34,19 @@ Drupal.behaviors.book = function(context){
     });
   };
 
-	imagePreview();
+  imagePreview();
+  var label = $('#file_view');
+  label.hide();
+
+  $("#file_label").toggle( function(event){
+    label.show('fast');
+    event.preventDefault();
+  },
+  function (event) {
+    label.hide('fast');
+    event.preventDefault();
+  });
+
 
 };
 

@@ -33,12 +33,16 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   module_load_include('inc', 'islandora_book', 'management/IslandoraFileReorderTable');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+
+  $path = drupal_get_path('module', 'islandora_book');
+  drupal_add_js($path . '/js/book.js');
+
   $table = islandora_file_reorder_table($pid);
   $languages = islandora_book_get_available_tesseract_languages();
 
   $item = new Fedora_Item($pid);
   $book_title = $item->objectProfile->objLabel;
-
+  $toggle_link = l(t("Reorder Files"), '#');
   $prompt = t("Add page(s) to @title", array('@title' => $book_title));
   $submit_prompt = t('Ingest Pages');
   if ($page_cmodel == 'islandora:bd_pageCModel') {
@@ -55,17 +59,18 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
   if ($table) {
     $form['intro'] = array(
       '#type' => 'item',
-      '#title' => t('Files to ingest'),
-      '#description' => t("Reorder files by dragging handles")
+      '#title' => '<span id ="file_label">' . $toggle_link . "</span",
+      '#description' => t("Adjust ingest order of uploaded files")
+     
     );
     $form['table'] = array(
+      '#prefix' => '<div id ="file_view">',
       'table' => $table,
+      '#suffix' => '</div>',
     );
   }
   $form['page_add'] = array(
-    '#type' => 'fieldset',
-    '#collapsed' => true,
-    '#collapsible' => false,
+    '#type' => 'item',
     '#title' => $prompt,
   );
 
@@ -92,7 +97,7 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
     '#value' => $relation,
   );
   if ($pages) {
-    $form['page_add']['insertion_point'] = array(
+    $form['insertion_point'] = array(
       '#type' => 'textfield',
       '#title' => t('Last sequence number'),
       '#default_value' => $current_page_count,
@@ -102,7 +107,7 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
   }
   if ($page_cmodel == 'islandora:pageCModel') {
 
-    $form['page_add']['preprocess'] = array(
+    $form['preprocess'] = array(
       '#title' => t('Preprocessing for typescripts?'),
       '#description' => t('Will add additional processing for typewritten text.  This script grayscales and sharpens an ingested .tiff before performing OCR processes. <br />
      This has been shown to improve OCR results for some images. Use with caution. Process can be lengthly and is resource intensive. <br />
@@ -111,7 +116,7 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
     );
 
 
-    $form['page_add']['language'] = array(
+    $form['language'] = array(
       '#title' => t('Language'),
       '#type' => 'select',
       '#options' => $languages,
@@ -119,7 +124,7 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
     );
   }
 
-  $form['page_add']['submit'] = array(
+  $form['submit'] = array(
     '#type' => 'submit',
     '#weight' => 10,
     '#value' => $submit_prompt,
