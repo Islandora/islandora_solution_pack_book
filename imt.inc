@@ -33,16 +33,13 @@ class IMTViewer {
         'PID' => $this->pid,
       ),
     );
-    $viewTag = l(t('View Full Size'), 'fedora/repository/' . $this->pid . '/JPEG/');
-    $returnTag = l(t('Return to Book View'), "fedora/repository/$book");
 
-    $links = array($viewTag, $returnTag);
-    // hook added to allow support modules to additional links to page.
-
+    $link = array();
+    $links[] = l(t('Return to Book View'), "fedora/repository/$book");
     $links = array_merge($links, module_invoke_all('islandora_book_get_pageview_links', $this->pid));
     $htmlstr = theme_item_list($links);
 
-    $htmlstr .= '<div><a href="' . $base_url . '/fedora/repository/' . $this->pid . '"><img src="' . $base_url . '/fedora/repository/' . $this->pid . '/JPEG/' . '" /></a></div>';
+    $htmlstr .= '<div><a href="' . $base_url . '/fedora/repository/' . $this->pid . '/JPEG/"><img src="' . $base_url . '/fedora/repository/' . $this->pid . '/JPEG/' . '" /></a></div>';
 
 
     $collection_fieldset = array(

@@ -94,6 +94,12 @@ function islandora_book_menu() {
     'file' => 'pageload/upload_frame.inc',
     'type' => MENU_CALLBACK,
   );
+  $items['islandora/page/manage'] = array(
+    'page callback' => 'islandora_book_page_management',
+    'access arguments' => array('manage page object'),
+    'file' => 'page_object_manager.inc',
+    'type' => MENU_CALLBACK,
+  );
   return $items;
 }
 
