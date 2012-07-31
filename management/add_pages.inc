@@ -1,11 +1,17 @@
 <?php
 
 function book_add_pages(&$form_state, $pid) {
+  $path = drupal_get_path('module', 'islandora_book');
+  drupal_add_js($path . '/js/book.js');
+  drupal_add_css($path . '/css/islandora_book.css');
   $list = array(
     l(t("Append or Insert Pages"), "islandora/book/upload/$pid"),
     l(t("Create Digital Page"), "islandora/book/borndigital/$pid")
   );
-
+  $form['link'] = array(
+    '#type' => 'item',
+    '#value' => l(t('Return to book view'), "fedora/repository/$pid"),
+  );
   $form['page_add'] = array(
     '#attributes' => array('class' => 'page_fieldset'),
     '#type' => 'fieldset',
@@ -61,7 +67,6 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
       '#type' => 'item',
       '#title' => '<span id ="file_label">' . $toggle_link . "</span",
       '#description' => t("Adjust ingest order of uploaded files")
-     
     );
     $form['table'] = array(
       '#prefix' => '<div id ="file_view">',

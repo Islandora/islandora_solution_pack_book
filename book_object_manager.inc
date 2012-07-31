@@ -7,7 +7,7 @@
  */
 function book_management_wrapper($pid) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
-  return drupal_render(get_page_model_management_content($pid));
+  return drupal_render(get_book_model_management_content($pid));
 }
 
 /**

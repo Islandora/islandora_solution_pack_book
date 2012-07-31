@@ -3,6 +3,7 @@
 function book_collection_management(&$form_state, $pid) {
 
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
+  module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
   $potential_collections = get_collections_as_option_array();
   $sorted = array();
   $current_collections = get_collection_relationships($pid);

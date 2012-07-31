@@ -106,6 +106,16 @@ function islandora_book_menu() {
     'file' => 'management/IslandoraBookDisplayLinks.inc',
     'type' => MENU_CALLBACK,
   );
+  $items['islandora/book/management'] = array(
+    'page callback' => 'book_management_wrapper',
+    'access arguments' => array('manage book object'),
+    'file' => 'book_object_manager.inc',
+    'type' => MENU_CALLBACK,
+  );
+
+
+
+
   return $items;
 }
 
@@ -136,7 +146,7 @@ function islandora_book_islandora_tabs($content_models, $pid) {
   }
 
   if ($content_model == 'islandora:bookCModel' || $content_model == 'islandora:iaBookCModel') {
-    $return_tabs = get_book_model_management_content($pid);
+  //  $return_tabs = get_book_model_management_content($pid);
     $return_tabs['fedora_object_details'] = null;
     return $return_tabs;
   }

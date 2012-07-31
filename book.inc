@@ -37,7 +37,7 @@ class IslandoraBook {
     module_load_include('inc', 'fedora_repository', 'CollectionClass');
     $path = drupal_get_path('module', 'islandora_book');
     drupal_add_css($path . '/css/islandora_book.css');
-  
+
     drupal_add_js($path . '/js/book.js?stopcache');
     global $base_url;
     $show_purge_tab = (!empty($_POST['form_id']) && ($_POST['form_id'] == 'islandora_book_purge_pages_form'));
@@ -126,15 +126,16 @@ XML;
     global $base_url;
     module_load_include('inc', 'fedora_repository', 'api/fedora_item');
     module_load_include('inc', 'islandora_book', 'book_pack_utils');
-    
+
     $page_pids = get_sorted_pages($pid);
-    if(count($page_pids) >0){
+    if (count($page_pids) > 0) {
       $has_pages = TRUE;
     }
     $item = new Fedora_Item($this->pid);
     $img = theme_image("$base_url/fedora/repository/" . $this->pid . "/TN", '', NULL, NULL, FALSE);
     $links = array();
     $links[] = l(t('Metadata'), "islandora/page/manage/metadata/$this->pid/");
+    $links[] = l(t('Management'), "islandora/book/management/$this->pid/");
     $links = array_merge($links, module_invoke_all('islandora_book_get_bookview_links', $this->pid));
 
     $headers = array($item->objectProfile->objLabel, "");
