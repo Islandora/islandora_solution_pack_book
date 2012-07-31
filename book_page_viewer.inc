@@ -24,7 +24,6 @@ class PageViewer {
     $links[] = l(t('Return to Book View'), "fedora/repository/$book");
     $links = array_merge($links, module_invoke_all('islandora_book_get_pageview_links', $pid));
     $htmlstr = theme_item_list($links);
-    $img = "<img src= $base_url/fedora/repository/$pid/JPEG/>";
     $alink_options = array(
       'attributes' => array('target' => '_blank', 'class' => 'fedora_image', 'title' => $pid),
       'html' => TRUE,

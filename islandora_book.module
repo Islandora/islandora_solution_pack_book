@@ -100,6 +100,12 @@ function islandora_book_menu() {
     'file' => 'page_object_manager.inc',
     'type' => MENU_CALLBACK,
   );
+  $items['islandora/book/manage'] = array(
+    'page callback' => 'islandora_book_display_links',
+    'access arguments' => array('manage book object'),
+    'file' => 'management/IslandoraBookDisplayLinks.inc',
+    'type' => MENU_CALLBACK,
+  );
   return $items;
 }
 
@@ -138,7 +144,7 @@ function islandora_book_islandora_tabs($content_models, $pid) {
 
 /**
  * Implementation of hook_init
- * (currenlty disabled)
+ * (currently disabled)
  */
 function disabled_islandora_book_init() {
 

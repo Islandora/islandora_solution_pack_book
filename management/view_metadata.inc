@@ -2,9 +2,6 @@
 
 function view_metadata(&$form_state, $pid) {
 
-  //to be removed
-
-  module_load_include('inc', 'islandora_book', 'book_pack_utils');
   module_load_include('inc', 'fedora_repository', 'plugins/FedoraObjectDetailedContent');
   module_load_include('inc', 'fedora_repository', 'ObjectHelper');
  
@@ -35,6 +32,6 @@ function view_metadata(&$form_state, $pid) {
     '#value' => $edit_metadata_link,
   );
 
- // return $form;
+
 }
 
