@@ -19,22 +19,24 @@ class PageViewer {
     $books = get_collection_from_pid($this->pid);
     $book = $books[0];
     $item = new fedora_item($this->pid);
-
+    $pid = $this->pid;
     $link = array();
     $links[] = l(t('Return to Book View'), "fedora/repository/$book");
-    $links = array_merge($links, module_invoke_all('islandora_book_get_pageview_links', $this->pid));
+    $links = array_merge($links, module_invoke_all('islandora_book_get_pageview_links', $pid));
     $htmlstr = theme_item_list($links);
-    $htmlstr .= '<div><a href="' . $base_url . '/fedora/repository/' . $this->pid . '/JPEG/"><img src="' . $base_url . '/fedora/repository/' . $this->pid . '/JPEG/' . '" /></a></div>';
-
-    $collection_fieldset = array(
-      '#attributes' => array(),
-      '#collapsible' => FALSE,
-      '#value' => $htmlstr,
+    $img = "<img src= $base_url/fedora/repository/$pid/JPEG/>";
+    $alink_options = array(
+      'attributes' => array('target' => '_blank', 'class' => 'fedora_image', 'title' => $pid),
+      'html' => TRUE,
     );
+
+    $img = theme_image("$base_url/fedora/repository/$pid/JPEG", '', NULL, NULL, FALSE);
+    $htmlstr .= l($img, 'fedora/repository/'. $this->pid . '/JPEG/',$alink_options);
+
     $tabset['pages_tab'] = array(
       '#type' => 'tabpage',
       '#title' => $item->objectProfile->objLabel,
-      '#content' => theme('fieldset', $collection_fieldset),
+      '#content' => $htmlstr,
       '#selected' => true,
     );
     return $tabset;
