@@ -1,6 +1,6 @@
 <?php
 
-class IMTViewer {
+class PageViewer {
 
   private $pid = NULL;
 
@@ -12,35 +12,19 @@ class IMTViewer {
     $this->pid = $pid;
   }
 
-  function showIMT() {
+  function showPage() {
     global $base_url;
     module_load_include('inc', 'fedora_repository', 'api/fedora_item');
     module_load_include('inc', 'islandora_book', 'book_pack_utils');
     $books = get_collection_from_pid($this->pid);
     $book = $books[0];
     $item = new fedora_item($this->pid);
-    $path = drupal_get_path('module', 'islandora_book');
-    module_load_include('inc', 'fedora_repository', 'ObjectHelper');
-    $collectionHelper = new CollectionClass();
-    $pathTojs = $path . '/js/imt_template.js';
-    drupal_add_js("$pathTojs");
-    $pathToCSS = $path . '/js/imt_template.css';
-    drupal_add_css("$pathToCSS");
-
-    $options = array(
-      'attributes' => array('target' => '_blank'),
-      'query' => array(
-        'PID' => $this->pid,
-      ),
-    );
 
     $link = array();
     $links[] = l(t('Return to Book View'), "fedora/repository/$book");
     $links = array_merge($links, module_invoke_all('islandora_book_get_pageview_links', $this->pid));
     $htmlstr = theme_item_list($links);
-
     $htmlstr .= '<div><a href="' . $base_url . '/fedora/repository/' . $this->pid . '/JPEG/"><img src="' . $base_url . '/fedora/repository/' . $this->pid . '/JPEG/' . '" /></a></div>';
-
 
     $collection_fieldset = array(
       '#attributes' => array(),
