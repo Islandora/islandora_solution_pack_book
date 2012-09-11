@@ -1,6 +1,7 @@
 <?php
 
 function islandora_book_get_metadata_link(&$form_state, $pid) {
+  global $base_url;
   module_load_include('inc', 'fedora_repository', 'plugins/FedoraObjectDetailedContent');
   module_load_include('inc', 'fedora_repository', 'ObjectHelper');
   $edit_metadata_link = l(t('Edit Metadata'), $base_url . '/fedora/repository/editmetadata/' . $pid . '/metadata', array('attributes' => array('class' => 'islandora-repo-button')));

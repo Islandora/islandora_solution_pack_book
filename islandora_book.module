@@ -295,7 +295,7 @@ function theme_imagebutton($element) {
 }
 
 /**
- * Implementation of hook_theme() to register how to theme image buttons.
+ * Implementation of hook_theme().
  *
  * @return type
  */

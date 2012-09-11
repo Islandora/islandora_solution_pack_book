@@ -15,9 +15,6 @@ function current_datastreams(&$form_state, $pid) {
   $object_helper = new ObjectHelper();
   $ds_list = $object_helper->get_formatted_datastream_list($content_helper->pid, NULL, $content_helper->item);
 
-  // $ds_list = datastream_display_builder($content_helper->pid, $content_helper->item);
-  $add_datastreams_details = get_add_datastream_data($content_helper->pid);
-
   $form = array();
   $form['pid'] = array(
     '#type' => 'hidden',
@@ -166,7 +163,7 @@ function update_individual_pages($page_pid, $do_ocr, $refresh_images, $language,
   $item = new Fedora_Item($page_pid);
   $stream = 'TIFF';
   $ext = ".tif";
-  if (!key_exists('TIFF', $item->datastreams) & !key_exists('TIF', $item->datastreams)) {
+  if (!array_key_exists('TIFF', $item->datastreams) & !key_exists('TIF', $item->datastreams)) {
     $stream = 'JPG';
     $ext = '.jpg';
   }

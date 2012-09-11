@@ -32,7 +32,6 @@ XML;
   $object = array();
   foreach ($lines as $line) {
     $line_parts = explode(',', $line);
-
     $objects[$line_parts[0]] = array($line_parts[1], $line_parts[2]);
     $keys[] = $line_parts[0];
   }
