@@ -380,7 +380,7 @@ function islandora_book_viewer_create_hocr($executable, $page_file, $lang, &$obj
     $input->loadXML($xml_string);
     $path = drupal_get_path('module', 'islandora_bookviewer');
     $xsl = new DomDocument();
-    $test = $xsl->load($path . '/xslt/hocrToLowerhocr.xsl');
+    $test = $xsl->load($path . '/xsl/hocrToLowerhocr.xsl');
     if (!$test) {//can't run transform so leaving
       return FALSE;
     }

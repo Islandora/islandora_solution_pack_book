@@ -110,5 +110,5 @@ function relabel_pages($pid, $label) {
   }
 
   // update object label
-  $item->modify_object($label, 'A', $uer->uid);
+  $item->modify_object($label, 'A', $user->uid);
 }
