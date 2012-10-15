@@ -11,7 +11,7 @@ function islandora_book_enable() {
     drupal_set_message(t('Fedora instance is not currently available.  Installation must be verified and completed on the Islandora Configuration page.'));
   }
   else {
-    $solution_pack_info = islandora_book_required_fedora_objects();
+    $solution_pack_info = islandora_book_fedora_repository_required_fedora_objects();
 
     $batch = array(
       'title' => t('Installing Book Solutionpack objects'),

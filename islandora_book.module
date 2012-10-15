@@ -306,7 +306,7 @@ function _islandora_book_viewer_available() {
  * islandora book required fedora objects
  * @return array
  */
-function islandora_book_required_fedora_objects() {
+function islandora_book_fedora_repository_required_fedora_objects() {
   module_load_include('inc', 'fedora_repository', 'fedora_repository.solutionpacks');
   // Add the form and associate it to the content model
   $module_path = drupal_get_path('module', 'islandora_book');
