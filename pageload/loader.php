@@ -28,7 +28,7 @@
     <div class="container">
       <div class="page-header">
         <h3 id="book_title">Add page files</h3>
-        <h4>Please upload the items in the queue by clicking the 'Start' button beside each item. Pages will be added to the book based on this upload order.</h4>
+        <h4>Please upload the items in the queue by clicking the 'Start' button beside each item.</h4>
       </div>
       <a id="back_to_book"href="#">Return to Book</a>
       <!-- The file upload form used as target for the file upload widget -->
@@ -44,7 +44,7 @@
             </span>
                 <button type="submit" class="btn btn-primary start">
                     <i class="icon-upload icon-white"></i>
-                    <span>Start all Ingests</span>
+                    <span>Begin all file uploads</span>
                 </button>
             <button id="add_page" type="button" class="btn btn-primary">
               <i class="icon-upload icon-white"></i>

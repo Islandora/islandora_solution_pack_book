@@ -84,6 +84,7 @@ xsi:schemaLocation="info:fedora/fedora-system:def/foxml# http://www.fedora.info/
 <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:fedora="info:fedora/fedora-system:def/relations-external#" xmlns:fedora-model="info:fedora/fedora-system:def/model#" xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
   <rdf:Description rdf:about="info:fedora/islandora:person-entityCModel">
     <fedora:isMemberOfCollection rdf:resource="info:fedora/islandora:ContentModelsCollection"></fedora:isMemberOfCollection>
+    <hasModel rdf:resource="info:fedora/fedora-system:ContentModel-3.0"/>
   </rdf:Description>
 </rdf:RDF>
 </foxml:xmlContent>
