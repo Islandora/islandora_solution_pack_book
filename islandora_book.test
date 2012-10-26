@@ -30,4 +30,14 @@ class BookSolutionPackTestCase extends SolutionPackTestCase {
     return 'islandora_book';
   }
 
+  /**
+   *  Adds book solution pack permissions to the list of parent permissions.
+   */
+  protected function getUserPermissions() {
+    $out = parent::getUserPermissions();
+    $out[] = 'delete pages';
+    $out[] = 'manage book object';
+    $out[] = 'manage page object';
+    return $out;
+  }
 }
