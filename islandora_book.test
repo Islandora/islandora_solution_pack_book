@@ -4,7 +4,7 @@ module_load_include('inc', 'fedora_repository', 'fedora_repository.solutionpacks
 
 /**
  * @file
- * All tests relating to Islandora's Audio Solution Pack.
+ * All tests relating to Islandora's Book Solution Pack.
  */
 class BookSolutionPackTestCase extends SolutionPackTestCase {
 
@@ -24,7 +24,7 @@ class BookSolutionPackTestCase extends SolutionPackTestCase {
   /**
    * Overridden to provide the short form name of the module being tested.
    *
-   * @return string - 'islandora_audio_sp'
+   * @return string - 'islandora_book'
    */
   protected function getModuleShortFormName() { 
     return 'islandora_book';
