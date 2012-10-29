@@ -74,6 +74,11 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
       '#suffix' => '</div>',
     );
   }
+  $form['alpha_sort'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Sort by input file names?'),
+    '#description' => t("If checked files will be sorted alphanumerically to determine page order.")
+  );
   $form['page_add'] = array(
     '#type' => 'item',
     '#title' => $prompt,
@@ -174,13 +179,18 @@ function book_add_pages_form_submit($form, &$form_state) {
   // $tmpDir = file_directory_path() . '/' . $dirName . '/';
   $relationship = $form_state['values']['relation'];
   $language = (isset($form_state['values']['language'])) ? $form_state['values']['language'] : 'eng';
-  if ($pageCModel == 'islandora:pageCModel') {
 
+  if ($pageCModel == 'islandora:pageCModel') {
     $file_list = array();
     foreach ($form_state['values']['table']['rows'] as $row) {
       $file_list[$row['pos']] = $row['file'];
     }
-    ksort($file_list);
+    if ($form_state['values']['alpha_sort']) {
+      asort($file_list);
+    }
+    else {
+      ksort($file_list);
+    }
     ibook_create_page_objects($pid, $file_list, $form_state['values']['page_cmodel'], $relationship, $tmpDir, $start_page, $language, $preprocess);
   }
   if ($pageCModel == 'islandora:bd_pageCModel') {
@@ -289,6 +299,13 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
   $page_item->add_relationship('isSection', '1', 'http://islandora.ca/ontology/relsext#', 3);
   $page_item->add_relationship('isMemberOf', $book_pid, RELS_EXT_URI);
 
+  //add TECHMD stream if enabled
+
+  if (variable_get('enable_fits', FALSE) == TRUE) {
+    exec(variable_get('fits_path', '/usr/local/bin/fits.sh') . ' -i ' . escapeshellarg($page_file) . '', $TECHMD);
+    $TECHMD = implode($TECHMD);
+    $page_item->add_datastream_from_string($TECHMD, 'TECHMD', 'TECHMD', 'text/xml', 'M');
+  }
   // add original image
   if (strtolower($ext) == 'tif') {
     $ext = 'TIFF';
