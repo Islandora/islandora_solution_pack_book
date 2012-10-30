@@ -313,7 +313,6 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
   module_load_include('inc', 'fedora_repository', 'MimeClass');
   $mime_helper = new MimeClass();
   $mimetype = $mime_helper->get_mimetype($page_file);
-  $label = "Archival TIFF";
 
   $page_item->add_datastream_from_file($page_file, strtoupper($ext), 'Archival IMAGE', $mimetype, 'M');
   $page_file = preg_replace('/\/\//', '/', $page_file);
@@ -328,7 +327,10 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
         $success = NULL;
         while ($attempts < 10 && !isset($success)) {
           $success = $page_item->add_datastream_from_file("$page_file.jp2", 'JP2', "Compressed JP2", 'image/jp2', 'M');
-          if (!$success) {
+          if (isset($success)) {
+            unlink("$page_file.jp2");
+          }
+          else {
             time_nanosleep(0, 500000000);
           }
           $attempts++;
@@ -339,7 +341,6 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
     $cmd = "convert {$page_file}[0] -colorspace RGB -thumbnail 120x $page_file-tn.jpg";
     exec($cmd, $output, $returnValue);
     if ($returnValue == '0') {
-      $page_item->add_datastream_from_file("$page_file-tn.jpg", 'TN', 'Thumbnail', 'image/jpeg', 'M');
       if ($page_num == 1) {
         $book_item = new Fedora_Item($book_pid);
         $DSIDS = $book_item->get_datastreams_list_as_array();
@@ -348,11 +349,14 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
         }
         $book_item->add_datastream_from_file("$page_file-tn.jpg", 'TN', 'Thumbnail', 'image/jpeg', 'M');
       }
+      $page_item->add_datastream_from_file("$page_file-tn.jpg", 'TN', 'Thumbnail', 'image/jpeg', 'M');
+      unlink("$page_file-tn.jpg");
     }
     //add medium jpeg
     exec("convert -resize 800 \"{$page_file}\" \"$page_file-med.jpg\"", $output, $returnValue);
     if ($returnValue == '0') {
       $page_item->add_datastream_from_file("$page_file-med.jpg", 'JPEG', "JPEG image", 'image/jpeg', 'M');
+      unlink("$page_file-med.jpg");
     }
   }
   //perform OCR using Tesseract, add text datastream
@@ -371,13 +375,16 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
     $command = "$executable $page_file $page_file -l $language";
     exec("$executable $page_file $page_file -l $language", $output, $returnValue);
     if ($returnValue == '0') {
+      $textfile = "$page_file.txt";
       $page_item->add_datastream_from_file("$page_file.txt", 'OCR', "Scanned Text", 'text/plain', 'M');
+      unlink($textfile);
     }
     else {
       $page_item->add_datastream_from_string('No OCR available', 'OCR', 'Scanned Text', 'text/plain', 'M');
     }
     islandora_book_viewer_create_hocr($executable, $page_file, $language, &$page_item);
   }
+  unlink($page_file);
 }
 
 /**
