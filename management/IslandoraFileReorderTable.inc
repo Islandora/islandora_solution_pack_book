@@ -48,8 +48,8 @@ function islandora_file_reorder_table($book_pid) {
     $cells['file'] = array('#type' => 'hidden', '#value' => $object);
     $rows[] = $cells;
   }
-
-  return $table;
+  
+  return array('table' =>$table, 'filecount' => count($files));
 }
 
 /**

@@ -43,7 +43,9 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
   $path = drupal_get_path('module', 'islandora_book');
   drupal_add_js($path . '/js/book.js');
 
-  $table = islandora_file_reorder_table($pid);
+  $table_data = islandora_file_reorder_table($pid);
+  $table = $table_data['table'];
+  $filecount = $table_data['filecount'];
   $languages = islandora_book_get_available_tesseract_languages();
 
   $item = new Fedora_Item($pid);
@@ -62,12 +64,14 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
   }
   $message = t("This sequence currently has @count pages. Additional pages will be appended at the end of the sequence by default. !break", array("@count" => $current_page_count, '!break' => '<br />'));
   $message .= t("Choose a number lower than @count to insert page(s) at a specific location in the sequence.", array("@count" => $current_page_count, '!break' => '<br />'));
-  if ($table) {
+  if ($filecount > 1) {
     $form['intro'] = array(
       '#type' => 'item',
       '#title' => '<span id ="file_label">' . $toggle_link . "</span",
       '#description' => t("Adjust ingest order of uploaded files")
     );
+  }
+  if ($table) {
     $form['table'] = array(
       '#prefix' => '<div id ="file_view">',
       'table' => $table,
