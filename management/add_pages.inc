@@ -187,10 +187,12 @@ function book_add_pages_form_submit($form, &$form_state) {
   if ($pageCModel == 'islandora:pageCModel') {
     $file_list = array();
     foreach ($form_state['values']['table']['rows'] as $row) {
-      $file_list[$row['pos']] = $row['file'];
+      $pos = (strlen($row['pos']) > 0) ? $row['pos']:0;
+      $pos = intval($pos);
+      $file_list[$pos] = $row['file'];
     }
     if ($form_state['values']['alpha_sort']) {
-      asort($file_list);
+      sort($file_list);
     }
     else {
       ksort($file_list);

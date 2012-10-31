@@ -11,15 +11,16 @@ function islandora_file_reorder_table($book_pid) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
 
   $files = get_page_files($book_pid);
+  if (count($files) < 1) {
+    return;
+  }
   $file_info = array();
   foreach ($files as $file) {
     $path_parts = pathinfo($file);
     $file_info[pathinfo($file, PATHINFO_FILENAME)] = $file;
   }
 
-  if (count($files) < 1) {
-    return;
-  }
+
 
   $table = array(
     '#header' => array("", t("File")),
@@ -48,8 +49,8 @@ function islandora_file_reorder_table($book_pid) {
     $cells['file'] = array('#type' => 'hidden', '#value' => $object);
     $rows[] = $cells;
   }
-  
-  return array('table' =>$table, 'filecount' => count($files));
+
+  return array('table' => $table, 'filecount' => count($files));
 }
 
 /**
@@ -97,7 +98,11 @@ function get_page_files($pid) {
   module_load_include('inc', 'islandora_book', 'management/add_pages');
   $flat_pid = str_replace(':', '_', $pid);
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
+
   $file_dir = file_directory_path() . "/$flat_pid/";
+  if (!is_dir($file_dir)) {
+    return;
+  }
   $files = scandir($file_dir);
 
 //clean and order array input array

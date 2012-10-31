@@ -275,7 +275,7 @@ class UploadHandler {
     $file->type = $type;
     $error = $this->has_error($uploaded_file, $file, $error);
     if (!$error && $file->name) {
-      $file_path = $this->options['upload_dir'] . date_timestamp_get($datetime) . $file->name;
+      $file_path = $this->options['upload_dir']  . $file->name;
       $append_file = !$this->options['discard_aborted_uploads'] &&
           is_file($file_path) && $file->size > filesize($file_path);
       clearstatcache();
