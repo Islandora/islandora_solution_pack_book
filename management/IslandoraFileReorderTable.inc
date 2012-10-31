@@ -17,7 +17,7 @@ function islandora_file_reorder_table($book_pid) {
     $file_info[pathinfo($file, PATHINFO_FILENAME)] = $file;
   }
 
-  if (count($files) < 2) {
+  if (count($files) < 1) {
     return;
   }
 
