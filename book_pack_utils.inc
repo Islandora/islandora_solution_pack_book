@@ -367,11 +367,11 @@ function renumber_pages($insertion_point, $book_pid, $new_page_count) {
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   $page_pids = get_sorted_pages($book_pid);
+  $count = count($page_pids);
 
-
-  for ($i = $insertion_point; $i <= count($page_pids); ++$i) {
+  for ($i = $insertion_point; $i <= $count; $i++) {
     $pid = $page_pids[$i];
-    $sequence = $i + 1;
+    $sequence = $i + $new_page_count;
     $item = new Fedora_Item($pid);
     if ($item->exists()) {
       $rdf_string = islandora_book_create_rdf($pid, $book_pid, $sequence);

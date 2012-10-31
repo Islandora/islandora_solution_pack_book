@@ -176,7 +176,7 @@ function book_add_pages_form_submit($form, &$form_state) {
   $preprocess = $form_state['values']['preprocess'];
   $start_page = (isset($form_state['values']['insertion_point'])) ? $form_state['values']['insertion_point'] + 1 : 1;
   $dirName = str_replace(':', '_', $pid);
-  // $tmpDir = file_directory_path() . '/' . $dirName . '/';
+  $tmpDir = file_directory_path() . '/' . $dirName . '/';
   $relationship = $form_state['values']['relation'];
   $language = (isset($form_state['values']['language'])) ? $form_state['values']['language'] : 'eng';
 
@@ -191,6 +191,7 @@ function book_add_pages_form_submit($form, &$form_state) {
     else {
       ksort($file_list);
     }
+
     ibook_create_page_objects($pid, $file_list, $form_state['values']['page_cmodel'], $relationship, $tmpDir, $start_page, $language, $preprocess);
   }
   if ($pageCModel == 'islandora:bd_pageCModel') {
@@ -247,11 +248,12 @@ function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = '
   );
   $page_num = $start_page;
   $book_title = $book->objectProfile->objLabel;
-  $batch['operations'][] = array('renumber_pages', array($start_page, $pid, $image_count));
+  $batch['operations'][] = array('wrap_renumber_pages', array($start_page, $pid, $image_count));
   foreach ($image_list as $image_path) {
     $batch['operations'][] = array('ibook_add_single_page_object', array($pid, $image_path, $page_num, "$book_title - Page " . sprintf("%03d", $page_num), $page_cmodel, $relation, $language, $preprocess));
     $page_num++;
   }
+  $batch['operations'][] = array('deleteDirectory', array($tmpDir));
   if (variable_get('islandora_create_book_pdf', FALSE)) {
     $batch['operations'][] = array('makePDF', array($pid, $image_list, $tmpDir));
   }
@@ -327,15 +329,13 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
         $success = NULL;
         while ($attempts < 10 && !isset($success)) {
           $success = $page_item->add_datastream_from_file("$page_file.jp2", 'JP2', "Compressed JP2", 'image/jp2', 'M');
-          if (isset($success)) {
-            unlink("$page_file.jp2");
-          }
-          else {
+          if (!isset($success)) {
             time_nanosleep(0, 500000000);
           }
           $attempts++;
         }
       }
+      unlink("$page_file.jp2");
     }
     //add thumbnail image
     $cmd = "convert {$page_file}[0] -colorspace RGB -thumbnail 120x $page_file-tn.jpg";
@@ -399,6 +399,10 @@ function islandora_book_viewer_create_hocr($executable, $page_file, $lang, &$obj
   exec("$executable $page_file $page_file -l $lang hocr", $output, $returnValue);
   $datastreams = $object->get_datastreams_list_as_array();
   if ($returnValue == '0') {
+    if (!is_file("$page_file.html")) {
+      unlink("$page_file.txt");
+      return FALSE;
+    }
     $html_string = file_get_contents("$page_file.html");
     if (empty($html_string)) {
       return FALSE;
@@ -550,3 +554,12 @@ function wrap_post_deletion_renumber_pages($book_pid) {
   post_deletion_renumber_pages($book_pid);
 }
 
+/**
+ * Wrapper to call function from utilities page
+ * Batch will not call functions from multiple files
+ * @param string $book_pid
+ */
+function wrap_renumber_pages($start_page, $pid, $image_count) {
+  module_load_include('inc', 'islandora_book', 'book_pack_utils');
+  renumber_pages($start_page, $pid, $image_count);
+}
