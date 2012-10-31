@@ -118,7 +118,7 @@ function get_page_files($pid) {
   foreach ($sorted_files as $candidate) {
     $old_filename = pathinfo($candidate, PATHINFO_FILENAME);
     $ext = pathinfo($candidate, PATHINFO_EXTENSION);
-    $new_file_name = preg_replace("/[^a-z\.\d]/i", "", $old_filename);
+    $new_file_name = preg_replace("/[^a-z\.\d]/i", "_", $old_filename);
     if ($new_file_name != $old_filename) {
       $new_fullname = str_replace($old_filename, $new_file_name, $candidate);
       $success = rename("$candidate", "$new_fullname");
