@@ -70,19 +70,19 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
       '#title' => '<span id ="file_label">' . $toggle_link . "</span",
       '#description' => t("Adjust ingest order of uploaded files")
     );
-  }
-  if ($table) {
+
     $form['table'] = array(
       '#prefix' => '<div id ="file_view">',
       'table' => $table,
       '#suffix' => '</div>',
     );
+
+    $form['alpha_sort'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Sort by input file names?'),
+      '#description' => t("If checked files will be sorted alphanumerically to determine page order.")
+    );
   }
-  $form['alpha_sort'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Sort by input file names?'),
-    '#description' => t("If checked files will be sorted alphanumerically to determine page order.")
-  );
   $form['page_add'] = array(
     '#type' => 'item',
     '#title' => $prompt,
@@ -187,7 +187,7 @@ function book_add_pages_form_submit($form, &$form_state) {
   if ($pageCModel == 'islandora:pageCModel') {
     $file_list = array();
     foreach ($form_state['values']['table']['rows'] as $row) {
-      $pos = (strlen($row['pos']) > 0) ? $row['pos']:0;
+      $pos = (strlen($row['pos']) > 0) ? $row['pos'] : 0;
       $pos = intval($pos);
       $file_list[$pos] = $row['file'];
     }

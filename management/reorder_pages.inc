@@ -34,7 +34,14 @@ function page_reorder_submit($form, &$form_state) {
   $book_pid = $form_state['values']['pid'];
   $pids_to_delete = @array_filter($form_state['values']['table']['selections']);
   $pages = $form_state['values']['table']['rows'];
-
+  $pageholder = array();
+  foreach($pages as $page){
+    $arraypos = intval($page['pos']);
+    $pageholder[$arraypos] = $page;
+  }
+  ksort($pageholder);
+  $pageholder = array_values($pageholder);
+  $stop = "";
   $batch = array(
     'title' => t("Processing @page_count pages", array('@page_count' => $count)),
     'operations' => array(),
@@ -45,11 +52,8 @@ function page_reorder_submit($form, &$form_state) {
 
 
   //reorder pages first
-  foreach ($pages as $page) {
-    $new_sequence = $page['current_sequence'];
-    if ($page['pos'] != $page['current_sequence']) {
-      $new_sequence = ($page['pos'] + 1) / 2;
-    }
+  foreach ($pageholder as $index => $page) {
+    $new_sequence = $index + 1;
     if ($new_sequence != $page['current_sequence']) {
       $batch['operations'][] = array('reorder_dragged_pages', array($page['page_pid'], $page['current_sequence'], $new_sequence));
     }
