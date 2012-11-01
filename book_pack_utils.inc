@@ -152,7 +152,9 @@ function save_datastream_as_tempfile($pid, $dsid, $ext = '.tif') {
  */
 function save_all_tiffs_in_tempdir($pid, $dsid) {
   $tmp_dirname = file_directory_path() . "/" . preg_replace("/:|-/", '_', $pid);
-  mkdir($tmp_dirname);
+  if (!is_dir($tmp_dirname)) {
+    mkdir($tmp_dirname);
+  }
   $member_pids = get_page_pids($pid);
   foreach ($member_pids as $member_pid) {
     $item = new Fedora_Item($member_pid);
@@ -171,7 +173,6 @@ function save_all_tiffs_in_tempdir($pid, $dsid) {
 
   return $tmp_dirname;
 }
-
 
 /**
  * Returns an array of collection pids for each collection
