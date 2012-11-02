@@ -122,7 +122,7 @@ XML;
     return $tabset;
   }
 
-  function create_book_view() {
+  function create_book_viewx() {
     global $base_url;
     module_load_include('inc', 'fedora_repository', 'api/fedora_item');
     module_load_include('inc', 'islandora_book', 'book_pack_utils');
@@ -140,6 +140,29 @@ XML;
 
     $headers = array($item->objectProfile->objLabel, "");
     $rows = array(array($img, theme_item_list($links)));
+    return theme_table($headers, $rows);
+  }
+
+  function create_book_view() {
+    global $base_url;
+    module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+    module_load_include('inc', 'fedora_repository', 'ObjectDetails');
+    $headers = array($item->objectProfile->objLabel, "");
+    $item = new Fedora_Item($this->pid);
+    $img = theme_image("$base_url/fedora/repository/" . $this->pid . "/TN", '', NULL, NULL, FALSE);
+    $output = "";
+    if (user_access('manage book object')) {
+      $links = array();
+      $links[] = l(t('Edit Metadata'), "fedora/repository/editmetadata/$this->pid/metadata");
+      $links[] = l(t('Manage Book'), "islandora/book/management/$this->pid/");
+      $links = array_merge($links, module_invoke_all('islandora_book_get_bookview_links', $this->pid));
+      $output .= theme_item_list($links);
+    }
+
+    $output .= fedora_repository_object_details_XSLT($item);
+
+    $headers = array($item->objectProfile->objLabel, "");
+    $rows = array(array($img, $output));
     return theme_table($headers, $rows);
   }
 
