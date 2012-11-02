@@ -43,6 +43,10 @@ function islandora_book_page_delete($form, $pid) {
     '#collapsed' => TRUE,
   );
 
+  $form['pid'] = array(
+    '#type' => 'hidden',
+    '#value' => $pid,
+  );
   $form['delete_page']['confirm']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Delete this page'),
@@ -53,6 +57,12 @@ function islandora_book_page_delete($form, $pid) {
 
 function islandora_book_page_delete_submit($form, &$form_state) {
   global $user;
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  module_load_include('inc', 'islandora_book', 'book_pack_utils');
+  $pid = $form_state['values']['pid'];
+  $book_pids = get_collection_from_pid($pid);
+  $book_pid = $book_pids[0];
+  $item = new Fedora_Item($pid);
   $item->purge($pid . ' deleted by user identified as ' . $user->name);
   post_deletion_renumber_pages($book_pid);
   drupal_goto("fedora/repository/$book_pid");
