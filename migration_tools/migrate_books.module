@@ -98,7 +98,7 @@ function islandora_update_book_create_rels($book_pid, $pid, $page_number) {
 	<isSequenceNumber xmlns="http://islandora.ca/ontology/relsext#">$page_number</isSequenceNumber>
 	<isMemberOf xmlns="info:fedora/fedora-system:def/relations-external#" rdf:resource="info:fedora/$book_pid"></isMemberOf>
 	<isSection xmlns="http://islandora.ca/ontology/relsext#">1</isSection>
-	<isPageOf xmlns="http://islandora.ca/ontology/relsext#" rdf:resource="inf:fedora/$book_pid"></isPageOf>
+	<isPageOf xmlns="http://islandora.ca/ontology/relsext#" rdf:resource="info:fedora/$book_pid"></isPageOf>
   <isPageNumber xmlns="http://islandora.ca/ontology/relsext#">$page_number</isPageNumber>
 </rdf:Description>
 </rdf:RDF>
