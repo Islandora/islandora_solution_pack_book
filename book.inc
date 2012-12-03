@@ -160,7 +160,6 @@ XML;
     }
 
     $output .= fedora_repository_object_details_XSLT($item);
-
     $headers = array($item->objectProfile->objLabel, "");
     $rows = array(array($img, $output));
     return theme_table($headers, $rows);
