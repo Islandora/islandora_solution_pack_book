@@ -4,11 +4,31 @@ function migrate_books_menu() {
   $items = array();
   $items['migrate/books'] = array(
     'title' => t('Add new Islandora RDF relatationships to existing books'),
-    'page callback' => 'batch_process_book',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('migrate_books_confirmation_form'),
     'type' => MENU_NORMAL_ITEM,
     'access arguments' => array('migrate all books'),
   );
   return $items;
+}
+
+function migrate_books_confirmation_form(&$form_state) {
+  $description = 'This action cannot be undone. This utility module will add the fedora 
+    relationships required by the current version of the Islandora Book Solution Pack.  
+    The module is intended for <b>single use only</b>. If you are on a multisite it is safer 
+    to update on a collection by collection basis. Select <i>Manage This Collection</i> from 
+    within the collection you wish to update then select <i>Add new Islandora relationships to 
+    book objects</i> to update all the books within that particular collection.';
+
+  return confirm_form(
+    $form, 
+    'Are you sure you want to update ALL the books in the repository?', 
+    'fedora/repository', 
+    $description);
+}
+
+function migrate_books_confirmation_form_submit($form, &$form_state) {
+  batch_process_book();
 }
 
 function migrate_books_islandora_collection_mangement($pid) {
@@ -78,7 +98,7 @@ function islandora_update_book_create_rels($book_pid, $pid, $page_number) {
 	<isSequenceNumber xmlns="http://islandora.ca/ontology/relsext#">$page_number</isSequenceNumber>
 	<isMemberOf xmlns="info:fedora/fedora-system:def/relations-external#" rdf:resource="info:fedora/$book_pid"></isMemberOf>
 	<isSection xmlns="http://islandora.ca/ontology/relsext#">1</isSection>
-	<isPageOf xmlns="http://islandora.ca/ontology/relsext#" rdf:resource="inf:fedora/$book_pid"></isPageOf>
+	<isPageOf xmlns="http://islandora.ca/ontology/relsext#" rdf:resource="info:fedora/$book_pid"></isPageOf>
   <isPageNumber xmlns="http://islandora.ca/ontology/relsext#">$page_number</isPageNumber>
 </rdf:Description>
 </rdf:RDF>
