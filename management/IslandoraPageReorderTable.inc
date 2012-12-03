@@ -6,9 +6,8 @@
  * @param string $collection_pid
  * @return array
  */
-
-
-function islandora_book_page_table($book_pid) {
+function islandora_book_page_reorder_table($book_pid) {
+  global $base_url;
   module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
   $query = <<<XML
   select \$object \$page \$title from <#ri>
@@ -32,18 +31,18 @@ XML;
   $object = array();
   foreach ($lines as $line) {
     $line_parts = explode(',', $line);
+
     $objects[$line_parts[0]] = array($line_parts[1], $line_parts[2]);
     $keys[] = $line_parts[0];
   }
 
-  $form['list'] = array(
-    '#value' => $list,
-  );
+
 
   $table = array(
-    '#header' => array(theme('table_select_header_cell'), t('Page Pid'), 'Sequence Number', t('Page Label')),
-    '#theme' => 'islandora_book_page_table',
+    '#header' => array(theme('table_select_header_cell'), t("Page"), 'Current<br />Sequence #', t('Label')),
+    '#theme' => 'islandora_book_page_reorder_table',
     '#tree' => TRUE,
+    '#id' => 'page_weight_table',
     'rows' => array(),
     'selections' => array(
       '#type' => 'checkboxes',
@@ -51,22 +50,42 @@ XML;
     ),
   );
   $rows = &$table['rows'];
-  if(empty($objects)){
+  if (empty($objects)) {
     return;
   }
   foreach ($objects as $key => $object) {
-    $rows[] = array(
-      '#pid' => $key,
-      'pid' => array('#value' => l($key, 'fedora/repository/' . $key)),
-      'sequence' => array('#value' => $object[0]),
-      'label' => array('#value' => $object[1]),
+    $alink_options = array(
+      'attributes' => array('target' => '_blank', 'class' => 'fedora_image', 'title' => $key),
+      'html' => TRUE,
     );
+    $img = "<img src='$base_url/fedora/repository/$key/TN' width='28' height='42'>";
+    $img = theme_image("$base_url/fedora/repository/$key/TN", '', NULL, array('width' => '20'), FALSE);
+    $cells = array();
+    $cells['#pid'] = $key;
+    $cells['pid'] = array('#value' => l($img, 'fedora/repository/' . $key , $alink_options));
+
+    $cells['sequence'] = array(
+      '#type' => 'item',
+      '#value' => $object[0],
+    );
+
+    $cells['pos'] = array(
+      '#type' => 'textfield',
+      '#default_value' => $object[0],
+      '#size' => 3,
+      '#maxlenth' => 4,
+      '#attributes' => array('class' => 'sequence_weight'),
+    );
+
+    $cells['label'] = array('#type' => 'textfield', '#default_value' => $object[1]);
+    $cells['page_pid'] = array('#type' => 'hidden', '#value' => $key);
+    $cells['current_sequence'] = array('#type' => 'hidden', '#value' => $object[0]);
+    $cells['current_label'] = array('#type' => 'hidden', '#value' => $object[1]);
+    $rows[] = $cells;
   }
 
   return $table;
 }
-
-
 
 /**
  * themes the form table.
@@ -74,9 +93,7 @@ XML;
  * @param array $element Drupal Form Element.
  * @return string
  */
-
-
-function theme_islandora_book_page_table(array $element) {
+function theme_islandora_book_page_reorder_table(array $element) {
   $rows = array();
   foreach (element_children($element['rows']) as $child) {
     $setting = $element['rows'][$child];
@@ -85,14 +102,23 @@ function theme_islandora_book_page_table(array $element) {
       drupal_render($element['selections'][$pid]) // First field is a checkbox
     );
     foreach (element_children($setting) as $property) {
+      $cell_array = array();
       $field = $setting[$property];
-      $fields[] = drupal_render($field);
+      $cell_array['data'] = drupal_render($field);
+      if ($property == 'pos') {
+        $cell_array['class'] = 'sequence_weight';
+      }
+      if ($property == 'pid') {
+        $cell_array['class'] = 'fedora_link';
+      }
+      $fields[] = $cell_array;
     }
     $rows[] = array(
       'data' => $fields,
-      'class' => isset($setting['#attributes']['class']) ? $setting['#attributes']['class'] : NULL
+      'class' => 'draggable',
     );
   }
-  $attributes = isset($element['#id']) ? array('id' => $element['#id']) : NULL;
-  return theme_table($element['#header'], $rows, $attributes);
+
+  drupal_add_tabledrag('page_weight_table', 'order', 'sibling', 'sequence_weight');
+  return theme('table', $element['#header'], $rows, array('id' => 'page_weight_table'));
 }

@@ -8,25 +8,10 @@
  */
 
 
-function islandora_book_page_table($book_pid) {
-  module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
-  $query = <<<XML
-  select \$object \$page \$title from <#ri>
-where \$object <fedora-rels-ext:isMemberOf> <info:fedora/$book_pid>
-and \$object <fedora-model:state> <fedora-model:Active>
-and \$object <dc:title> \$title
-and (\$object <info:islandora/islandora-system:def/paged-item-info#sequenceNumber> \$page
-or \$object <http://islandora.ca/ontology/relsext#isSequenceNumber> \$page)
-order by \$page
-XML;
-  $query = htmlentities(urlencode($query));
-  $content = '';
+function islandora_book_undelete_table() {
+  module_load_include('inc', 'islandora_book', 'book_pack_utils');
 
-  $url = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
-  $url .= "?type=tuples&flush=TRUE&format=csv&limit=$limit&offset=$offset&lang=itql&stream=on&query=" . $query;
-  $content .= do_curl($url);
-  $results = explode("\n", $content);
-  $lines = preg_replace('/info:fedora\/|"object","page","title"/', '', $results);
+  $lines = islandora_book_get_inactive_books();
   $lines = array_values(array_filter($lines));
   $keys = array();
   $object = array();
@@ -36,13 +21,10 @@ XML;
     $keys[] = $line_parts[0];
   }
 
-  $form['list'] = array(
-    '#value' => $list,
-  );
 
   $table = array(
-    '#header' => array(theme('table_select_header_cell'), t('Page Pid'), 'Sequence Number', t('Page Label')),
-    '#theme' => 'islandora_book_page_table',
+    '#header' => array(theme('table_select_header_cell'), t('Book Pid'),  t('Book Title')),
+    '#theme' => 'islandora_book_undelete_table',
     '#tree' => TRUE,
     'rows' => array(),
     'selections' => array(
@@ -76,7 +58,7 @@ XML;
  */
 
 
-function theme_islandora_book_page_table(array $element) {
+function theme_islandora_book_undelete_table(array $element) {
   $rows = array();
   foreach (element_children($element['rows']) as $child) {
     $setting = $element['rows'][$child];

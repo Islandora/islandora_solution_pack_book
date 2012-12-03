@@ -3,9 +3,18 @@
 function book_collection_management(&$form_state, $pid) {
 
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
+  module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
   $potential_collections = get_collections_as_option_array();
+  $sorted = array();
   $current_collections = get_collection_relationships($pid);
   $keys = array_keys($current_collections);
+  foreach($potential_collections as $key=>$collection){
+    if(in_array($key, $keys)){
+      $sorted[$key] = $potential_collections[$key];
+      unset($potential_collections[$key]);
+    }
+  }
+  $sorted = array_merge($sorted, $potential_collections);
   $form = array();
   $form['pid'] = array(
     '#type' => 'hidden',
@@ -23,14 +32,14 @@ function book_collection_management(&$form_state, $pid) {
     '#title' => 'Collection Membership',
     '#description' => t("Books will belong to all selected collections"),
     '#type' => 'checkboxes',
-    '#options' => $potential_collections,
+    '#options' => $sorted,
     '#default_value' => $keys,
   );
 
   $form['collections']['submit'] = array(
     '#type' => 'submit',
     '#id' => 'add_collection',
-    '#value' => t('Save Book Membership'),
+    '#value' => t('Save Collection Membership'),
   );
 
   return $form;
@@ -54,9 +63,7 @@ function book_collection_management_submit($form, &$form_state) {
   global $user;
   $book_pid = $form_state['values']['pid'];
   $current_collections = array_keys(get_collection_relationships($book_pid));
-  $new_collections = array_values(array_filter($form_state['values']['membership'], function($e) {
-                return ($e !== 0);
-              }));
+  $new_collections = array_values(array_filter($form_state['values']['membership']));
 
   $to_keep = array_intersect($current_collections, $new_collections);
   $to_toss = array_diff($current_collections, $to_keep);
