@@ -21,6 +21,7 @@ $(function () {
   var base = here.split(splitter);
   base = base[0];
   var url = base + '/islandora/book/upload_setup/' + PID;
+
   $.ajax({
     url: url,
     async:false,

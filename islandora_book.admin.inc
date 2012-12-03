@@ -11,7 +11,7 @@
  * @return type 
  */
 function islandora_book_admin_settings(&$form_state) {
-
+  module_load_include('inc', 'islandora_book', 'book_pack_utils');
 
   $ocr_path = isset($form_state['values']['islandora_ocr_path']) ? $form_state['values']['islandora_ocr_path'] : variable_get('islandora_ocr_path', '/usr/bin/tesseract');
   $ocr_avail = exec("ls $ocr_path");
@@ -22,6 +22,7 @@ function islandora_book_admin_settings(&$form_state) {
 
   $ocr = isset($form_state['values']['islandora_book_do_ocr']) ? $form_state['values']['islandora_book_do_ocr'] : variable_get('islandora_book_do_ocr', TRUE);
   $help_page = l('Help', 'admin/help/islandora_book');
+
 
   $form = array();
 
@@ -44,7 +45,7 @@ function islandora_book_admin_settings(&$form_state) {
     '#description' => t('Check this box to have a PDF produced locally on ingest.'),
     '#default_value' => variable_get('islandora_create_book_pdf', FALSE),
   );
-    $form['book_ahah_wrapper'] = array(
+  $form['book_ahah_wrapper'] = array(
     '#prefix' => '<div id="ibook-url">',
     '#suffix' => '</div>',
     '#type' => 'fieldset',
@@ -60,14 +61,20 @@ function islandora_book_admin_settings(&$form_state) {
       'effect' => 'fade',
       'event' => 'change'),
   );
-  $form['book_ahah_wrapper']['islandora_book_solr_subject_field'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Solr subject field'),
-    '#description' => t('The solr field containing your untokenized subject value, used to link between books with the same subject.'),
-    // keep default value as previous default so its backward compatible
-    '#default_value' => variable_get('islandora_book_solr_subject_field', 'mods.subject'),
-  );
   if ($ocr) {
+    $form['book_ahah_wrapper']['islandora_book_ocr_languages'] = array(
+      '#type' => 'checkboxes',
+      '#title' => t('Languages available for OCR'),
+      '#options' => islandora_book_get_tesseract_langauges(),
+      '#description' => t("Select from the language packs available on your processing server.<br />
+                         These are normally found in <strong>/usr/local/share/tessdata/</strong><br />
+                         Check with your systems admininistrator if you are unsure of availablilty"),
+      '#default_value' => islandora_book_get_available_tesseract_languages(),
+    );
+
+
+
+
     $form['book_ahah_wrapper']['islandora_ocr_path'] = array(
       '#type' => 'textfield',
       '#title' => t('Path to OCR executable'),
@@ -91,7 +98,13 @@ function islandora_book_admin_settings(&$form_state) {
       '#submit' => array('book_admin_refresh'),
     );
   }
-
+  $form['book_ahah_wrapper']['islandora_book_solr_subject_field'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Solr subject field'),
+    '#description' => t('The solr field containing your untokenized subject value, used to link between books with the same subject.'),
+    // keep default value as previous default so its backward compatible
+    '#default_value' => variable_get('islandora_book_solr_subject_field', 'mods.subject'),
+  );
   $form['buttons']['submit'] = array('#type' => 'submit', '#value' => t('Save Configuration'));
   $form['buttons']['reset'] = array('#type' => 'submit', '#value' => t('Reset to defaults'));
   $form['#submit'][] = 'book_settings_form_submit';
@@ -100,7 +113,7 @@ function islandora_book_admin_settings(&$form_state) {
 }
 
 /**
- * update ocr div ??
+ * update ocr div 
  */
 function update_ocr_div() {
 
@@ -115,7 +128,7 @@ function update_ocr_div() {
 }
 
 /**
- * book callback prep??
+ * book callback prep
  * @return type 
  */
 function book_callback_prep() {
@@ -134,7 +147,7 @@ function book_callback_prep() {
 }
 
 /**
- * book settings form submit ??
+ * book settings form submit 
  * @param type $form
  * @param type $form_state
  * @return type 
@@ -189,13 +202,19 @@ function book_admin_refresh($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
 }
 
+/**
+ * Checks url.  Fails on any 400 series retun code
+ * @param <type> $url
+ * @return boolean
+ */
 function is_url_valid($url) {
   $handle = curl_init($url);
   curl_setopt($handle, CURLOPT_RETURNTRANSFER, TRUE);
   $response = curl_exec($handle);
   $httpCode = curl_getinfo($handle, CURLINFO_HTTP_CODE);
   $retval = TRUE;
-  if ($httpCode % 100 == 4) {
+  $results = intval($httpCode / 100);
+  if ($results == 4) {
     $retval = FALSE;
   }
   curl_close($handle);

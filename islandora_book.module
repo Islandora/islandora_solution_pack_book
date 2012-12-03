@@ -17,6 +17,15 @@ function islandora_book_menu() {
     'type' => MENU_CALLBACK,
     'access arguments' => array('view fedora collection'),
   );
+  $items['restore/books'] = array(
+    'title' => t('Deleted Books'),
+    'file' => 'management/book_undelete.inc',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('book_undelete_form'),
+    'type' => MENU_NORMAL_ITEM,
+    'access arguments' => array('manage deleted books'),
+  );
+
   $items['fedora/book_viewer'] = array(
     'title' => t('Book viewer'),
     'page callback' => 'islandora_book_book_viewer',
@@ -43,14 +52,14 @@ function islandora_book_menu() {
 
   $items['islandora/book/updatepage'] = array(
     'page callback' => 'page_management_wrapper',
-    'access arguments' => array('view fedora collection'),
+    'access arguments' => array('manage book object'),
     'file' => 'ObjectManager.inc',
     'type' => MENU_CALLBACK,
   );
 
   $items['islandora/book/upload'] = array(
     'page callback' => 'upload_pages',
-    'access arguments' => array('view fedora collection'),
+    'access arguments' => array('manage book object'),
     'file' => 'pageload/upload_frame.inc',
     'type' => MENU_CALLBACK,
   );
@@ -63,7 +72,7 @@ function islandora_book_menu() {
 
   $items['islandora/book/upload_setup'] = array(
     'page callback' => 'upload_setup',
-    'access arguments' => array('view fedora collection'),
+    'access arguments' => array('manage book object'),
     'file' => 'pageload/upload_frame.inc',
     'type' => MENU_CALLBACK,
   );
@@ -85,6 +94,28 @@ function islandora_book_menu() {
     'file' => 'pageload/upload_frame.inc',
     'type' => MENU_CALLBACK,
   );
+  $items['islandora/page/manage'] = array(
+    'page callback' => 'islandora_book_page_management',
+    'access arguments' => array('manage page object'),
+    'file' => 'page_object_manager.inc',
+    'type' => MENU_CALLBACK,
+  );
+  $items['islandora/book/manage'] = array(
+    'page callback' => 'islandora_book_display_links',
+    'access arguments' => array('manage book object'),
+    'file' => 'management/IslandoraBookDisplayLinks.inc',
+    'type' => MENU_CALLBACK,
+  );
+  $items['islandora/book/management'] = array(
+    'page callback' => 'book_management_wrapper',
+    'access arguments' => array('manage book object'),
+    'file' => 'book_object_manager.inc',
+    'type' => MENU_CALLBACK,
+  );
+
+
+
+
   return $items;
 }
 
@@ -93,6 +124,7 @@ function islandora_book_perm() {
     'delete pages',
     'manage book object',
     'manage page object',
+    'manage deleted books',
   );
 }
 
@@ -114,7 +146,7 @@ function islandora_book_islandora_tabs($content_models, $pid) {
   }
 
   if ($content_model == 'islandora:bookCModel' || $content_model == 'islandora:iaBookCModel') {
-    $return_tabs = get_book_model_management_content($pid);
+  //  $return_tabs = get_book_model_management_content($pid);
     $return_tabs['fedora_object_details'] = null;
     return $return_tabs;
   }
@@ -122,7 +154,7 @@ function islandora_book_islandora_tabs($content_models, $pid) {
 
 /**
  * Implementation of hook_init
- * (currenlty disabled)
+ * (currently disabled)
  */
 function disabled_islandora_book_init() {
 
@@ -221,13 +253,7 @@ function islandora_book_create_book_view($pid, $query = NULL) {
     $xsl = $proc->importStylesheet($xsl);
     $output = $proc->transformToXML($input);
   }
-  if (isset($query)) {
-    module_load_include('inc', 'fedora_repository', 'core/SearchClass');
-    $searchClass = new SearchClass();
-    $pageQuery = convert_query_to_page_query($query, $pid);
-    $output .= '<div>' . $searchClass->custom_search($pageQuery, $startPage, '/xsl/pageResults.xsl', 500) . '</div>'; //limit results to 500 pages of a book since there is no paging if we enable paging in xslt this can be changed
-    //return $output."<div>used this query to find this page $query and new query = $pageQuery</div>";
-  }
+
   return $output;
 }
 
@@ -269,7 +295,7 @@ function theme_imagebutton($element) {
 }
 
 /**
- * Implementation of hook_theme() to register how to theme image buttons.
+ * Implementation of hook_theme().
  *
  * @return type
  */
@@ -287,6 +313,18 @@ function islandora_book_theme() {
     'islandora_book_page_table' => array(
       'arguments' => array('element' => NULL),
       'file' => 'management/IslandoraBookPageTable.inc',
+    ),
+    'islandora_book_page_reorder_table' => array(
+      'arguments' => array('element' => NULL),
+      'file' => 'management/IslandoraPageReorderTable.inc',
+    ),
+    'islandora_book_undelete_table' => array(
+      'arguments' => array('element' => NULL),
+      'file' => 'management/IslandoraBookUndelete.inc',
+    ),
+    'islandora_file_reorder_table' => array(
+      'arguments' => array('element' => NULL),
+      'file' => 'management/IslandoraFileReorderTable.inc',
     )
   );
 }
@@ -393,6 +431,27 @@ function islandora_book_fedora_repository_required_fedora_objects() {
         array(
           'foxml_file' => "$module_path/xml/islandora_book_collection.xml",
           'pid' => 'islandora:collection',
+          'dsid' => NULL,
+          'datastream_file' => NULL,
+          'dsversion' => NULL,
+        ),
+        array(
+          'foxml_file' => "$module_path/xml/islandora_organization-entityCModel.xml",
+          'pid' => 'islandora:organization-entityCModel',
+          'dsid' => NULL,
+          'datastream_file' => NULL,
+          'dsversion' => NULL,
+        ),
+        array(
+          'foxml_file' => "$module_path/xml/islandora_place-entityCModel.xml",
+          'pid' => 'islandora:place-entityCModel',
+          'dsid' => NULL,
+          'datastream_file' => NULL,
+          'dsversion' => NULL,
+        ),
+        array(
+          'foxml_file' => "$module_path/xml/islandora_person-entityCModel.xml",
+          'pid' => 'islandora:person-entityCModel',
           'dsid' => NULL,
           'datastream_file' => NULL,
           'dsversion' => NULL,
@@ -550,3 +609,25 @@ function islandora_book_help($path, $arg) {
   }
 }
 
+/**
+ * Implementation of hook_islandora_tabs_alter().
+ *
+ * @param &$tabs array
+ *   The array of tabs/tabset to alter.
+ * @param $params array
+ *   An associative array containing the parameters with which the original
+ *   hook was called.
+ * @see fedora_repository_get_items()
+ */
+function islandora_book_islandora_tabs_alter(&$tabs, $params) {
+  //Turn off object details
+  $models = array(
+    'islandora:pageCModel',
+    'islandora:bookCModel',
+    'islandora:iaBookCModel'
+  );
+
+  if (in_array($params['content_models'][0]->pid, $models)) {
+    $tabs['fedora_object_details'] = null;
+  }
+}

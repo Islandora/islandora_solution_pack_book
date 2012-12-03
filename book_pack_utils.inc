@@ -51,7 +51,7 @@ XML;
     }
     $item->add_datastream_from_file("$tiff.txt", 'OCR', "Scanned Text", 'text/plain', 'M');
     file_delete("$tiff.txt");
-   
+
     $success = TRUE;
   }
   if (!$success) {
@@ -62,9 +62,9 @@ XML;
   if (!$success) {
     drupal_set_message(t('ENCODED_OCR replacement for @pid was unsuccessful', array('@pid' => $item->pid)));
   }
-   if ($tiff != $original) {
-      file_delete($tiff);
-    }
+  if ($tiff != $original) {
+    file_delete($tiff);
+  }
   return $success;
 }
 
@@ -152,7 +152,9 @@ function save_datastream_as_tempfile($pid, $dsid, $ext = '.tif') {
  */
 function save_all_tiffs_in_tempdir($pid, $dsid) {
   $tmp_dirname = file_directory_path() . "/" . preg_replace("/:|-/", '_', $pid);
-  mkdir($tmp_dirname);
+  if (!is_dir($tmp_dirname)) {
+    mkdir($tmp_dirname);
+  }
   $member_pids = get_page_pids($pid);
   foreach ($member_pids as $member_pid) {
     $item = new Fedora_Item($member_pid);
@@ -170,112 +172,6 @@ function save_all_tiffs_in_tempdir($pid, $dsid) {
   }
 
   return $tmp_dirname;
-}
-
-/**
- *
- * Returns tabular display of current datastreams
- *
- * @global string $fedoraUser
- * @global string $fedoraPass
- * @global url $base_url
- * @global user $user
- * @param  string $object_pid
- * @param Fedora_Item $fedoraItem
- * @return string
- */
-function datastream_display_builder($object_pid, &$fedoraItem) {
-  global $fedoraUser, $fedoraPass, $base_url, $user;
-  module_load_include('inc', 'fedora_repository', 'ConnectionHelper');
-  module_load_include('inc', 'fedora_repository', 'ObjectHelper');
-  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
-  module_load_include('inc', 'fedora_repository', 'ContentModel');
-  $object_helper = new ObjectHelper();
-  $path = drupal_get_path('module', 'fedora_repository');
-  $dataStreamBody = '';
-  $fedoraItem = new Fedora_Item($object_pid);
-
-  if (user_access(ObjectHelper :: $VIEW_DETAILED_CONTENT_LIST)) {
-    $current_datastreams = 'All Datastreams';
-//$metaDataText='Description';
-    $mainStreamLabel = NULL;
-    $object = $fedoraItem->get_datastreams_list_as_SimpleXML();
-    if (!isset($object)) {
-      drupal_set_message(t("No datastreams available"));
-      return ' ';
-    }
-    $hasOBJStream = NULL;
-    $hasTNStream = FALSE;
-    $dataStreamBody = "<br /><table>\n";
-
-    $cmDatastreams = array();
-    if (variable_get('fedora_object_restrict_datastreams', FALSE) == TRUE && ($cm = ContentModel::loadFromObject($object_pid)) !== FALSE) {
-      $cmDatastreams = $cm->listDatastreams();
-    }
-
-    $dataStreamBody .= $object_helper->get_parent_objects_asHTML($object_pid);
-    $dataStreamBody .= '<tr><th colspan="4"><h3>' . t("!text", array('!text' => $current_datastreams)) . '</h3></th></tr>';
-    foreach ($object as $datastream) {
-      foreach ($datastream as $datastreamValue) {
-        if (variable_get('fedora_object_restrict_datastreams', FALSE) == FALSE || ((isset($user) && in_array('administrator', $user->roles)) || in_array($datastreamValue->ID, $cmDatastreams))) {
-          if ($datastreamValue->ID == 'OBJ') {
-            $hasOBJStream = '1';
-            $mainStreamLabel = $datastreamValue->label;
-            $mainStreamLabel = str_replace("_", " ", $mainStreamLabel);
-          }
-          if ($datastreamValue->ID == 'TN') {
-            $hasTNStream = TRUE;
-          }
-//create the links to each datastream
-          $dataStreamBody .= $object_helper->create_link_for_ds($object_pid, $datastreamValue); //"<tr><td><b>$key :</b></td><td>$value</td></tr>\n";
-        }
-      }
-    }
-    $dataStreamBody .= "</table>\n";
-    return $dataStreamBody;
-
-
-
-//if they have access let them add a datastream
-    if (user_access(ObjectHelper :: $ADD_FEDORA_STREAMS)) {
-      $allow = TRUE;
-      if (module_exists('fedora_fesl')) {
-        $allow = fedora_fesl_check_roles($object_pid, 'write');
-      }
-      if ($allow) {
-        $dataStreamBody .= drupal_get_form('add_stream_form', $object_pid);
-      }
-    }
-    $fieldset = array(
-      '#title' => t("!text", array('!text' => $availableDataStreamsText)),
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
-      '#value' => $dataStreamBody
-    );
-    $dataStreamBody = '<div class = "fedora_detailed_list">' . theme('fieldset', $fieldset) . '</div>';
-
-    return $dataStreamBody;
-  }
-  return '';
-}
-
-/**
- * returns form allowing the ingestion of additional datastreams
- *
- * @param string $object_pid
- * @return array
- */
-function get_add_datastream_data($object_pid) {
-  if (user_access(ObjectHelper :: $ADD_FEDORA_STREAMS)) {
-    $allow = TRUE;
-    if (module_exists('fedora_fesl')) {
-      $allow = fedora_fesl_check_roles($object_pid, 'write');
-    }
-    if ($allow) {
-      $dataStreamBody = drupal_get_form('add_stream_form', $object_pid);
-    }
-  }
-  return $dataStreamBody;
 }
 
 /**
@@ -343,11 +239,11 @@ function islandora_recursive_directory_delete($dir) {
   return rmdir($dir);
 }
 
-function get_sorted_pages($book_pid) {
+function get_sorted_pages($book_pid, $state = 'Active') {
   $query = <<<XML
   select \$object \$page from <#ri>
 where \$object <fedora-rels-ext:isMemberOf> <info:fedora/$book_pid>
-and \$object <fedora-model:state> <fedora-model:Active>
+and \$object <fedora-model:state> <fedora-model:$state>
 and (\$object <info:islandora/islandora-system:def/paged-item-info#sequenceNumber> \$page
 or \$object <http://islandora.ca/ontology/relsext#isSequenceNumber> \$page)
 order by \$page
@@ -472,11 +368,11 @@ function renumber_pages($insertion_point, $book_pid, $new_page_count) {
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   $page_pids = get_sorted_pages($book_pid);
+  $count = count($page_pids);
 
-
-  for ($i = $insertion_point; $i <= count($page_pids); ++$i) {
+  for ($i = $insertion_point; $i <= $count; $i++) {
     $pid = $page_pids[$i];
-    $sequence = $i + 1;
+    $sequence = $i + $new_page_count;
     $item = new Fedora_Item($pid);
     if ($item->exists()) {
       $rdf_string = islandora_book_create_rdf($pid, $book_pid, $sequence);
@@ -556,16 +452,43 @@ RDF;
   return $rdf_string;
 }
 
-function islandora_book_get_tesseract_langauges(){
-    return array(
+function islandora_book_get_tesseract_langauges() {
+  return array(
     'eng' => t('English'),
+    'fra' => t('French'),
     'deu-frak' => t('German'),
     'por' => t('Portugese'),
-    'fra' => t('French'),
     'spa' => t('Spanish'),
     'hin' => t('Hindi'),
     'jpn' => t('Japanese'),
     'ita' => t('Italian')
   );
+}
 
+function islandora_book_get_available_tesseract_languages() {
+  $languages = variable_get('islandora_book_ocr_languages', array('eng'));
+  $languages = array_filter($languages);
+
+  return $languages;
+}
+
+function islandora_book_get_inactive_books() {
+  module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
+  $query = <<<STRING
+select \$subject \$title from <#ri>
+where(\$subject<info:fedora/fedora-system:def/model#hasModel> <info:fedora/islandora:bookCModel>
+or \$subject<info:fedora/fedora-system:def/model#hasModel> <info:fedora/islandora:iaBookCModel>)
+and \$subject <info:fedora/fedora-system:def/model#state> <info:fedora/fedora-system:def/model#Inactive>
+and \$subject <dc:title> \$title
+STRING;
+
+  $query_string = htmlentities(urlencode($query));
+  $url = variable_get('fedora_repository_url', 'http://localhost:8080/fedora/risearch');
+  $url .= '?type=tuples&flush=true&format=csv&limit=13000&lang=itql&stream=on&query=' . $query_string;
+  $content = do_curl($url, TRUE);
+  $results = explode("\n", $content);
+  array_shift($results);
+  $object_pids = preg_replace('/^info:fedora\//', '', $results);
+  $object_pids = array_values(array_filter($object_pids));
+  return $object_pids;
 }

@@ -19,7 +19,7 @@ class UploadHandler {
 
     $upload_dir = $_SERVER['DOCUMENT_ROOT'] . $base_path . file_directory_path() . "/$flat_pid/";
     $upload_dir = str_replace('//', '/', $upload_dir);
-    $save_path =  file_directory_path() . "/$flat_pid/";
+    $save_path = file_directory_path() . "/$flat_pid/";
     $this->options = array(
       'script_url' => $this->getFullUrl() . '/',
       'script_url' => $_SESSION['script_url'] . '/',
@@ -267,13 +267,15 @@ class UploadHandler {
   }
 
   protected function handle_file_upload($uploaded_file, $name, $size, $type, $error) {
+    $datetime = new DateTime();
     $file = new stdClass();
     $file->name = $this->trim_file_name($name, $type);
+
     $file->size = intval($size);
     $file->type = $type;
     $error = $this->has_error($uploaded_file, $file, $error);
     if (!$error && $file->name) {
-      $file_path = $this->options['upload_dir'] . $file->name;
+      $file_path = $this->options['upload_dir']  . $file->name;
       $append_file = !$this->options['discard_aborted_uploads'] &&
           is_file($file_path) && $file->size > filesize($file_path);
       clearstatcache();
@@ -385,6 +387,7 @@ class UploadHandler {
     }
     header('Vary: Accept');
     $json = json_encode($info);
+    $file_list = "$";
     $redirect = isset($_REQUEST['redirect']) ?
         stripslashes($_REQUEST['redirect']) : null;
     if ($redirect) {

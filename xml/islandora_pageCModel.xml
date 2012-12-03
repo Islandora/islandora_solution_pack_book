@@ -49,21 +49,20 @@ xsi:schemaLocation="info:fedora/fedora-system:def/foxml# http://www.fedora.info/
             <type>application/xml</type>
           </mimetypes>
           <ingest_rules></ingest_rules>
-          <datastreams>
+         <datastreams>
             <datastream dsid="ABBYY"></datastream>
             <datastream dsid="TEI"></datastream>
             <datastream dsid="DC"></datastream>
             <datastream dsid="RELS-EXT"></datastream>
             <datastream dsid="PDF"></datastream>
             <datastream dsid="OCR"></datastream>
-            <datastream dsid="TN"></datastream>
-            <datastream dsid="IMT-JPG"></datastream>
-            <datastream dsid="IMT-HTML">
-              <display_method class="IMTViewer" file="imt.inc" method="showIMT" module="islandora_book"></display_method>
+            <datastream dsid="TN">
+              <display_method class="PageViewer" file="book_page_viewer.inc" method="showPage" module="islandora_book"></display_method>
             </datastream>
           </datastreams>
         </content_model>
       </foxml:xmlContent>
     </foxml:datastreamVersion>
   </foxml:datastream>
+
 </foxml:digitalObject>
