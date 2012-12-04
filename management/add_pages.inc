@@ -6,7 +6,7 @@ function book_add_pages(&$form_state, $pid) {
   drupal_add_css($path . '/css/islandora_book.css');
   $list = array(
     l(t("Append or Insert Pages"), "islandora/book/upload/$pid"),
-    l(t("Create Digital Page"), "islandora/book/borndigital/$pid")
+   // l(t("Create Digital Page"), "islandora/book/borndigital/$pid")
   );
   $form['link'] = array(
     '#type' => 'item',
