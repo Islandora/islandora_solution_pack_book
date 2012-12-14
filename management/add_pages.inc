@@ -482,7 +482,7 @@ function makePDF($book_pid, $file_list, $tmpDir) {
   $book_item = new Fedora_Item($book_pid);
   $outputFile = "${tmpDir}book.pdf";
   $tiffs = array();
-  $cmdString = 'convert -compress LZW';
+  $cmdString = 'convert -compress JPEG -density 150';
   foreach ($file_list as $tiff) {
     $cmdString .= " $tiff";
   }
