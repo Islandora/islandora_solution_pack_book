@@ -966,6 +966,7 @@
                                     <options>
                                         <Asia>Asia</Asia>
                                         <Africa>Africa</Africa>
+                                        <Australia>Australia</Australia>
                                         <Europe>Europe</Europe>
                                         <index key="North America">North America</index>
                                         <index key="South America">South America</index>
