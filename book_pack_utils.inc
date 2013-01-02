@@ -306,19 +306,19 @@ function add_islandora_rdfs($book_pid) {
 function get_files_from_zip($zip_file) {
   $file_dir = pathinfo($zip_file, PATHINFO_DIRNAME);
   $tmpDir = $file_dir . '/tmpZip/';
+  $file_list = array();
   if (!is_dir($tmpDir)) {
     mkdir($tmpDir, 0766);
+    $cmdString = "unzip -q -o -d $tmpDir \"$zip_file\"";
+    system($cmdString, $retVal);
   }
-  $file_list = array();
 
-  $cmdString = "unzip -q -o -d $tmpDir \"$zip_file\"";
 
-  system($cmdString, $retVal);
-  file_delete("$tmpDir \"$zip_file\"");
 
   $dirs = array();
   array_push($dirs, $tmpDir);
   $files = scandir($tmpDir);
+  // unlink("$zip_file");
 
   foreach ($files as $file) {
     if (is_dir("$tmpDir/$file") && $file != '.' && $file != '..' && $file != '__MACOSX') {
