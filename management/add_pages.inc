@@ -64,7 +64,7 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
   }
   $message = t("This sequence currently has @count pages. Additional pages will be appended at the end of the sequence by default. !break", array("@count" => $current_page_count, '!break' => '<br />'));
   $message .= t("Choose a number lower than @count to insert page(s) at a specific location in the sequence.", array("@count" => $current_page_count, '!break' => '<br />'));
-  if ($filecount > 1) {
+  if ($filecount > 0) {
     $form['intro'] = array(
       '#type' => 'item',
       '#title' => '<span id ="file_label">' . $toggle_link . "</span",
@@ -83,6 +83,7 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
       '#description' => t("If checked files will be sorted alphanumerically to determine page order.")
     );
   }
+  
   $form['page_add'] = array(
     '#type' => 'item',
     '#title' => $prompt,
