@@ -6,7 +6,7 @@ function book_add_pages(&$form_state, $pid) {
   drupal_add_css($path . '/css/islandora_book.css');
   $list = array(
     l(t("Append or Insert Pages"), "islandora/book/upload/$pid"),
-   // l(t("Create Digital Page"), "islandora/book/borndigital/$pid")
+      // l(t("Create Digital Page"), "islandora/book/borndigital/$pid")
   );
   $form['link'] = array(
     '#type' => 'item',
@@ -64,25 +64,27 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
   }
   $message = t("This sequence currently has @count pages. Additional pages will be appended at the end of the sequence by default. !break", array("@count" => $current_page_count, '!break' => '<br />'));
   $message .= t("Choose a number lower than @count to insert page(s) at a specific location in the sequence.", array("@count" => $current_page_count, '!break' => '<br />'));
-  if ($filecount > 1) {
+  $visible = ($filecount < 2) ? FALSE : TRUE;
+  if ($visible) {
     $form['intro'] = array(
       '#type' => 'item',
       '#title' => '<span id ="file_label">' . $toggle_link . "</span",
       '#description' => t("Adjust ingest order of uploaded files")
     );
-
-    $form['table'] = array(
-      '#prefix' => '<div id ="file_view">',
-      'table' => $table,
-      '#suffix' => '</div>',
-    );
-
-    $form['alpha_sort'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Sort by input file names?'),
-      '#description' => t("If checked files will be sorted alphanumerically to determine page order.")
-    );
   }
+  $form['table'] = array(
+    '#prefix' => '<div id ="file_view">',
+    'table' => $table,
+    '#suffix' => '</div>',
+    '#access' => $visible,
+  );
+
+  $form['alpha_sort'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Sort by input file names?'),
+    '#description' => t("If checked files will be sorted alphanumerically to determine page order.")
+  );
+
   $form['page_add'] = array(
     '#type' => 'item',
     '#title' => $prompt,
