@@ -1,18 +1,27 @@
 <?php
 
 function book_add_pages(&$form_state, $pid) {
+  $path = drupal_get_path('module', 'islandora_book');
+  drupal_add_js($path . '/js/book.js');
+  drupal_add_css($path . '/css/islandora_book.css');
+  $list = array(
+    l(t("Append or Insert Pages"), "islandora/book/upload/$pid"),
+      // l(t("Create Digital Page"), "islandora/book/borndigital/$pid")
+  );
+  $form['link'] = array(
+    '#type' => 'item',
+    '#value' => l(t('Return to book view'), "fedora/repository/$pid"),
+  );
   $form['page_add'] = array(
     '#attributes' => array('class' => 'page_fieldset'),
     '#type' => 'fieldset',
     '#collapsed' => FALSE,
     '#collapsible' => true,
   );
-  $form['page_add']['link'] = array(
-    '#value' => l(t("Append or Insert Pages"), "islandora/book/upload/$pid") . '<br />',
+  $form['page_add']['links'] = array(
+    '#value' => theme_item_list($list),
   );
-  $form['page_add']['bd_link'] = array(
-    '#value' => l(t("Create Digital Page"), "islandora/book/borndigital/$pid"),
-  );
+
 
   return $form;
 }
@@ -28,13 +37,20 @@ function book_add_pages(&$form_state, $pid) {
 function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageCModel', $relation = 'isMemberOf') {
   $file = (isset($form_state['values']['ingest-file-location']) ? $form_state['values']['ingest-file-location'] : '');
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
+  module_load_include('inc', 'islandora_book', 'management/IslandoraFileReorderTable');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
 
-  $languages = islandora_book_get_tesseract_langauges();
+  $path = drupal_get_path('module', 'islandora_book');
+  drupal_add_js($path . '/js/book.js');
+
+  $table_data = islandora_file_reorder_table($pid);
+  $table = $table_data['table'];
+  $filecount = $table_data['filecount'];
+  $languages = islandora_book_get_available_tesseract_languages();
 
   $item = new Fedora_Item($pid);
   $book_title = $item->objectProfile->objLabel;
-
+  $toggle_link = l(t("Reorder Files"), '#');
   $prompt = t("Add page(s) to @title", array('@title' => $book_title));
   $submit_prompt = t('Ingest Pages');
   if ($page_cmodel == 'islandora:bd_pageCModel') {
@@ -48,11 +64,29 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
   }
   $message = t("This sequence currently has @count pages. Additional pages will be appended at the end of the sequence by default. !break", array("@count" => $current_page_count, '!break' => '<br />'));
   $message .= t("Choose a number lower than @count to insert page(s) at a specific location in the sequence.", array("@count" => $current_page_count, '!break' => '<br />'));
+  $visible = ($filecount < 2) ? FALSE : TRUE;
+  if ($visible) {
+    $form['intro'] = array(
+      '#type' => 'item',
+      '#title' => '<span id ="file_label">' . $toggle_link . "</span",
+      '#description' => t("Adjust ingest order of uploaded files")
+    );
+  }
+  $form['table'] = array(
+    '#prefix' => '<div id ="file_view">',
+    'table' => $table,
+    '#suffix' => '</div>',
+    '#access' => $visible,
+  );
+
+  $form['alpha_sort'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Sort by input file names?'),
+    '#description' => t("If checked files will be sorted alphanumerically to determine page order.")
+  );
 
   $form['page_add'] = array(
-    '#type' => 'fieldset',
-    '#collapsed' => true,
-    '#collapsible' => false,
+    '#type' => 'item',
     '#title' => $prompt,
   );
 
@@ -79,7 +113,7 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
     '#value' => $relation,
   );
   if ($pages) {
-    $form['page_add']['insertion_point'] = array(
+    $form['insertion_point'] = array(
       '#type' => 'textfield',
       '#title' => t('Last sequence number'),
       '#default_value' => $current_page_count,
@@ -89,16 +123,16 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
   }
   if ($page_cmodel == 'islandora:pageCModel') {
 
-   // $form['page_add']['preprocess'] = array(
-   //   '#title' => t('Preprocessing for typescripts?'),
-   //   '#description' => t('Will add additional processing for typewritten text.  This script grayscales and sharpens an ingested .tiff before performing OCR processes. <br />
-   //     This has been shown to improve OCR results for some images. Use with caution. Process can be lengthly and is resource intensive. <br />
-    //    If your image is already gray, this script will not run'),
-    //  '#type' => 'checkbox',
-   // );
+    $form['preprocess'] = array(
+      '#title' => t('Preprocessing for typescripts?'),
+      '#description' => t('Will add additional processing for typewritten text.  This script grayscales and sharpens an ingested .tiff before performing OCR processes. <br />
+     This has been shown to improve OCR results for some images. Use with caution. Process can be lengthly and is resource intensive. <br />
+    If your image is already gray, this script will not run'),
+      '#type' => 'checkbox',
+    );
 
 
-    $form['page_add']['language'] = array(
+    $form['language'] = array(
       '#title' => t('Language'),
       '#type' => 'select',
       '#options' => $languages,
@@ -106,7 +140,7 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
     );
   }
 
-  $form['page_add']['submit'] = array(
+  $form['submit'] = array(
     '#type' => 'submit',
     '#weight' => 10,
     '#value' => $submit_prompt,
@@ -139,7 +173,9 @@ function book_add_pages_form_validate($form, &$form_state) {
  * @param array $form_state
  */
 function book_add_pages_form_submit($form, &$form_state) {
+
   global $base_path;
+
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   $pageCModel = $form_state['values']['page_cmodel'];
   $pid = $form_state['values']['pid'];
@@ -149,8 +185,21 @@ function book_add_pages_form_submit($form, &$form_state) {
   $tmpDir = file_directory_path() . '/' . $dirName . '/';
   $relationship = $form_state['values']['relation'];
   $language = (isset($form_state['values']['language'])) ? $form_state['values']['language'] : 'eng';
+
   if ($pageCModel == 'islandora:pageCModel') {
-    $file_list = get_page_files($pid);
+    $file_list = array();
+    foreach ($form_state['values']['table']['rows'] as $row) {
+      $pos = (strlen($row['pos']) > 0) ? $row['pos'] : 0;
+      $pos = intval($pos);
+      $file_list[$pos] = $row['file'];
+    }
+    if ($form_state['values']['alpha_sort']) {
+      sort($file_list);
+    }
+    else {
+      ksort($file_list);
+    }
+
     ibook_create_page_objects($pid, $file_list, $form_state['values']['page_cmodel'], $relationship, $tmpDir, $start_page, $language, $preprocess);
   }
   if ($pageCModel == 'islandora:bd_pageCModel') {
@@ -163,7 +212,7 @@ function book_add_pages_form_submit($form, &$form_state) {
     $parts = explode(':', $pid);
     $nextPid = FEDORA_ITEM::get_next_PID_in_namespace($parts[0]);
     $page_item = Fedora_Item::ingest_new_item($nextPid, 'A', t('Digital Page'));
-    $page_item->add_relationship('hasModel', 'islandora:pageCModel', FEDORA_MODEL_URI);
+    $page_item->add_relationship('hasModel', 'islandora:bd_pageCModel', FEDORA_MODEL_URI);
     $page_item->add_relationship('isSequenceNumber', $start_page, 'http://islandora.ca/ontology/relsext#', 3);
     $page_item->add_relationship('isPageNumber', $start_page, 'http://islandora.ca/ontology/relsext#', 3);
     $page_item->add_relationship('isSection', '1', 'http://islandora.ca/ontology/relsext#', 3);
@@ -207,11 +256,12 @@ function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = '
   );
   $page_num = $start_page;
   $book_title = $book->objectProfile->objLabel;
-  $batch['operations'][] = array('renumber_pages', array($start_page, $pid, $image_count));
+  $batch['operations'][] = array('wrap_renumber_pages', array($start_page, $pid, $image_count));
   foreach ($image_list as $image_path) {
     $batch['operations'][] = array('ibook_add_single_page_object', array($pid, $image_path, $page_num, "$book_title - Page " . sprintf("%03d", $page_num), $page_cmodel, $relation, $language, $preprocess));
     $page_num++;
   }
+  $batch['operations'][] = array('deleteDirectory', array($tmpDir));
   if (variable_get('islandora_create_book_pdf', FALSE)) {
     $batch['operations'][] = array('makePDF', array($pid, $image_list, $tmpDir));
   }
@@ -259,6 +309,21 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
   $page_item->add_relationship('isSection', '1', 'http://islandora.ca/ontology/relsext#', 3);
   $page_item->add_relationship('isMemberOf', $book_pid, RELS_EXT_URI);
 
+  //add TECHMD stream if enabled
+
+  if (variable_get('enable_fits', FALSE) == TRUE) {
+    exec(variable_get('fits_path', '/usr/local/bin/fits.sh') . ' -i ' . escapeshellarg($page_file) . '', $TECHMD);
+    $TECHMD = implode($TECHMD);
+    $xml = simplexml_load_string($TECHMD);
+    $xml->registerXPathNamespace('fits', 'http://hul.harvard.edu/ois/xml/ns/fits/fits_output');
+    $image_height = $xml->xpath('//fits:imageHeight');
+    $image_height = (string) $image_height[0];
+    $image_width = $xml->xpath('//fits:imageWidth');
+    $image_width = (string) $image_width[0];
+    $page_item->add_datastream_from_string($TECHMD, 'TECHMD', 'TECHMD', 'text/xml', 'M');
+    $page_item->add_dsid_relationship('JPEG', 'islandora-book:height', $image_height, 'info:islandora/islandora-system:def/pageinfo#', 3);
+    $page_item->add_dsid_relationship('JPEG', 'islandora-book:width', $image_width, 'info:islandora/islandora-system:def/pageinfo#', 3);
+  }
   // add original image
   if (strtolower($ext) == 'tif') {
     $ext = 'TIFF';
@@ -266,7 +331,6 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
   module_load_include('inc', 'fedora_repository', 'MimeClass');
   $mime_helper = new MimeClass();
   $mimetype = $mime_helper->get_mimetype($page_file);
-  $label = "Archival TIFF";
 
   $page_item->add_datastream_from_file($page_file, strtoupper($ext), 'Archival IMAGE', $mimetype, 'M');
   $page_file = preg_replace('/\/\//', '/', $page_file);
@@ -274,16 +338,25 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
 
   //add compresed jp2 for viewer
   if (variable_get('islandora_book_create_images', TRUE)) {
-    if (strtolower($ext) == 'tif' || strtolower($ext) == 'tiff' ||strtolower($ext) == 'jpg' ||strtolower($ext) == 'jpeg') {
+    if (strtolower($ext) == 'tif' || strtolower($ext) == 'tiff' || strtolower($ext) == 'jpg' || strtolower($ext) == 'jpeg') {
       exec('kdu_compress -i "' . $page_file . '" -o "' . $page_file . '.jp2' . '" -rate 0.5 Clayers=1 Clevels=7 "Cprecincts={256,256},{256,256},{256,256},{128,128},{128,128},{64,64},{64,64},{32,32},{16,16}" "Corder=RPCL" "ORGgen_plt=yes" "ORGtparts=R" "Cblk={32,32}" Cuse_sop=yes', $output, $returnValue);
       if ($returnValue == '0') {
-        $page_item->add_datastream_from_file("$page_file.jp2", 'JP2', "Compressed JP2", 'image/jp2', 'M');
+        $attempts = 0;
+        $success = NULL;
+        while ($attempts < 10 && !isset($success)) {
+          $success = $page_item->add_datastream_from_file("$page_file.jp2", 'JP2', "Compressed JP2", 'image/jp2', 'M');
+          if (!isset($success)) {
+            time_nanosleep(0, 500000000);
+          }
+          $attempts++;
+        }
       }
+      unlink("$page_file.jp2");
     }
     //add thumbnail image
-    exec("convert {$page_file}[0] -colorspace RGB -thumbnail 120x $page_file-tn.jpg", $output, $returnValue);
+    $cmd = "convert {$page_file}[0] -colorspace RGB -thumbnail 120x $page_file-tn.jpg";
+    exec($cmd, $output, $returnValue);
     if ($returnValue == '0') {
-      $page_item->add_datastream_from_file("$page_file-tn.jpg", 'TN', 'Thumbnail', 'image/jpeg', 'M');
       if ($page_num == 1) {
         $book_item = new Fedora_Item($book_pid);
         $DSIDS = $book_item->get_datastreams_list_as_array();
@@ -292,11 +365,14 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
         }
         $book_item->add_datastream_from_file("$page_file-tn.jpg", 'TN', 'Thumbnail', 'image/jpeg', 'M');
       }
+      $page_item->add_datastream_from_file("$page_file-tn.jpg", 'TN', 'Thumbnail', 'image/jpeg', 'M');
+      unlink("$page_file-tn.jpg");
     }
     //add medium jpeg
     exec("convert -resize 800 \"{$page_file}\" \"$page_file-med.jpg\"", $output, $returnValue);
     if ($returnValue == '0') {
       $page_item->add_datastream_from_file("$page_file-med.jpg", 'JPEG', "JPEG image", 'image/jpeg', 'M');
+      unlink("$page_file-med.jpg");
     }
   }
   //perform OCR using Tesseract, add text datastream
@@ -315,13 +391,16 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
     $command = "$executable $page_file $page_file -l $language";
     exec("$executable $page_file $page_file -l $language", $output, $returnValue);
     if ($returnValue == '0') {
+      $textfile = "$page_file.txt";
       $page_item->add_datastream_from_file("$page_file.txt", 'OCR', "Scanned Text", 'text/plain', 'M');
+      unlink($textfile);
     }
     else {
       $page_item->add_datastream_from_string('No OCR available', 'OCR', 'Scanned Text', 'text/plain', 'M');
     }
     islandora_book_viewer_create_hocr($executable, $page_file, $language, &$page_item);
   }
+  unlink($page_file);
 }
 
 /**
@@ -336,6 +415,10 @@ function islandora_book_viewer_create_hocr($executable, $page_file, $lang, &$obj
   exec("$executable $page_file $page_file -l $lang hocr", $output, $returnValue);
   $datastreams = $object->get_datastreams_list_as_array();
   if ($returnValue == '0') {
+    if (!is_file("$page_file.html")) {
+      unlink("$page_file.txt");
+      return FALSE;
+    }
     $html_string = file_get_contents("$page_file.html");
     if (empty($html_string)) {
       return FALSE;
@@ -347,9 +430,9 @@ function islandora_book_viewer_create_hocr($executable, $page_file, $lang, &$obj
     $xml_string = str_replace($doc_type, '<?xml version="1.0" encoding="UTF-8"?>', $html_string);
     $input = new DomDocument();
     $input->loadXML($xml_string);
-    $path = drupal_get_path('module', 'islandora_bookviewer');
+    $path = drupal_get_path('module', 'islandora_book');
     $xsl = new DomDocument();
-    $test = $xsl->load($path . '/xslt/hocrToLowerhocr.xsl');
+    $test = $xsl->load($path . '/xsl/hocrToLowerhocr.xsl');
     if (!$test) {//can't run transform so leaving
       return FALSE;
     }
@@ -401,7 +484,7 @@ function makePDF($book_pid, $file_list, $tmpDir) {
   $book_item = new Fedora_Item($book_pid);
   $outputFile = "${tmpDir}book.pdf";
   $tiffs = array();
-  $cmdString = 'convert -compress LZW';
+  $cmdString = 'convert -compress JPEG -density 150';
   foreach ($file_list as $tiff) {
     $cmdString .= " $tiff";
   }
@@ -416,6 +499,7 @@ function makePDF($book_pid, $file_list, $tmpDir) {
   }
 }
 
+//deprecated - to be deleted on approval
 function page_delete(&$form_state, $pid) {
   module_load_include('inc', 'islandora_book', 'management/IslandoraBookPageTable');
   $table = islandora_book_page_table($pid);
@@ -446,57 +530,7 @@ function page_delete(&$form_state, $pid) {
   return $form;
 }
 
-/**
- * retrieves all files from temporary directory, including zipped files, and ordering by mtime
- * @param string $pid
- * @return array
- */
-function get_page_files($pid) {
-  module_load_include('inc', 'islandora_book', 'management/add_pages');
-  $flat_pid = str_replace(':', '_', $pid);
-  module_load_include('inc', 'islandora_book', 'book_pack_utils');
-  $file_dir = file_directory_path() . "/$flat_pid/";
-  $files = scandir($file_dir);
-
-//clean and order array input array
-
-  $temp_process = array();
-  foreach ($files as $file) {
-    if ($file != '.' && $file != '..') {
-      $filename = $file_dir . $file;
-      $temp_process[$filename] = filemtime($filename);
-    }
-  }
-  asort($temp_process);
-  $sorted_files = array_keys($temp_process);
-// unzip files and add them to array in the correct order
-// spaces are rmoved from file names in the interest of consistency
-
-  $ordered_files = array();
-  foreach ($sorted_files as $candidate) {
-    $old_filename = pathinfo($candidate, PATHINFO_FILENAME);
-    $ext = pathinfo($candidate, PATHINFO_EXTENSION);
-    $new_file_name = preg_replace("/[^a-z\.\d]/i", "", $old_filename);
-    if ($new_file_name != $old_filename) {
-      $new_fullname = str_replace($old_filename, $new_file_name, $candidate);
-      $success = rename("$candidate", "$new_fullname");
-      $candidate = $new_fullname;
-    }
-    $allowed_extentions = array('tif', 'tiff', 'jpg', 'jpeg');
-    if (in_array(strtolower($ext), $allowed_extentions)) {
-      $ordered_files[] = $candidate;
-    }
-
-    if ($ext == 'zip') {
-      $unzipped_files = get_files_from_zip($candidate);
-      $ordered_files = array_merge($ordered_files, $unzipped_files);
-    }
-  }
-  // ordered files now has all the information we need to do a sucessful page ingest
-
-  return $ordered_files;
-}
-
+//deprecated - to be deleted on approval
 function page_delete_submit($form, &$form_state) {
 
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
@@ -534,4 +568,26 @@ function islandora_book_delete_single_page($page_pid) {
 function wrap_post_deletion_renumber_pages($book_pid) {
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   post_deletion_renumber_pages($book_pid);
+}
+
+/**
+ * Wrapper to call function from utilities page
+ * Batch will not call functions from multiple files
+ * @param string $book_pid
+ */
+function wrap_renumber_pages($start_page, $pid, $image_count) {
+  module_load_include('inc', 'islandora_book', 'book_pack_utils');
+  renumber_pages($start_page, $pid, $image_count);
+}
+
+function islandora_book_get_dimensions($pid) {
+  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
+  $item = new fedora_item($pid);
+  $TECHMD = $item->get_datastream_dissemination('TECHMD');
+  $xml = simplexml_load_string($TECHMD);
+  $xml->registerXPathNamespace('fits', 'http://hul.harvard.edu/ois/xml/ns/fits/fits_output');
+  $image_height = $xml->xpath('//fits:imageHeight');
+  $image_height = (string) $image_height[0];
+  $image_width = $xml->xpath('//fits:imageWidth');
+  $image_width = (string) $image_width[0];
 }

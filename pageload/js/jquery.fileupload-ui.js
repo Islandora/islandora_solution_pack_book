@@ -236,7 +236,9 @@
             },
             // Callback for uploads start, equivalent to the global ajaxStart event:
             start: function (e) {
+              
                 var that = $(this).data('fileupload');
+                console.dir(that)
                 that._transition($(this).find('.fileupload-buttonbar .progress')).done(
                     function () {
                         that._trigger('started', e);

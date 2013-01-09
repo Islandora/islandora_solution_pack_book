@@ -15,9 +15,6 @@ function current_datastreams(&$form_state, $pid) {
   $object_helper = new ObjectHelper();
   $ds_list = $object_helper->get_formatted_datastream_list($content_helper->pid, NULL, $content_helper->item);
 
-  // $ds_list = datastream_display_builder($content_helper->pid, $content_helper->item);
-  $add_datastreams_details = get_add_datastream_data($content_helper->pid);
-
   $form = array();
   $form['pid'] = array(
     '#type' => 'hidden',
@@ -50,7 +47,8 @@ function current_datastreams(&$form_state, $pid) {
 function update_datastreams(&$form_state, $pid) {
 
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
-  $languages = islandora_book_get_tesseract_langauges();
+  $languages = islandora_book_get_available_tesseract_languages();
+  $warning = NULL;
 
 
   $form = array();
@@ -68,17 +66,18 @@ function update_datastreams(&$form_state, $pid) {
   );
   $form['page_manage']['do_ocr'] = array(
     '#type' => 'checkbox',
+    '#description' => t('Refreshing the OCR will remove all edits to the previous OCR stream, including TEI and entity markup.'),
     '#title' => t('Refresh OCR for this book')
   );
 
 
-  //$form['page_manage']['preprocess'] = array(
-  //  '#title' => t('Preprocessing for typescripts?'),
-  //  '#description' => t('Will add additional processing for typewritten text.  This script grayscales and sharpens an ingested .tiff before performing OCR processes. <br />
-  //      This has been shown to improve OCR results for some images. Use with caution. Process can be lengthly and is resource intensive. <br />
-  //      If your image is already gray, this script will not run'),
-  //  '#type' => 'checkbox',
-  //);
+  $form['page_manage']['preprocess'] = array(
+    '#title' => t('Preprocessing for typescripts?'),
+    '#description' => t('Will add additional processing for typewritten text.  This script grayscales and sharpens an ingested .tiff before performing OCR processes. <br />
+        This has been shown to improve OCR results for some images. Use with caution. Process can be lengthly and is resource intensive. <br />
+        If your image is already gray, this script will not run'),
+    '#type' => 'checkbox',
+  );
 
   $form['page_manage']['language'] = array(
     '#title' => t('Language'),
@@ -164,7 +163,7 @@ function update_individual_pages($page_pid, $do_ocr, $refresh_images, $language,
   $item = new Fedora_Item($page_pid);
   $stream = 'TIFF';
   $ext = ".tif";
-  if (!key_exists('TIFF', $item->datastreams) & !key_exists('TIF', $item->datastreams)) {
+  if (!array_key_exists('TIFF', $item->datastreams) & !key_exists('TIF', $item->datastreams)) {
     $stream = 'JPG';
     $ext = '.jpg';
   }

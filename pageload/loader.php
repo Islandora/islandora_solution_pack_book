@@ -28,29 +28,33 @@
     <div class="container">
       <div class="page-header">
         <h3 id="book_title">Add page files</h3>
-        <h4>Please upload the items in the queue by clicking the 'Start' button beside each item. Pages will be added to the book based on this upload order.</h4>
+        <h4>Please upload the items in the queue by clicking the 'Start' button beside each item.</h4>
       </div>
       <a id="back_to_book"href="#">Return to Book</a>
       <!-- The file upload form used as target for the file upload widget -->
       <form id="fileupload" action="server/php/" method="POST" enctype="multipart/form-data">
         <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
         <div class="row fileupload-buttonbar">
-          <div class="span7">
+          <div class="span">
             <!-- The fileinput-button span is used to style the file input field as button -->
             <span class="btn btn-success fileinput-button">
               <i class="icon-plus icon-white"></i>
               <span>Add files to upload queue</span>
               <input type="file" name="files[]" multiple>
             </span>
+                <button type="submit" class="btn btn-primary start">
+                    <i class="icon-upload icon-white"></i>
+                    <span>Begin all file uploads</span>
+                </button>
             <button id="add_page" type="button" class="btn btn-primary">
               <i class="icon-upload icon-white"></i>
-              <span>Ingest Uploaded files</span>
+              <span>Ingest uploaded files</span>
             </button>
             <button id="delete_page_files" type="button" class="btn btn-danger delete">
               <i class="icon-trash icon-white"></i>
               <span>Empty upload queue</span>
             </button>
-            
+
           </div>
           <div class="span5">
             <!-- The global progress bar -->

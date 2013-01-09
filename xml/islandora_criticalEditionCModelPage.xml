@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<foxml:digitalObject VERSION="1.1" PID="islandora:criticalEditionCModelPage"
+xmlns:foxml="info:fedora/fedora-system:def/foxml#"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="info:fedora/fedora-system:def/foxml# http://www.fedora.info/definitions/1/0/foxml1-1.xsd">
+<foxml:objectProperties>
+<foxml:property NAME="info:fedora/fedora-system:def/model#state" VALUE="Active"/>
+<foxml:property NAME="info:fedora/fedora-system:def/model#label" VALUE="Critical Edition Page"/>
+<foxml:property NAME="info:fedora/fedora-system:def/model#ownerId" VALUE=""/>
+<foxml:property NAME="info:fedora/fedora-system:def/model#createdDate" VALUE="2012-08-14T17:47:31.234Z"/>
+<foxml:property NAME="info:fedora/fedora-system:def/view#lastModifiedDate" VALUE="2012-08-14T17:54:39.818Z"/>
+</foxml:objectProperties>
+<foxml:datastream ID="AUDIT" STATE="A" CONTROL_GROUP="X" VERSIONABLE="false">
+<foxml:datastreamVersion ID="AUDIT.0" LABEL="Audit Trail for this object" CREATED="2012-08-14T17:47:31.234Z" MIMETYPE="text/xml" FORMAT_URI="info:fedora/fedora-system:format/xml.fedora.audit">
+<foxml:xmlContent>
+<audit:auditTrail xmlns:audit="info:fedora/fedora-system:def/audit#">
+<audit:record ID="AUDREC1">
+<audit:process type="Fedora API-M"/>
+<audit:action>addDatastream</audit:action>
+<audit:componentID>ISLANDORACM</audit:componentID>
+<audit:responsibility>fedoraAdmin</audit:responsibility>
+<audit:date>2012-08-14T17:54:22.416Z</audit:date>
+<audit:justification></audit:justification>
+</audit:record>
+<audit:record ID="AUDREC2">
+<audit:process type="Fedora API-M"/>
+<audit:action>modifyDatastreamByValue</audit:action>
+<audit:componentID>ISLANDORACM</audit:componentID>
+<audit:responsibility>fedoraAdmin</audit:responsibility>
+<audit:date>2012-08-14T17:54:39.818Z</audit:date>
+<audit:justification></audit:justification>
+</audit:record>
+</audit:auditTrail>
+</foxml:xmlContent>
+</foxml:datastreamVersion>
+</foxml:datastream>
+<foxml:datastream ID="DC" STATE="A" CONTROL_GROUP="X" VERSIONABLE="true">
+<foxml:datastreamVersion ID="DC1.0" LABEL="Dublin Core Record for this object" CREATED="2012-08-14T17:47:31.234Z" MIMETYPE="text/xml" FORMAT_URI="http://www.openarchives.org/OAI/2.0/oai_dc/" SIZE="409">
+<foxml:xmlContent>
+<oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+  <dc:title>Critical Edition Page</dc:title>
+  <dc:identifier>islandora:criticalEditionCModelPage</dc:identifier>
+</oai_dc:dc>
+</foxml:xmlContent>
+</foxml:datastreamVersion>
+</foxml:datastream>
+<foxml:datastream ID="ISLANDORACM" STATE="A" CONTROL_GROUP="X" VERSIONABLE="true">
+<foxml:datastreamVersion ID="ISLANDORACM.0" LABEL="" CREATED="2012-08-14T17:54:22.416Z" MIMETYPE="text/xml" SIZE="1311">
+<foxml:xmlContent>
+<content_model xmlns="http://www.islandora.ca" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="book" xsi:schemaLocation="http://www.islandora.ca http://137.149.200.50/sites/all/modules/islandora/islandoracm.xsd">
+  <mimetypes>
+    <type>text/xml</type>
+    <type>image/tiff</type>
+    <type>image/jp2</type>
+    <type>image/jpg</type>
+    <type>text/plain</type>
+    <type>text/html</type>
+    <type>application/pdf</type>
+    <type>application/xml</type>
+  </mimetypes>
+  <ingest_rules></ingest_rules>
+  <datastreams>
+    <datastream dsid="ABBYY"></datastream>
+    <datastream dsid="TEI"></datastream>
+    <datastream dsid="DC"></datastream>
+    <datastream dsid="RELS-EXT"></datastream>
+    <datastream dsid="PDF"></datastream>
+    <datastream dsid="OCR"></datastream>
+    <datastream dsid="TN">
+      <display_method class="PageViewer" file="book_page_viewer.inc" method="showPage" module="islandora_book"></display_method>
+    </datastream>
+  </datastreams>
+  <ingest_form dsid="QDC" hide_file_chooser="true" page="2">
+    <form_builder_method class="" file="" handler="" method="" module=""></form_builder_method>
+    <form_elements></form_elements>
+  </ingest_form>
+  <forms>
+    <form document_class="" document_file="" document_module="" dsid="" name=""></form>
+  </forms>
+</content_model>
+</foxml:xmlContent>
+</foxml:datastreamVersion>
+<foxml:datastreamVersion ID="ISLANDORACM.1" LABEL="Islandora Content Model" CREATED="2012-08-14T17:54:39.818Z" MIMETYPE="text/xml" SIZE="1311">
+<foxml:xmlContent>
+<content_model xmlns="http://www.islandora.ca" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="book" xsi:schemaLocation="http://www.islandora.ca http://137.149.200.50/sites/all/modules/islandora/islandoracm.xsd">
+  <mimetypes>
+    <type>text/xml</type>
+    <type>image/tiff</type>
+    <type>image/jp2</type>
+    <type>image/jpg</type>
+    <type>text/plain</type>
+    <type>text/html</type>
+    <type>application/pdf</type>
+    <type>application/xml</type>
+  </mimetypes>
+  <ingest_rules></ingest_rules>
+  <datastreams>
+    <datastream dsid="ABBYY"></datastream>
+    <datastream dsid="TEI"></datastream>
+    <datastream dsid="DC"></datastream>
+    <datastream dsid="RELS-EXT"></datastream>
+    <datastream dsid="PDF"></datastream>
+    <datastream dsid="OCR"></datastream>
+    <datastream dsid="TN">
+      <display_method class="PageViewer" file="book_page_viewer.inc" method="showPage" module="islandora_book"></display_method>
+    </datastream>
+  </datastreams>
+  <ingest_form dsid="QDC" hide_file_chooser="true" page="2">
+    <form_builder_method class="" file="" handler="" method="" module=""></form_builder_method>
+    <form_elements></form_elements>
+  </ingest_form>
+  <forms>
+    <form document_class="" document_file="" document_module="" dsid="" name=""></form>
+  </forms>
+</content_model>
+</foxml:xmlContent>
+</foxml:datastreamVersion>
+</foxml:datastream>
+</foxml:digitalObject>

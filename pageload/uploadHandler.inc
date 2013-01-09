@@ -19,19 +19,13 @@ class UploadHandler {
 
     $upload_dir = $_SERVER['DOCUMENT_ROOT'] . $base_path . file_directory_path() . "/$flat_pid/";
     $upload_dir = str_replace('//', '/', $upload_dir);
-    $save_path =  file_directory_path() . "/$flat_pid/";
+    $save_path = file_directory_path() . "/$flat_pid/";
     $this->options = array(
       'script_url' => $this->getFullUrl() . '/',
       'script_url' => $_SESSION['script_url'] . '/',
-      //
-      //  'upload_dir' => dirname($_SERVER['SCRIPT_FILENAME']).'/files/',
       'upload_dir' => $save_path,
       'upload_url' => $save_path,
-      //
-      //'upload_url' => $this->getFullUrl().'/files/',
       'param_name' => 'files',
-      // Set the following option to 'POST', if your server does not support
-      // DELETE requests. This is a parameter sent to the client:
       'delete_type' => 'DELETE',
       // The php.ini settings upload_max_filesize and post_max_size
       // take precedence over the following max_file_size setting:
@@ -40,7 +34,7 @@ class UploadHandler {
       'accept_file_types' => '/.+$/i',
       'max_number_of_files' => null,
       // Set the following option to false to enable resumable uploads:
-      'discard_aborted_uploads' => true,
+      'discard_aborted_uploads' => false,
       // Set to true to rotate images based on EXIF meta data, if available:
       'orient_image' => false,
       'image_versions' => array(
@@ -116,6 +110,7 @@ class UploadHandler {
   }
 
   protected function create_scaled_image($file_name, $options) {
+    return false;
     $file_path = $this->options['upload_dir'] . $file_name;
     $new_file_path = $options['upload_dir'] . $file_name;
     list($img_width, $img_height) = @getimagesize($file_path);
@@ -267,13 +262,15 @@ class UploadHandler {
   }
 
   protected function handle_file_upload($uploaded_file, $name, $size, $type, $error) {
+   
     $file = new stdClass();
     $file->name = $this->trim_file_name($name, $type);
+
     $file->size = intval($size);
     $file->type = $type;
     $error = $this->has_error($uploaded_file, $file, $error);
     if (!$error && $file->name) {
-      $file_path = $this->options['upload_dir'] . $file->name;
+      $file_path = $this->options['upload_dir']  . $file->name;
       $append_file = !$this->options['discard_aborted_uploads'] &&
           is_file($file_path) && $file->size > filesize($file_path);
       clearstatcache();
@@ -304,18 +301,18 @@ class UploadHandler {
           $this->orient_image($file_path);
         }
         $file->url = $this->options['upload_url'] . rawurlencode($file->name);
-        foreach ($this->options['image_versions'] as $version => $options) {
-          if ($this->create_scaled_image($file->name, $options)) {
-            if ($this->options['upload_dir'] !== $options['upload_dir']) {
-              $file->{$version . '_url'} = $options['upload_url']
-                  . rawurlencode($file->name);
-            }
-            else {
-              clearstatcache();
-              $file_size = filesize($file_path);
-            }
-          }
-        }
+//        foreach ($this->options['image_versions'] as $version => $options) {
+//          if ($this->create_scaled_image($file->name, $options)) {
+//            if ($this->options['upload_dir'] !== $options['upload_dir']) {
+//              $file->{$version . '_url'} = $options['upload_url']
+//                  . rawurlencode($file->name);
+//            }
+//            else {
+//              clearstatcache();
+//              $file_size = filesize($file_path);
+//            }
+//          }
+//        }
       }
       else if ($this->options['discard_aborted_uploads']) {
         unlink($file_path);
@@ -385,6 +382,7 @@ class UploadHandler {
     }
     header('Vary: Accept');
     $json = json_encode($info);
+    $file_list = "$";
     $redirect = isset($_REQUEST['redirect']) ?
         stripslashes($_REQUEST['redirect']) : null;
     if ($redirect) {
