@@ -48,7 +48,7 @@
                 </button>
             <button id="add_page" type="button" class="btn btn-primary">
               <i class="icon-upload icon-white"></i>
-              <span>Ingest Uploaded files</span>
+              <span>Ingest uploaded files</span>
             </button>
             <button id="delete_page_files" type="button" class="btn btn-danger delete">
               <i class="icon-trash icon-white"></i>
