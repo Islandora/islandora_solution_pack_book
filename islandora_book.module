@@ -146,7 +146,7 @@ function islandora_book_islandora_tabs($content_models, $pid) {
   }
 
   if ($content_model == 'islandora:bookCModel' || $content_model == 'islandora:iaBookCModel') {
-  //  $return_tabs = get_book_model_management_content($pid);
+    //  $return_tabs = get_book_model_management_content($pid);
     $return_tabs['fedora_object_details'] = null;
     return $return_tabs;
   }
@@ -361,6 +361,13 @@ function islandora_book_fedora_repository_required_fedora_objects() {
         array(
           'foxml_file' => "$module_path/xml/islandora_pageCModel.xml",
           'pid' => 'islandora:pageCModel',
+          'dsid' => NULL,
+          'datastream_file' => NULL,
+          'dsversion' => NULL,
+        ),
+        array(
+          'foxml_file' => "$module_path/xml/islandora_criticalEditionCModelPage.xml",
+          'pid' => 'islandora:criticalEditionCModelPage',
           'dsid' => NULL,
           'datastream_file' => NULL,
           'dsversion' => NULL,

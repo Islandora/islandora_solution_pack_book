@@ -109,7 +109,7 @@ function get_page_files($pid) {
 
   $temp_process = array();
   foreach ($files as $file) {
-    if ($file != '.' && $file != '..') {
+    if ($file != '.' && $file != '..' &! is_dir($file)) {
       $filename = $file_dir . $file;
       $temp_process[$filename] = filemtime($filename);
     }

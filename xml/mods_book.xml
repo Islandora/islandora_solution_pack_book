@@ -212,7 +212,8 @@
                                             <schema/>
                                             <type>xml</type>
                                             <prefix>NULL</prefix>
-                                            <value>&lt;role&gt;&lt;roleTerm authority="marcrelator" type="text"&gt;%value%&lt;/roleTerm&gt;&lt;/role&gt;</value>
+                                            <value>&lt;role&gt;&lt;roleTerm authority="marcrelator"
+                                                type="text"&gt;%value%&lt;/roleTerm&gt;&lt;/role&gt;</value>
                                         </create>
                                         <read>
                                             <path>mods:role/mods:roleTerm</path>
@@ -261,7 +262,6 @@
                     <type>textfield</type>
                     <access>TRUE</access>
                     <description>marcgt</description>
-                    <required>FALSE</required>
                     <title>Genre</title>
                     <tree>TRUE</tree>
                     <actions>
@@ -322,7 +322,6 @@
                 <properties>
                     <type>fieldset</type>
                     <access>TRUE</access>
-                    <required>FALSE</required>
                     <title>Origin Information</title>
                     <tree>TRUE</tree>
                     <actions>
@@ -408,7 +407,6 @@
                             <type>hidden</type>
                             <access>TRUE</access>
                             <default_value>monographic</default_value>
-                            <required>FALSE</required>
                             <tree>TRUE</tree>
                             <actions>
                                 <create>
@@ -433,7 +431,6 @@
                         <properties>
                             <type>textfield</type>
                             <access>TRUE</access>
-                            <required>FALSE</required>
                             <title>Edition</title>
                             <tree>TRUE</tree>
                             <actions>
@@ -501,10 +498,12 @@
                                     <schema/>
                                     <type>xml</type>
                                     <prefix>NULL</prefix>
-                                    <value>&lt;place&gt;&lt;placeTerm authority='marccountry'&gt;%value%&lt;/placeTerm&gt;&lt;/place&gt;</value>
+                                    <value>&lt;place&gt;&lt;placeTerm authority='marccountry'
+                                        type='code'&gt;%value%&lt;/placeTerm&gt;&lt;/place&gt;</value>
                                 </create>
                                 <read>
-                                    <path>mods:place/mods:placeTerm[@type = 'code']</path>
+                                    <path>mods:place/mods:placeTerm[@authority =
+                                        'marccountry']</path>
                                     <context>parent</context>
                                 </read>
                                 <update>
@@ -530,7 +529,8 @@
                                     <schema/>
                                     <type>xml</type>
                                     <prefix>NULL</prefix>
-                                    <value>&lt;place&gt;&lt;placeTerm type="text"&gt;%value%&lt;/placeTerm&gt;&lt;/place&gt;</value>
+                                    <value>&lt;place&gt;&lt;placeTerm
+                                        type="text"&gt;%value%&lt;/placeTerm&gt;&lt;/place&gt;</value>
                                 </create>
                                 <read>
                                     <path>mods:place/mods:placeTerm[@type = 'text']</path>
@@ -562,7 +562,8 @@
                             <schema/>
                             <type>xml</type>
                             <prefix>NULL</prefix>
-                            <value>&lt;language&gt;&lt;languageTerm authority="iso639-2b" type="code"&gt;%value%&lt;/languageTerm&gt;&lt;/language&gt;</value>
+                            <value> &lt;language&gt;&lt;languageTerm authority="iso639-2b"
+                                type="code"&gt;%value%&lt;/languageTerm&gt;&lt;/language&gt;</value>
                         </create>
                         <read>
                             <path>/mods:mods/mods:language/mods:languageTerm</path>
@@ -581,7 +582,6 @@
                 <properties>
                     <type>textarea</type>
                     <access>TRUE</access>
-                    <required>FALSE</required>
                     <title>Abstract</title>
                     <tree>TRUE</tree>
                     <actions>
@@ -610,7 +610,6 @@
                 <properties>
                     <type>textfield</type>
                     <access>TRUE</access>
-                    <required>FALSE</required>
                     <title>ISBN</title>
                     <tree>TRUE</tree>
                     <actions>
@@ -665,7 +664,6 @@
                             <type>textfield</type>
                             <access>TRUE</access>
                             <description>marcform</description>
-                            <required>FALSE</required>
                             <title>Form</title>
                             <tree>TRUE</tree>
                             <actions>
@@ -675,7 +673,8 @@
                                     <schema/>
                                     <type>xml</type>
                                     <prefix>NULL</prefix>
-                                    <value>&lt;form authority="marcform"&gt;%value%&lt;/form&gt;</value>
+                                    <value>&lt;form
+                                        authority="marcform"&gt;%value%&lt;/form&gt;</value>
                                 </create>
                                 <read>
                                     <path>mods:form</path>
@@ -694,7 +693,6 @@
                         <properties>
                             <type>textfield</type>
                             <access>TRUE</access>
-                            <required>FALSE</required>
                             <title>Extent</title>
                             <tree>TRUE</tree>
                             <actions>
@@ -725,7 +723,6 @@
                 <properties>
                     <type>textarea</type>
                     <access>TRUE</access>
-                    <required>FALSE</required>
                     <title>Statement of Responsibility</title>
                     <tree>TRUE</tree>
                     <actions>
@@ -735,7 +732,8 @@
                             <schema/>
                             <type>xml</type>
                             <prefix>NULL</prefix>
-                            <value>&lt;note type="statement of responsibility"&gt;%value%&lt;/note&gt;</value>
+                            <value>&lt;note type="statement of
+                                responsibility"&gt;%value%&lt;/note&gt;</value>
                         </create>
                         <read>
                             <path>/mods:mods/mods:note[@type='statement of responsibility']</path>
@@ -754,7 +752,6 @@
                 <properties>
                     <type>textarea</type>
                     <access>TRUE</access>
-                    <required>FALSE</required>
                     <title>Note</title>
                     <tree>TRUE</tree>
                     <actions>
@@ -811,6 +808,12 @@
                             <required>FALSE</required>
                             <title>Topic</title>
                             <tree>TRUE</tree>
+                            <actions>
+                                <create>NULL</create>
+                                <read>NULL</read>
+                                <update>NULL</update>
+                                <delete>NULL</delete>
+                            </actions>
                         </properties>
                         <children>
                             <element name="0">
@@ -853,6 +856,12 @@
                             <required>FALSE</required>
                             <title>Geographic</title>
                             <tree>TRUE</tree>
+                            <actions>
+                                <create>NULL</create>
+                                <read>NULL</read>
+                                <update>NULL</update>
+                                <delete>NULL</delete>
+                            </actions>
                         </properties>
                         <children>
                             <element name="0">
@@ -895,6 +904,12 @@
                             <required>FALSE</required>
                             <title>Temporal</title>
                             <tree>TRUE</tree>
+                            <actions>
+                                <create>NULL</create>
+                                <read>NULL</read>
+                                <update>NULL</update>
+                                <delete>NULL</delete>
+                            </actions>
                         </properties>
                         <children>
                             <element name="0">
@@ -999,7 +1014,8 @@
                                 <properties>
                                     <type>textfield</type>
                                     <access>TRUE</access>
-                                    <description>Name of a country, i.e. a political entity considered a country.</description>
+                                    <description>Name of a country, i.e. a political entity
+                                        considered a country.</description>
                                     <required>FALSE</required>
                                     <title>Country</title>
                                     <tree>TRUE</tree>
@@ -1029,7 +1045,8 @@
                                 <properties>
                                     <type>textfield</type>
                                     <access>TRUE</access>
-                                    <description>Includes first order political divisions called provinces within a country, e.g. in Canada.</description>
+                                    <description>Includes first order political divisions called
+                                        provinces within a country, e.g. in Canada.</description>
                                     <required>FALSE</required>
                                     <title>Province</title>
                                     <tree>TRUE</tree>
@@ -1059,7 +1076,9 @@
                                 <properties>
                                     <type>textfield</type>
                                     <access>TRUE</access>
-                                    <description>Includes regions that have status as a jurisdiction, usually incorporating more than one first level jurisdiction.</description>
+                                    <description>Includes regions that have status as a
+                                        jurisdiction, usually incorporating more than one first
+                                        level jurisdiction.</description>
                                     <required>FALSE</required>
                                     <title>Region</title>
                                     <tree>TRUE</tree>
@@ -1089,7 +1108,8 @@
                                 <properties>
                                     <type>textfield</type>
                                     <access>TRUE</access>
-                                    <description>Name of the largest local administrative unit in various countries, e.g. England.</description>
+                                    <description>Name of the largest local administrative unit in
+                                        various countries, e.g. England.</description>
                                     <required>FALSE</required>
                                     <title>County</title>
                                     <tree>TRUE</tree>
@@ -1119,7 +1139,8 @@
                                 <properties>
                                     <type>textfield</type>
                                     <access>TRUE</access>
-                                    <description>Name of an inhabited place incorporated as a city, town, etc.</description>
+                                    <description>Name of an inhabited place incorporated as a city,
+                                        town, etc.</description>
                                     <required>FALSE</required>
                                     <title>City</title>
                                     <tree>TRUE</tree>
@@ -1149,7 +1170,8 @@
                                 <properties>
                                     <type>textfield</type>
                                     <access>TRUE</access>
-                                    <description>Name of a smaller unit within a populated place, e.g., neighborhoods, parks, or streets.</description>
+                                    <description>Name of a smaller unit within a populated place,
+                                        e.g., neighborhoods, parks, or streets.</description>
                                     <required>FALSE</required>
                                     <title>City Section</title>
                                     <tree>TRUE</tree>
@@ -1209,7 +1231,8 @@
                                 <properties>
                                     <type>textfield</type>
                                     <access>TRUE</access>
-                                    <description>Contains a statement of coordinates covered by the resource.</description>
+                                    <description>Contains a statement of coordinates covered by the
+                                        resource.</description>
                                     <required>FALSE</required>
                                     <title>Coordinates</title>
                                     <tree>TRUE</tree>
@@ -1243,7 +1266,6 @@
                 <properties>
                     <type>textfield</type>
                     <access>TRUE</access>
-                    <required>FALSE</required>
                     <title>Classification (lcc)</title>
                     <tree>TRUE</tree>
                     <actions>
@@ -1253,7 +1275,8 @@
                             <schema/>
                             <type>xml</type>
                             <prefix>NULL</prefix>
-                            <value>&lt;classification authority="lcc"&gt;%value%&lt;/classification&gt;</value>
+                            <value>&lt;classification
+                                authority="lcc"&gt;%value%&lt;/classification&gt;</value>
                         </create>
                         <read>
                             <path>/mods:mods/mods:classification[@authority='lcc']</path>
@@ -1272,7 +1295,6 @@
                 <properties>
                     <type>textfield</type>
                     <access>TRUE</access>
-                    <required>FALSE</required>
                     <title>Classification (ddc)</title>
                     <tree>TRUE</tree>
                     <actions>
@@ -1282,7 +1304,8 @@
                             <schema/>
                             <type>xml</type>
                             <prefix>NULL</prefix>
-                            <value>&lt;classification edition="21" authority="ddc"&gt;%value%&lt;/classification&gt;</value>
+                            <value>&lt;classification edition="21"
+                                authority="ddc"&gt;%value%&lt;/classification&gt;</value>
                         </create>
                         <read>
                             <path>/mods:mods/mods:classification[@authority='ddc']</path>
