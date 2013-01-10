@@ -1,11 +1,6 @@
-name = Islandora Book Solution Pack
-description = Provides book interface
-package = Islandora Solution Pack
-dependencies[] = fedora_repository
-dependencies[] = xml_forms
-dependencies[] = islandora_content_model_forms
-dependencies[] = islandora_collection_manager
-dependencies[] = islandora_bookviewer
-version = 6.x-dev
-
-core = 6.x
+name = "Islandora Book Solution Pack"
+description = "Provides book interface for book objects."
+package = Islandora
+dependencies[] = islandora
+version = 7.x-dev
+core = 7.x

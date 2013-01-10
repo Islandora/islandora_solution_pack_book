@@ -1,20 +1,40 @@
-
-.fedora_detailed_list {
-  display: none;
+.islandora-book-pages-display-switch {
+  float: right;
 }
-#fedora-repository-purge-object-form{
-  display: none;
+.islandora-book-pages {
+  overflow: hidden;
+  width: 100%;
+  margin: 0 auto;
 }
-
-.sequence_weight{
-  display: none;
+.islandora-book-pages-grid dl {
+  width: 20%;
+  min-width: 100px;
+  min-height: 180px;
+  display: -moz-inline-stack;
+  display: inline-block;
+  vertical-align: top;
+  margin: 1.5em 1.84%;
+  zoom: 1;
 }
-#thumbnail{
-  position:absolute;
-  border:1px solid #ccc;
-  background:#333;
-  padding:5px;
-  display:none;
-  color:#fff;
+.islandora-book-pages-grid dd {
+  margin: 0;
+  padding: 0;
 }
-img{border:none;}
+.islandora-book-page-object dd {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+.islandora-book-page-list-item {
+  padding-bottom: 1.5em;
+  border-bottom: 1px solid #ddd;
+}
+.islandora-book-page-list-item dl dt {
+  clear: left;
+  float: left;
+  padding: 3px 0 0;
+  text-align: center;
+  width: 100px;
+}
+.islandora-book-page-list-item dl dd {
+  margin: 0 0 0 130px;
+}

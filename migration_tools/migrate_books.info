@@ -1,7 +1,0 @@
-; $Id$
-name = Migrate Books
-description = Will safely add new isPageOf and isPageNumber to existing books
-dependencies[] = fedora_repository
-dependencies[] = islandora_book
-package = Islandora
-core = 6.x

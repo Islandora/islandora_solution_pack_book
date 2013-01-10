@@ -1,47 +1,41 @@
 <?php
 
 /**
- * Implementation of hook_enable()
- * Installs all the requirements for this solution pack in local fedora instance
+ * @file
+ *
+ * Install hooks for this module.
  */
-function islandora_book_enable() {
-  module_load_include('inc', 'fedora_repository', 'api/fedora_item');
-  module_load_include('inc', 'fedora_repository', 'api/fedora_utils');
-  if (!fedora_available()) {
-    drupal_set_message(t('Fedora instance is not currently available.  Installation must be verified and completed on the Islandora Configuration page.'));
-  }
-  else {
-    // Get info on the required fedora objects for this solution pack
-    $solution_pack_info = islandora_book_fedora_repository_required_fedora_objects();
 
-    // Declare an array that models an empty batch
-    $batch = array(
-      'title' => t('Installing Book Solutionpack objects'),
-      'file' => drupal_get_path('module', 'fedora_repository') . '/fedora_repository.module',
-      'operations' => array(),
-    );
-
-    // Iterate through the required objects, and push an operation onto the
-    // batch model to re-ingest the object if it does not exist
-    foreach ($solution_pack_info['islandora_book']['objects'] as $object) {
-      $item = new Fedora_Item($object['pid']);
-      if (!$item->exists()) {
-        $batch['operations'][] = array('fedora_repository_batch_reingest_object', array($object));
-      }
-    }
-
-
-    // If there's any operations to perform
-    if (count($batch['operations'])) {
-      
-      // Add the batch to be processed
-      batch_set($batch);
-      
-      // Start processing, if required
-      if (!batch_get()) {
-        batch_process();
-      }
-    }
-  }
+/**
+ * Implements hook_install().
+ *
+ * @see islandora_book_islandora_required_objects()
+ */
+function islandora_book_install() {
+  module_load_include('inc', 'islandora_book', 'includes/utilities');
+  module_load_include('inc', 'islandora', 'includes/solution_packs');
+  islandora_install_solution_pack('islandora_book');
+  variable_set('islandora_book_solr_subject_field', 'mods.subject');
+  variable_set('islandora_book_ingest_derivatives', drupal_map_assoc(array('pdf', 'image', 'ocr')));
+  variable_set('islandora_book_tesseract', '/usr/bin/tesseract');
+  variable_set('islandora_book_gimp', '/usr/bin/gimp');
+  variable_set('islandora_book_gs', '/usr/bin/gs');
+  variable_set('islandora_book_tesseract_enabled_languages', drupal_map_assoc(array_keys(islandora_book_get_tesseract_languages())));
 }
 
+/**
+ * Implements hook_uninstall().
+ */
+function islandora_book_uninstall() {
+  module_load_include('inc', 'islandora', 'includes/solution_packs');
+  islandora_install_solution_pack('islandora_book', 'uninstall');
+  $variables = array(
+    'islandora_book_solr_subject_field',
+    'islandora_book_ingest_derivatives',
+    'islandora_book_tesseract',
+    'islandora_book_gimp',
+    'islandora_book_gs',
+    'islandora_book_tesseract_enabled_languages'
+  );
+  array_walk($variables, 'variable_del');
+}
