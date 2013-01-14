@@ -17,7 +17,7 @@
  */
 function islandora_book_upload_page_form(array $form, array &$form_state) {
   module_load_include('inc', 'islandora_book', 'includes/utilities');
-  $get_default_value = function($name, $default) use($form_state) {
+  $get_default_value = function($name, $default) use(&$form_state) {
     return isset($form_state['values'][$name]) ? $form_state['values'][$name] : $default;
   };
   $upload_size = min((int)ini_get('post_max_size'), (int)ini_get('upload_max_filesize'));
