@@ -19,7 +19,7 @@
  */
 function islandora_book_admin_settings_form(array $form, array &$form_state) {
   module_load_include('inc', 'islandora_book', 'includes/utilities');
-  $get_default_value = function($name, $default) use($form_state) {
+  $get_default_value = function($name, $default) use(&$form_state) {
     return isset($form_state['values'][$name]) ? $form_state['values'][$name] : variable_get($name, $default);
   };
   $tesseract = $get_default_value('islandora_book_tesseract', '/usr/bin/tesseract');

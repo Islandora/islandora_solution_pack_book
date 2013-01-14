@@ -2,5 +2,6 @@ name = "Islandora Book Solution Pack"
 description = "Provides book interface for book objects."
 package = Islandora
 dependencies[] = islandora
+dependencies[] = file
 version = 7.x-dev
 core = 7.x
