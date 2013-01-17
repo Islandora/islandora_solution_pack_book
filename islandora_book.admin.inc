@@ -214,7 +214,7 @@ function is_url_valid($url) {
   $httpCode = curl_getinfo($handle, CURLINFO_HTTP_CODE);
   $retval = TRUE;
   $results = intval($httpCode / 100);
-  if ($results == 4) {
+  if ($results == 4 || $results == 0) {
     $retval = FALSE;
   }
   curl_close($handle);
