@@ -83,7 +83,7 @@ function book_add_pages_form(&$form_state, $pid, $page_cmodel = 'islandora:pageC
       '#description' => t("If checked files will be sorted alphanumerically to determine page order.")
     );
   }
-  
+
   $form['page_add'] = array(
     '#type' => 'item',
     '#title' => $prompt,

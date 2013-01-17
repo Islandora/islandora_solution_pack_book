@@ -130,7 +130,7 @@ function islandora_update_book_rels_doAction($query_file, $interactive, $action 
       if (drush_confirm(dt('%s all page relationships in this book @pid ?', array('@pid' => $object, '%s' => $action)))) {
 //$item = new Fedora_Item($object);
 
-        islandora_update_book_rels_stream($object, $action);
+        islandora_drush_update_book_rels_stream($object, $action);
       }
     }
   }
@@ -138,7 +138,7 @@ function islandora_update_book_rels_doAction($query_file, $interactive, $action 
     foreach ($objects as $object) {
 //$item = new Fedora_Item($object);
 
-      islandora_update_book_rels_stream($object, $action);
+      islandora_drush_update_book_rels_stream($object, $action);
     }
   }
 }
@@ -166,7 +166,7 @@ function islandora_sparql_results_as_array($content) {
  * @param string $book_pid
  * 
  */
-function islandora_update_book_rels_stream($book_pid, $action = 'UPDATE') {
+function islandora_drush_update_book_rels_stream($book_pid, $action = 'UPDATE') {
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
 
