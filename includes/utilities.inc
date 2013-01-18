@@ -2,8 +2,7 @@
 
 /**
  * @file
- *
- *  This file contains functions used throughout this module.
+ * This file contains functions used throughout this module.
  *
  *  Some things you may find:
  *    Fetch pages from a book.
@@ -44,20 +43,24 @@ function islandora_book_get_pages(FedoraObject $object) {
     return array(
       'label' => $o['label']['value'],
       'page' => $o['page']['value'],
-      'pid' => $o['object']['value']
+      'pid' => $o['object']['value'],
     );
   };
   $pages = array_map($map, $results);
-  $pids = array_map(function($o) { return $o['pid']; }, $pages);
+  $get_pid = function($o) {
+    return $o['pid'];
+  };
+  $pids = array_map($get_pid, $pages);
   $pages = count($pids) ? array_combine($pids, $pages) : array();
-  uasort($pages, function($a, $b) {
-      $a_page = (is_array($a) && isset($a['page'])) ? $a['page'] : 0;
-      $b_page = (is_array($b) && isset($b['page'])) ? $b['page'] : 0;
-      if ($a_page == $b_page) {
-        return 0;
-      }
-      return ($a_page < $b_page) ? -1 : 1;
-    });
+  $sort = function($a, $b) {
+    $a = (is_array($a) && isset($a['page'])) ? $a['page'] : 0;
+    $b = (is_array($b) && isset($b['page'])) ? $b['page'] : 0;
+    if ($a == $b) {
+      return 0;
+    }
+    return ($a < $b) ? -1 : 1;
+  };
+  uasort($pages, $sort);
   return $pages;
 }
 
@@ -98,7 +101,7 @@ function islandora_book_get_tesseract_languages() {
     'spa' => t('Spanish'),
     'hin' => t('Hindi'),
     'jpn' => t('Japanese'),
-    'ita' => t('Italian')
+    'ita' => t('Italian'),
   );
 }
 
@@ -116,11 +119,24 @@ function islandora_book_get_enabled_tesseract_languages() {
 }
 
 /**
+ * Gets only the enabled ingest derivatives.
+ *
+ * As defined by the user in the admin form.
+ *
+ * @return array
+ *   The enabled ingest derivatives.
+ */
+function islandora_book_get_enabled_ingest_derivatives() {
+  $default_derivatives = drupal_map_assoc(array('pdf', 'image', 'ocr'));
+  return variable_get('islandora_book_ingest_derivatives', $default_derivatives);
+}
+
+/**
  * Gets the source file for the given, derivative datastream.
  *
- * @param AbstractFedoraObject
+ * @param AbstractFedoraObject $object
  *   The owner of the datastreams.
- * @param string
+ * @param string $dsid
  *   The derived datastream ID.
  *
  * @return string
@@ -141,12 +157,12 @@ function islandora_book_get_page_derivative_source(AbstractFedoraObject $object,
 /**
  * Checks if the given object can derive the given datastream.
  *
- * @param AbstractFedoraObject
+ * @param AbstractFedoraObject $object
  *   The object to check.
- * @param string
+ * @param string $dsid
  *   The derived datastream ID.
  *
- * @return boolean
+ * @return bool
  *   TRUE if the datastream can be derived, FALSE otherwise.
  */
 function islandora_book_can_derive(AbstractFedoraObject $object, $dsid) {
@@ -176,7 +192,7 @@ function islandora_book_can_derive(AbstractFedoraObject $object, $dsid) {
 /**
  * Checks if it is possible to create PDF files with imagemagick.
  *
- * @return boolean
+ * @return bool
  *   TRUE if it is possible, FALSE otherwise.
  */
 function islandora_book_can_create_pdf() {
@@ -187,7 +203,7 @@ function islandora_book_can_create_pdf() {
 /**
  * Checks if it is possible to combined PDF files with GhostScript.
  *
- * @return boolean
+ * @return bool
  *   TRUE if it is possible, FALSE otherwise.
  */
 function islandora_book_can_combine_pdf() {
@@ -198,7 +214,7 @@ function islandora_book_can_combine_pdf() {
 /**
  * Checks if it is possible to create files with tesseract.
  *
- * @return boolean
+ * @return bool
  *   TRUE if it is possible, FALSE otherwise.
  */
 function islandora_book_can_create_ocr() {
@@ -209,7 +225,7 @@ function islandora_book_can_create_ocr() {
 /**
  * Check if preprocessing images for OCR is possible on this computer.
  *
- * @return boolean
+ * @return bool
  *   TRUE if preprocessing images is possible, FALSE otherwise.
  */
 function islandora_book_can_preprocess_ocr() {
@@ -218,10 +234,9 @@ function islandora_book_can_preprocess_ocr() {
 }
 
 /**
- * Checks if it is possible to create image files with the large image solution
- * pack.
+ * Checks if it is possible to create image files.
  *
- * @return boolean
+ * @return bool
  *   TRUE if it is possible, FALSE otherwise.
  */
 function islandora_book_can_create_images() {
@@ -229,8 +244,7 @@ function islandora_book_can_create_images() {
 }
 
 /**
- * Checks if it is possible to update a book's thumbnail from the first
- * page thumbnail.
+ * Checks if it is possible to update a book's thumbnail image.
  */
 function islandora_book_can_update_book_thumbnail(FedoraObject $object) {
   $pages = islandora_book_get_pages($object);
@@ -245,12 +259,12 @@ function islandora_book_can_update_book_thumbnail(FedoraObject $object) {
 /**
  * Checks if the given derivative datastream's intended source exists.
  *
- * @param AbstractFedoraObject
+ * @param AbstractFedoraObject $object
  *   The object to check.
- * @param string
+ * @param string $dsid
  *   The derived datastream ID.
  *
- * @return boolean
+ * @return bool
  *   TRUE if the source datastream exists, FALSE otherwise.
  */
 function islandora_book_page_has_derivative_source(AbstractFedoraObject $object, $dsid) {
@@ -259,10 +273,9 @@ function islandora_book_page_has_derivative_source(AbstractFedoraObject $object,
 }
 
 /**
- * Gets the datastream ID of the intended source for the given derivative
- * datastream ID.
+ * Gets the datastream ID of the intended source for the given derivative.
  *
- * @param string
+ * @param string $dsid
  *   The derived datastream ID.
  *
  * @return string
@@ -283,24 +296,24 @@ function islandora_book_get_page_derivative_source_id($dsid) {
 }
 
 /**
- * Creates a PDF derivative from the given Page object, and convert options and
- * adds it to the given Page object.
+ * Creates a PDF derivative for the given Page object.
  *
  * @param FedoraObject $object
  *   The page object that the derivative will be generated from, and added to.
  * @param array $options
  *   The options to be passed to convert.
  *
- * @return boolean
+ * @return bool
  *   TRUE if successful, FALSE otherwise.
  */
 function islandora_book_page_derive_pdf_datastream(FedoraObject $object, array $options = array('-compress' => 'LZW')) {
-  if ($pdf_file = islandora_book_page_derive_pdf($object, $options)) {
-    $ret = islandora_book_update_datastream($object, $pdf_file, 'PDF');
-    file_unmanaged_delete($pdf_file);
-    return $ret;
+  $pdf_file = islandora_book_page_derive_pdf($object, $options);
+  if (!$pdf_file) {
+    return FALSE;
   }
-  return FALSE;
+  $ret = islandora_book_update_datastream($object, $pdf_file, 'PDF');
+  file_unmanaged_delete($pdf_file);
+  return $ret;
 }
 
 /**
@@ -337,14 +350,21 @@ function islandora_book_page_derive_pdf(FedoraObject $object, array $options = a
  */
 function islandora_book_convert_to_pdf($image_file, array $options) {
   // Convert options into a string.
-  array_walk($options, function(&$o, $k) { $o = "$k $o"; });
+  $to_string = function(&$o, $k) {
+    $o = "$k $o";
+  }
+  array_walk($options, $to_string);
   $options = implode(' ', $options);
   $pdf_file = "$image_file.pdf";
   $command_args = "{$options} {$image_file} {$pdf_file}";
   $output = array(); $ret = 0;
   if (_imagemagick_convert_exec($command_args, $output, $ret) !== TRUE) {
     $message = 'imagemagick convert failed to create pdf<br/>Error: @ret<br/>Command: @command<br/>Output: @output';
-    $variables = array('@ret' => $ret, '@command' => "convert $command_args", '@output' => implode('<br/>', $output));
+    $variables = array(
+      '@ret' => $ret,
+      '@command' => "convert $command_args",
+      '@output' => implode('<br/>', $output),
+    );
     watchdog('islandora_book', $message, $variables, WATCHDOG_ERROR);
     return FALSE;
   }
@@ -358,7 +378,8 @@ function islandora_book_convert_to_pdf($image_file, array $options) {
  *   The PDF files to append onto.
  * @param array $files
  *   The PDF files to append.
- * @return boolean
+ *
+ * @return bool
  *   TRUE if successful, FALSE otherwise.
  */
 function islandora_book_pdf_append($file, array $files) {
@@ -378,7 +399,7 @@ function islandora_book_pdf_append($file, array $files) {
  * @param string $out
  *   The absolute path to the combined PDF file.
  *
- * @return boolean
+ * @return bool
  *   TRUE on success, FALSE otherwise.
  */
 function islandora_book_pdf_combine(array $files, $out) {
@@ -389,7 +410,11 @@ function islandora_book_pdf_combine(array $files, $out) {
   exec($command, $output, $ret);
   if ($ret != 0) {
     $message = 'gs failed to combined PDF<br/>Error: @ret<br/>Command: @command <br/>Output !output';
-    $variables = array('@ret' => $ret, '@command' => $command, '!output' => implode('<br/>', $output));
+    $variables = array(
+      '@ret' => $ret,
+      '@command' => $command,
+      '!output' => implode('<br/>', $output),
+    );
     watchdog('islandora_book', $message, $variables, WATCHDOG_ERROR);
     return FALSE;
   }
@@ -402,7 +427,7 @@ function islandora_book_pdf_combine(array $files, $out) {
  * @param FedoraObject $object
  *   The page object that the derivative will be generated for.
  *
- * @return boolean
+ * @return bool
  *   TRUE if successful, FALSE otherwise.
  */
 function islandora_book_page_derive_image_datastreams(FedoraObject $object) {
@@ -411,22 +436,21 @@ function islandora_book_page_derive_image_datastreams(FedoraObject $object) {
 }
 
 /**
- * Creates and adds the OCR, RAW_HOCR, and ENCODED_OCR datastreams for the given
- * Page object.
+ * Creates and adds the OCR, RAW_HOCR, and ENCODED_OCR datastreams.
  *
  * @param FedoraObject $object
  *   The page object that the derivatives will be generated for.
  * @param array $options
  *   The options for tesseract/gimp.
  *
- * @return boolean
+ * @return bool
  *   TRUE on success, FALSE otherwise.
  */
 function islandora_book_page_derive_ocr_datastreams(FedoraObject $object, array $options = NULL) {
   $rels_ext = $object->relationships;
   $options = isset($options) ? $options : array(
-    'language' =>  islandora_book_get_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'hasLanguage', 'eng'),
-    'preprocess' => islandora_book_get_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'preprocess', 'false') == 'true'
+    'language' => islandora_book_get_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'hasLanguage', 'eng'),
+    'preprocess' => islandora_book_get_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'preprocess', 'false') == 'true',
   );
   $source_file = islandora_book_get_page_derivative_source($object, 'OCR');
   $source_file = $options['preprocess'] ? islandora_book_ocr_preprocess_image($source_file) : $source_file;
@@ -441,7 +465,8 @@ function islandora_book_page_derive_ocr_datastreams(FedoraObject $object, array 
   $rels_ext = $object->relationships;
   islandora_book_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'hasLanguage', $language, TRUE);
   islandora_book_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'preprocess', $preprocess, TRUE);
-  array_map('file_unmanaged_delete', array($source_file, $hocr_file, $hocr_file, $encoded_hocr_file));
+  array_map('file_unmanaged_delete', array(
+      $source_file, $hocr_file, $hocr_file, $encoded_hocr_file));
   return $ret;
 }
 
@@ -465,7 +490,11 @@ function islandora_book_ocr_preprocess_image($source_file) {
   // destination files existance.
   if ($ret != '0' || !file_exists($dest_file)) {
     $message = 'gimp failed to preproces image<br/>Error: @ret<br/>Command: @command<br/>Output: @output';
-    $variables = array('@ret' => $ret, '@command' => $command, '@output' => implode('<br/>', $output));
+    $variables = array(
+      '@ret' => $ret,
+      '@command' => $command,
+      '@output' => implode('<br/>', $output),
+    );
     watchdog('islandora_book', $message, $variables, WATCHDOG_ERROR);
     return $source_file;
   }
@@ -491,7 +520,11 @@ function islandora_book_convert_to_ocr($image_file, array $options) {
   exec($command, $output, $ret);
   if ($ret != '0') {
     $message = 'tesseract failed to create ocr<br/>Error: @ret<br/>Command: @command<br/>Output: @output';
-    $variables = array('@ret' => $ret, '@command' => $command, '@output' => implode('<br/>', $output));
+    $variables = array(
+      '@ret' => $ret,
+      '@command' => $command,
+      '@output' => implode('<br/>', $output),
+    );
     watchdog('islandora_book', $message, $variables, WATCHDOG_ERROR);
     return FALSE;
   }
@@ -517,7 +550,11 @@ function islandora_book_convert_to_hocr($image_file, array $options) {
   exec($command, $output, $ret);
   if ($ret != '0') {
     $message = 'tesseract failed to create hocr<br/>Error: @ret<br/>Command: @command<br/>Output: @output';
-    $variables = array('@ret' => $ret, '@command' => $command, '@output' => implode('<br/>', $output));
+    $variables = array(
+      '@ret' => $ret,
+      '@command' => $command,
+      '@output' => implode('<br/>', $output),
+    );
     watchdog('islandora_book', $message, $variables, WATCHDOG_ERROR);
     return FALSE;
   }
@@ -556,10 +593,10 @@ function islandora_book_encode_hocr($file) {
 /**
  * Updates a the given books thumbnail from the first page in the book.
  *
- * @param FedoraObject
+ * @param FedoraObject $object
  *   The book object to update.
  *
- * @return boolean
+ * @return bool
  *   TRUE on success, FALSE otherwise.
  */
 function islandora_book_update_book_thumbnail(FedoraObject $object) {
@@ -579,9 +616,10 @@ function islandora_book_update_book_thumbnail(FedoraObject $object) {
 }
 
 /**
- * Gets the given relationship if one is defined, assumes only one relationship
- * matches the given parameters. Will return the given default if no
- * relationship is found.
+ * Gets the given relationship if one is defined.
+ *
+ * Assumes only one relationship matches the given parameters.
+ * Will return the given default if no relationship is found.
  *
  * @param FedoraRelationships $relationships
  *   The Fedora relationships to check, either RELS-EXT or RELS-INT.
@@ -602,8 +640,7 @@ function islandora_book_get_relationship(FedoraRelationships $relationships, $pr
 }
 
 /**
- * Sets a relationship removing any previous relationships that have the same
- * URI and predicate.
+ * Sets a relationship removing any previous relationships.
  *
  * @param FedoraRelationships $relationships
  *   The Fedora relationships to be modified, either RELS-EXT or RELS-INT.
@@ -613,7 +650,7 @@ function islandora_book_get_relationship(FedoraRelationships $relationships, $pr
  *   The predicate.
  * @param string $object
  *   The object.
- * @param boolean $literal
+ * @param bool $literal
  *   TRUE if the object is a literal, FALSE if it is an object.
  */
 function islandora_book_set_relationship(FedoraRelationships $relationships, $predicate_uri, $predicate, $object, $literal = FALSE) {
@@ -638,7 +675,7 @@ function islandora_book_set_relationship(FedoraRelationships $relationships, $pr
  * @param string $control_group
  *   The datastream control group.
  *
- * @return boolean
+ * @return bool
  *   TRUE if successful, FALSE otherwise.
  */
 function islandora_book_update_datastream(AbstractFedoraObject $object, $file, $dsid, $label = NULL, $mimetype = NULL, $control_group = 'M', $copy = TRUE) {
