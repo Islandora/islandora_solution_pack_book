@@ -64,11 +64,11 @@ function islandora_book_admin_settings_form(array $form, array &$form_state) {
           '#description' => t('GhostScript is used to combined PDF files and generate a PDF repersentation of a Book.<br/>!msg',
                           array('!msg' => islandora_book_admin_settings_form_executable_availible_message($gs))),
           '#default_value' => $gs,
-          '#prefix' => '<div id="gimp-wrapper">',
+          '#prefix' => '<div id="gs-wrapper">',
           '#suffix' => '</div>',
           '#ajax' => array(
-            'callback' => 'islandora_book_admin_settings_form_gimp_ajax_callback',
-            'wrapper' => 'gimp-wrapper',
+            'callback' => 'islandora_book_admin_settings_form_gs_ajax_callback',
+            'wrapper' => 'gs-wrapper',
             'effect' => 'fade',
             'event' => 'change'
           )
@@ -82,7 +82,7 @@ function islandora_book_admin_settings_form(array $form, array &$form_state) {
           '#title' => t('Tesseract'),
           '#description' => t('Tesseract is used to generate the OCR datastreams.<br/>!msg', array('!msg' => islandora_book_admin_settings_form_executable_availible_message($tesseract))),
           '#default_value' => $tesseract,
-          '#prefix' => '<div id=oto-line"tesseract-wrapper">',
+          '#prefix' => '<div id="tesseract-wrapper">',
           '#suffix' => '</div>',
           '#ajax' => array(
             'callback' => 'islandora_book_admin_settings_form_tesseract_ajax_callback',
@@ -209,4 +209,19 @@ function islandora_book_admin_settings_form_tesseract_ajax_callback(array $form,
  */
 function islandora_book_admin_settings_form_gimp_ajax_callback(array $form, array $form_state) {
   return $form['local_derivative_settings']['ocr_derivative_settings']['islandora_book_gimp'];
+}
+
+/**
+ * Ajax callback for the GS textfield.
+ *
+ * @param array $form
+ *   The Drupal form definition.
+ * @param array $form_state
+ *   The Drupal form state.
+ *
+ * @return array
+ *   The element to render as part the ajax callback.
+ */
+function islandora_book_admin_settings_form_gs_ajax_callback(array $form, array $form_state) {
+  return $form['local_derivative_settings']['pdf_derivative_settings']['islandora_book_gs'];
 }
