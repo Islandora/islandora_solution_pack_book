@@ -352,7 +352,7 @@ function islandora_book_convert_to_pdf($image_file, array $options) {
   // Convert options into a string.
   $to_string = function(&$o, $k) {
     $o = "$k $o";
-  }
+  };
   array_walk($options, $to_string);
   $options = implode(' ', $options);
   $pdf_file = "$image_file.pdf";

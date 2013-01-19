@@ -89,7 +89,7 @@ function islandora_book_preprocess_islandora_book_pages(array &$variables) {
       'image' => l($img, $object_url, array('html' => TRUE, 'attributes' => array('title' => $o['label']))),
       'DC' => $dc->as_formatted_array(),
     );
-  }
+  };
   $pages = array_map($map, $pages);
   $theme = ($display == 'grid') ? 'islandora_book_pages_grid' : 'islandora_book_pages_list';
   $variables['content'] = theme($theme, array('object' => $object, 'pages' => $pages));
