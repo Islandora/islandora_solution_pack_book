@@ -2,7 +2,6 @@
 
 /**
  * @file
- *
  * Handles the display/submission of the admin settings form for this module.
  */
 
@@ -28,7 +27,8 @@ function islandora_book_admin_settings_form(array $form, array &$form_state) {
   $languages = $get_default_value('islandora_book_tesseract_enabled_languages', drupal_map_assoc(array_keys(islandora_book_get_tesseract_languages())));
   $form = array(
     'solr_settings' => array(
-      // @todo The Solr fields are not in active use, make them inaccessible for now.
+      // @todo The Solr fields are not in active use, make them inaccessible for
+      // now.
       '#access' => FALSE,
       '#disabled' => !module_exists('islandora_solr'),
       '#type' => 'fieldset',
@@ -38,7 +38,7 @@ function islandora_book_admin_settings_form(array $form, array &$form_state) {
         '#type' => 'textfield',
         '#title' => t('Subject field'),
         '#description' => t('The SOLR field containing the untokenized subject value, used to group books with the same subject.'),
-        '#default_value' => $get_default_value('islandora_book_solr_subject_field', 'mods.subject')
+        '#default_value' => $get_default_value('islandora_book_solr_subject_field', 'mods.subject'),
       ),
     ),
     'local_derivative_settings' => array(
@@ -51,9 +51,10 @@ function islandora_book_admin_settings_form(array $form, array &$form_state) {
         '#options' => array(
           'pdf' => t('PDF datastream. <b>Requires</b> <i>ImageMagick</i>'),
           'image' => t('Image datastreams (TN, JPEG, JP2). <b>Requires</b> <i>Large Image Solution Pack</i>'),
-          'ocr' => t('OCR datastreams (OCR, RAW_HOCR, ENCODED_OCR)')
+          'ocr' => t('OCR datastreams (OCR, RAW_HOCR, ENCODED_OCR)'),
         ),
-        '#default_value' => $get_default_value('islandora_book_ingest_derivatives', drupal_map_assoc(array('pdf', 'image', 'ocr')))
+        '#default_value' => $get_default_value('islandora_book_ingest_derivatives', drupal_map_assoc(
+                            array('pdf', 'image', 'ocr'))),
       ),
       'pdf_derivative_settings' => array(
         '#type' => 'fieldset',
@@ -64,14 +65,14 @@ function islandora_book_admin_settings_form(array $form, array &$form_state) {
           '#description' => t('GhostScript is used to combined PDF files and generate a PDF repersentation of a Book.<br/>!msg',
                           array('!msg' => islandora_book_admin_settings_form_executable_availible_message($gs))),
           '#default_value' => $gs,
-          '#prefix' => '<div id="gimp-wrapper">',
+          '#prefix' => '<div id="gs-wrapper">',
           '#suffix' => '</div>',
           '#ajax' => array(
-            'callback' => 'islandora_book_admin_settings_form_gimp_ajax_callback',
-            'wrapper' => 'gimp-wrapper',
+            'callback' => 'islandora_book_admin_settings_form_gs_ajax_callback',
+            'wrapper' => 'gs-wrapper',
             'effect' => 'fade',
-            'event' => 'change'
-          )
+            'event' => 'change',
+          ),
         ),
       ),
       'ocr_derivative_settings' => array(
@@ -82,13 +83,13 @@ function islandora_book_admin_settings_form(array $form, array &$form_state) {
           '#title' => t('Tesseract'),
           '#description' => t('Tesseract is used to generate the OCR datastreams.<br/>!msg', array('!msg' => islandora_book_admin_settings_form_executable_availible_message($tesseract))),
           '#default_value' => $tesseract,
-          '#prefix' => '<div id=oto-line"tesseract-wrapper">',
+          '#prefix' => '<div id="tesseract-wrapper">',
           '#suffix' => '</div>',
           '#ajax' => array(
             'callback' => 'islandora_book_admin_settings_form_tesseract_ajax_callback',
             'wrapper' => 'tesseract-wrapper',
             'effect' => 'fade',
-            'event' => 'change'
+            'event' => 'change',
           ),
         ),
         'islandora_book_gimp' => array(
@@ -103,8 +104,8 @@ function islandora_book_admin_settings_form(array $form, array &$form_state) {
             'callback' => 'islandora_book_admin_settings_form_gimp_ajax_callback',
             'wrapper' => 'gimp-wrapper',
             'effect' => 'fade',
-            'event' => 'change'
-          )
+            'event' => 'change',
+          ),
         ),
         'islandora_book_tesseract_enabled_languages' => array(
           '#type' => 'checkboxes',
@@ -116,9 +117,9 @@ function islandora_book_admin_settings_form(array $form, array &$form_state) {
                              Check with your systems admininistrator if you are
                              unsure of availablilty'),
           '#default_value' => $languages,
-        )
-      )
-    )
+        ),
+      ),
+    ),
   );
   module_load_include('inc', 'islandora', 'includes/solution_packs');
   $form += islandora_viewers_form('islandora_book_viewers', NULL, 'islandora:bookCModel');
@@ -209,4 +210,19 @@ function islandora_book_admin_settings_form_tesseract_ajax_callback(array $form,
  */
 function islandora_book_admin_settings_form_gimp_ajax_callback(array $form, array $form_state) {
   return $form['local_derivative_settings']['ocr_derivative_settings']['islandora_book_gimp'];
+}
+
+/**
+ * Ajax callback for the GS textfield.
+ *
+ * @param array $form
+ *   The Drupal form definition.
+ * @param array $form_state
+ *   The Drupal form state.
+ *
+ * @return array
+ *   The element to render as part the ajax callback.
+ */
+function islandora_book_admin_settings_form_gs_ajax_callback(array $form, array $form_state) {
+  return $form['local_derivative_settings']['pdf_derivative_settings']['islandora_book_gs'];
 }

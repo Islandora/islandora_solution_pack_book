@@ -2,7 +2,6 @@
 
 /**
  * @file
- *
  * Provides several batch operations for manipulating books.
  *
  * Each batch operation deals with a single page at a time.
@@ -18,21 +17,20 @@
 /**
  * Sets up a batch operation.
  *
- * @param array $pages
+ * @param array $operands
  *   All the pages to operate on.
  * @param array $context
  *   The context of this batch operation.
  * @param array $message
  *   Values are used as parameters to t() and drupal_set_message() that will be
- *   displayed when the batch is finished.
- *
- *   Placeholders include, but are not limited to:
- *     @successful, @failed, @total.
+ *   displayed when the batch is finished. Placeholders include, but are not
+ *   limited to: @successful, @failed, @total.
  *
  *  @code
  *    array(
  *      ...
- *      array('Processed @successful of @total. Created @pages pages.', array('@pages' => $pages), 'status')
+ *      array('Processed @successful of @total. Created @pages pages.', array(
+ *            '@pages' => $pages), 'status')
  *      ...
  *    )
  *  @endcode
@@ -40,14 +38,18 @@
  * @return mixed
  *   The current operand the operation will process.
  */
-function islandora_book_start_batch_operation(array $operands, array &$context, $message = array()) {
+function islandora_book_start_batch_operation(array $operands, array &$context, array $message = array()) {
   if (!isset($context['sandbox']['progress'])) {
     if (empty($context['results'])) {
       // "files" will be deleted upon failure or success of the batch.
       // "successful" an array of boolean values indicating operation success.
       // "messages" array of messages to display on finishing the batch
-      //    values are used as parameters to t() and drupal_set_message().
-      $context['results'] = array_fill_keys(array('files', 'successful', 'messages'), array());
+      // values are used as parameters to t() and drupal_set_message().
+      $context['results'] = array(
+        'files' => array(),
+        'successful' => array(),
+        'messages' => array(),
+      );
     }
     $context['sandbox']['progress'] = 0;
     $context['sandbox']['total'] = count($operands);
@@ -67,9 +69,10 @@ function islandora_book_start_batch_operation(array $operands, array &$context, 
  * @param array $message
  *   Values are used as parameters to t() and drupal_set_message() that will be
  *   displayed when the batch is finished.
- * @see islandora_book_start_batch_operation
  *
- * @return boolean
+ * @see islandora_book_start_batch_operation()
+ *
+ * @return bool
  *   TRUE if the batch operation is complete, FALSE otherwise.
  */
 function islandora_book_end_batch_operation(array &$context, $count = 1, $message = array()) {
@@ -88,11 +91,11 @@ function islandora_book_end_batch_operation(array &$context, $count = 1, $messag
 function islandora_book_batch_finished($success, $results, $operations) {
   if ($success) {
     // Delete any lingering files.
-    array_walk($results['files'], function($o) {
-        if (file_exists($o)) {
-          file_unmanaged_delete($o);
-        }
-      });
+    foreach ($results['files'] as $file) {
+      if (file_exists($file)) {
+        file_unmanaged_delete($file);
+      }
+    }
     // Build generic place holders for the message.
     $total = count($results['successful']);
     $successful = count(array_filter($results['successful']));
@@ -100,16 +103,16 @@ function islandora_book_batch_finished($success, $results, $operations) {
     $place_holders = array(
       '@successful' => $successful,
       '@failed' => $failed,
-      '@total' => $total
+      '@total' => $total,
     );
     // Display all messages/errors/warnings.
     $messages = array_filter($results['messages']);
-    array_walk($messages, function($o) use ($place_holders) {
-        $msg = $o[0];
-        $vars = isset($o[1]) ? array_merge($o[1], $place_holders) : $place_holders;
-        $status = isset($o[2]) ? $o[2] : 'status';
-        drupal_set_message(t($msg, $vars), $status);
-      });
+    foreach ($messages as $message) {
+      $vars = isset($message[1]) ? array_merge($message[1], $place_holders) : $place_holders;
+      $status = isset($message[2]) ? $message[2] : 'status';
+      $message = t($message[0], $vars);
+      drupal_set_message(check_plain($message), $status);
+    }
   }
   else {
     // Generic Error Message.
@@ -122,8 +125,9 @@ function islandora_book_batch_finished($success, $results, $operations) {
 }
 
 /**
- * Gets the batch definition for creating a PDF from the given pages from the
- * given book. This also updates each page object with a corresponding pdf.
+ * Gets the batch definition for creating a PDF from the given pages.
+ *
+ * This also updates each page object with a corresponding pdf.
  *
  * @param FedoraObject $book
  *   The book the pages belong to.
@@ -138,8 +142,10 @@ function islandora_book_batch_finished($success, $results, $operations) {
 function islandora_book_create_pdf_batch(FedoraObject $book, array $pages, array $options) {
   return array(
     'operations' => array(
-      array('islandora_book_create_pdf_page_batch_operation', array($pages, $options)),
-      array('islandora_book_create_pdf_book_batch_operation', array($book)),
+      array('islandora_book_create_pdf_page_batch_operation', array(
+          $pages, $options)),
+      array('islandora_book_create_pdf_book_batch_operation', array(
+          $book)),
     ),
     'finished' => 'islandora_book_batch_finished',
     'title' => t('Creating PDF from @label', array('@label' => $book->label)),
@@ -179,8 +185,6 @@ function islandora_book_create_pdf_page_batch_operation(array $pages, array $opt
  *
  * @param FedoraObject $book
  *   The book to store the PDF file.
- * @param string $options
- *   Options to pass into convert.
  * @param array $context
  *   The context of this batch operation.
  */
@@ -203,8 +207,7 @@ function islandora_book_create_pdf_book_batch_operation(FedoraObject $book, arra
 }
 
 /**
- * Gets the batch definition for creating OCR, RAW_HOCR, and ENCODED_OCR
- * datastreams in each of the given page objects.
+ * Gets the batch definition for creating OCR, RAW_HOCR, and ENCODED_OCR.
  *
  * @param FedoraObject $book
  *   The book the pages belong to.
@@ -219,7 +222,8 @@ function islandora_book_create_pdf_book_batch_operation(FedoraObject $book, arra
 function islandora_book_create_ocr_batch(FedoraObject $book, array $pages, array $options) {
   return array(
     'operations' => array(
-      array('islandora_book_create_ocr_batch_operation', array($pages, $options)),
+      array('islandora_book_create_ocr_batch_operation', array(
+          $pages, $options)),
     ),
     'finished' => 'islandora_book_batch_finished',
     'title' => t('Performing OCR on @label', array('@label' => $book->label)),
@@ -231,7 +235,7 @@ function islandora_book_create_ocr_batch(FedoraObject $book, array $pages, array
 }
 
 /**
- * Batch operation for createing the OCR, RAW_HOCR, and ENCODED_OCR datastreams for the given pages.
+ * Batch operation for createing the OCR, RAW_HOCR, and ENCODED_OCR datastreams.
  *
  * @param array $pages
  *   All the pages to perform OCR on.
@@ -252,8 +256,7 @@ function islandora_book_create_ocr_batch_operation(array $pages, array $options,
 }
 
 /**
- * Gets the batch definition for creating TN, JPG, JP2
- * datastreams in each of the given page objects.
+ * Gets the batch definition for creating TN, JPG, JP2 datastreams.
  *
  * @param FedoraObject $book
  *   The object the pages belong to.
@@ -266,7 +269,8 @@ function islandora_book_create_ocr_batch_operation(array $pages, array $options,
 function islandora_book_create_images_batch(FedoraObject $book, array $pages) {
   return array(
     'operations' => array(
-      array('islandora_book_create_images_batch_operation', array($book, $pages)),
+      array('islandora_book_create_images_batch_operation', array(
+          $book, $pages)),
     ),
     'finished' => 'islandora_book_batch_finished',
     'title' => t('Creating Images for @label', array('@label' => $book->label)),
@@ -278,7 +282,7 @@ function islandora_book_create_images_batch(FedoraObject $book, array $pages) {
 }
 
 /**
- * Batch operation for creating the TN, JPG, JP2 datastreams for the given pages.
+ * Batch operation for creating the TN, JPG, JP2 datastreams.
  *
  * @param FedoraObject $book
  *   The book the pages belong to.
@@ -301,7 +305,7 @@ function islandora_book_create_images_batch_operation(FedoraObject $book, array 
 }
 
 /**
- * Gets the batch definition for re-ordering the given pages from the given book.
+ * Gets the batch definition for re-ordering the given pages.
  *
  * This will order the pages from 1-#pages, the pages will be assigned a
  * sequence number in the order in which they appear.
@@ -317,11 +321,12 @@ function islandora_book_create_images_batch_operation(FedoraObject $book, array 
 function islandora_book_sequence_pages_batch(FedoraObject $book, array $pages) {
   return array(
     'operations' => array(
-      array('islandora_book_sequence_pages_batch_operation', array($book, $pages))
+      array('islandora_book_sequence_pages_batch_operation', array(
+          $book, $pages)),
     ),
     'finished' => 'islandora_book_batch_finished',
-    'title' => t('Sequencing @label\'s pages', array('@label' => $book->label)),
-    'init_message' => t('Preparing to sequence @label\'s pages.', array('@label' => $book->label)),
+    'title' => t("Sequencing @label's pages", array('@label' => $book->label)),
+    'init_message' => t("Preparing to sequence @label's pages.", array('@label' => $book->label)),
     'progress_message' => t('Time elapsed: @elapsed <br/>Estimated time remaning @estimate.'),
     'error_message' => t('An error has occurred.'),
     'file' => drupal_get_path('module', 'islandora_book') . '/includes/book.batch.inc',
@@ -346,7 +351,7 @@ function islandora_book_sequence_pages_batch_operation(FedoraObject $book, array
   islandora_book_set_relationship($page->relationships, ISLANDORA_RELS_EXT_URI, 'isSequenceNumber', $context['sandbox']['progress'] + 1, TRUE);
   // Assume it worked.
   $context['results']['successful'][] = TRUE;
-  if (islandora_book_end_batch_operation($context), array('Sequenced @label', array('@label' => $book->label))) {
+  if (islandora_book_end_batch_operation($context, array('Sequenced @label', array('@label' => $book->label)))) {
     islandora_book_update_book_thumbnail($book);
   }
   $context['message'] = t('Inserting page "@label" (@pid) at position "@pos"', array(
@@ -369,7 +374,8 @@ function islandora_book_sequence_pages_batch_operation(FedoraObject $book, array
 function islandora_book_delete_pages_batch(FedoraObject $book, array $pages) {
   return array(
     'operations' => array(
-      array('islandora_book_delete_pages_batch_operation', array($book, $pages))
+      array('islandora_book_delete_pages_batch_operation', array(
+          $book, $pages)),
     ),
     'finished' => 'islandora_book_batch_finished',
     'title' => t('Deleting page(s) from @label', array('@label' => $book->label)),

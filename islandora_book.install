@@ -2,7 +2,6 @@
 
 /**
  * @file
- *
  * Install hooks for this module.
  */
 
@@ -15,8 +14,9 @@ function islandora_book_install() {
   module_load_include('inc', 'islandora_book', 'includes/utilities');
   module_load_include('inc', 'islandora', 'includes/solution_packs');
   islandora_install_solution_pack('islandora_book');
+  $ingest_derivatives = drupal_map_assoc(array('pdf', 'image', 'ocr'));
   variable_set('islandora_book_solr_subject_field', 'mods.subject');
-  variable_set('islandora_book_ingest_derivatives', drupal_map_assoc(array('pdf', 'image', 'ocr')));
+  variable_set('islandora_book_ingest_derivatives', $ingest_derivatives);
   variable_set('islandora_book_tesseract', '/usr/bin/tesseract');
   variable_set('islandora_book_gimp', '/usr/bin/gimp');
   variable_set('islandora_book_gs', '/usr/bin/gs');
@@ -35,7 +35,7 @@ function islandora_book_uninstall() {
     'islandora_book_tesseract',
     'islandora_book_gimp',
     'islandora_book_gs',
-    'islandora_book_tesseract_enabled_languages'
+    'islandora_book_tesseract_enabled_languages',
   );
   array_walk($variables, 'variable_del');
 }

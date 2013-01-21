@@ -2,7 +2,6 @@
 
 /**
  * @file
- *
  * The page management menu.
  */
 
@@ -44,7 +43,7 @@ function islandora_book_manage_page_menu(FedoraObject $object) {
         '#collapsible' => TRUE,
         '#collapsed' => TRUE,
       ),
-    )
+    ),
   );
 }
 
@@ -61,7 +60,7 @@ function islandora_book_manage_page_menu(FedoraObject $object) {
  * @return array
  *   The Drupal form definition.
  */
-function islandora_book_manage_page_ocr_form(array $form_state, array &$form_state, FedoraObject $object) {
+function islandora_book_manage_page_ocr_form(array $form, array &$form_state, FedoraObject $object) {
   module_load_include('inc', 'islandora_book', 'includes/utilities');
   $form_state['object'] = $object;
   $can_derive = islandora_book_can_derive($object, 'OCR');
@@ -73,19 +72,19 @@ function islandora_book_manage_page_ocr_form(array $form_state, array &$form_sta
       '#type' => 'select',
       '#description' => t('Please select the language the page is written in.'),
       '#options' => $languages,
-     ),
+    ),
     'preprocess' => array(
-        '#disabled' => !$can_preprocess,
-        '#title' => t('Preprocessing for typescripts?'),
-        '#type' => 'checkbox',
-        '#description' => t('Will add additional processing for typewritten text. This script grayscales and sharpens the archival TIFF before performing OCR processes.<br/>This has been shown to improve OCR results for some images. Use with caution. Process can be lengthly and is resource intensive.<br/>'),
-        '#default_value' => $can_preprocess,
+      '#disabled' => !$can_preprocess,
+      '#title' => t('Preprocessing for typescripts?'),
+      '#type' => 'checkbox',
+      '#description' => t('Will add additional processing for typewritten text. This script grayscales and sharpens the archival TIFF before performing OCR processes.<br/>This has been shown to improve OCR results for some images. Use with caution. Process can be lengthly and is resource intensive.<br/>'),
+      '#default_value' => $can_preprocess,
     ),
     'submit' => array(
       '#disabled' => !$can_derive,
       '#type' => 'submit',
       '#value' => t('Perform OCR'),
-    )
+    ),
   );
 }
 
@@ -97,12 +96,12 @@ function islandora_book_manage_page_ocr_form(array $form_state, array &$form_sta
  * @param array $form_state
  *   The Drupal form state.
  */
-function islandora_book_manage_page_ocr_form_submit(array $form_state, array &$form_state) {
+function islandora_book_manage_page_ocr_form_submit(array $form, array &$form_state) {
   module_load_include('inc', 'islandora_book', 'includes/utilities');
   $object = $form_state['object'];
   $options = array(
     'language' => $form_state['values']['language'],
-    'preprocess' => (bool) $form_state['values']['preprocess']
+    'preprocess' => (bool) $form_state['values']['preprocess'],
   );
   islandora_book_page_derive_ocr_datastreams($object, $options);
 }
@@ -120,7 +119,7 @@ function islandora_book_manage_page_ocr_form_submit(array $form_state, array &$f
  * @return array
  *   The Drupal form definition.
  */
-function islandora_book_manage_page_images_form(array $form_state, array &$form_state, FedoraObject $object) {
+function islandora_book_manage_page_images_form(array $form, array &$form_state, FedoraObject $object) {
   module_load_include('inc', 'islandora_book', 'includes/utilities');
   $form_state['object'] = $object;
   $can_derive = islandora_book_can_derive($object, 'JP2');
@@ -133,7 +132,7 @@ function islandora_book_manage_page_images_form(array $form_state, array &$form_
       '#disabled' => !$can_derive,
       '#type' => 'submit',
       '#value' => t('Create Images'),
-    )
+    ),
   );
 }
 
@@ -145,7 +144,7 @@ function islandora_book_manage_page_images_form(array $form_state, array &$form_
  * @param array $form_state
  *   The Drupal form state.
  */
-function islandora_book_manage_page_images_form_submit(array $form_state, array &$form_state) {
+function islandora_book_manage_page_images_form_submit(array $form, array &$form_state) {
   module_load_include('inc', 'islandora_book', 'includes/utilities');
   $object = $form_state['object'];
   islandora_book_page_create_image_derivatives($object);
@@ -164,7 +163,7 @@ function islandora_book_manage_page_images_form_submit(array $form_state, array 
  * @return array
  *   The Drupal form definition.
  */
-function islandora_book_manage_page_pdf_form(array $form_state, array &$form_state, FedoraObject $object) {
+function islandora_book_manage_page_pdf_form(array $form, array &$form_state, FedoraObject $object) {
   module_load_include('inc', 'islandora_book', 'includes/utilities');
   $form_state['object'] = $object;
   $can_derive = islandora_book_can_derive($object, 'PDF');
@@ -177,13 +176,13 @@ function islandora_book_manage_page_pdf_form(array $form_state, array &$form_sta
       '#type' => 'select',
       '#title' => t('DPI (Dots Per Inch)'),
       '#description' => t('Set the DPI for the generated PDF.'),
-      '#options' => drupal_map_assoc(array('72','96','300', '600')),
+      '#options' => drupal_map_assoc(array('72', '96', '300', '600')),
     ),
     'submit' => array(
       '#disabled' => !$can_derive,
       '#type' => 'submit',
       '#value' => t('Create PDF'),
-    )
+    ),
   );
 }
 
@@ -195,12 +194,12 @@ function islandora_book_manage_page_pdf_form(array $form_state, array &$form_sta
  * @param array $form_state
  *   The Drupal form state.
  */
-function islandora_book_manage_page_pdf_form_submit(array $form_state, array &$form_state) {
+function islandora_book_manage_page_pdf_form_submit(array $form, array &$form_state) {
   module_load_include('inc', 'islandora_book', 'includes/utilities');
   $object = $form_state['object'];
   $options = array(
     '-density' => $form_state['values']['dpi'],
-    '-compress' => 'LZW'
+    '-compress' => 'LZW',
   );
   islandora_book_page_derive_pdf_datastream($object, $options);
 }
