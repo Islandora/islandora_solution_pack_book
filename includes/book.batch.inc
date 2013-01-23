@@ -38,7 +38,7 @@
  * @return mixed
  *   The current operand the operation will process.
  */
-function islandora_book_start_batch_operation(array $operands, array &$context, array $message = array()) {
+function islandora_book_start_batch_operation(array $operands, &$context, array $message = array()) {
   if (!isset($context['sandbox']['progress'])) {
     if (empty($context['results'])) {
       // "files" will be deleted upon failure or success of the batch.
@@ -75,7 +75,7 @@ function islandora_book_start_batch_operation(array $operands, array &$context, 
  * @return bool
  *   TRUE if the batch operation is complete, FALSE otherwise.
  */
-function islandora_book_end_batch_operation(array &$context, $count = 1, $message = array()) {
+function islandora_book_end_batch_operation(&$context, $count = 1, $message = array()) {
   $context['sandbox']['progress'] += $count;
   if ($context['sandbox']['progress'] != $context['sandbox']['total']) {
     $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['total'];
@@ -166,7 +166,7 @@ function islandora_book_create_pdf_batch(FedoraObject $book, array $pages, array
  * @param array $context
  *   The context of this batch operation.
  */
-function islandora_book_create_pdf_page_batch_operation(array $pages, array $options, array &$context) {
+function islandora_book_create_pdf_page_batch_operation(array $pages, array $options, &$context) {
   module_load_include('inc', 'islandora_book', 'includes/utilities');
   $page = islandora_book_start_batch_operation($pages, $context);
   $page = islandora_object_load($page);
@@ -188,7 +188,7 @@ function islandora_book_create_pdf_page_batch_operation(array $pages, array $opt
  * @param array $context
  *   The context of this batch operation.
  */
-function islandora_book_create_pdf_book_batch_operation(FedoraObject $book, array &$context) {
+function islandora_book_create_pdf_book_batch_operation(FedoraObject $book, &$context) {
   module_load_include('inc', 'islandora_book', 'includes/utilities');
   islandora_book_start_batch_operation($context['results']['pages'], $context);
   $pdf_file = drupal_realpath("temporary://{$book->id}_PDF.pdf");
@@ -244,7 +244,7 @@ function islandora_book_create_ocr_batch(FedoraObject $book, array $pages, array
  * @param array $context
  *   The context of this batch operation.
  */
-function islandora_book_create_ocr_batch_operation(array $pages, array $options, array &$context) {
+function islandora_book_create_ocr_batch_operation(array $pages, array $options, &$context) {
   module_load_include('inc', 'islandora_book', 'includes/utilities');
   $page = islandora_book_start_batch_operation($pages, $context);
   $page = islandora_object_load($page);
@@ -291,7 +291,7 @@ function islandora_book_create_images_batch(FedoraObject $book, array $pages) {
  * @param array $context
  *   The context of this batch operation.
  */
-function islandora_book_create_images_batch_operation(FedoraObject $book, array $pages, array &$context) {
+function islandora_book_create_images_batch_operation(FedoraObject $book, array $pages, &$context) {
   module_load_include('inc', 'islandora_book', 'includes/utilities');
   $page = islandora_book_start_batch_operation($pages, $context);
   $page = islandora_object_load($page);
@@ -343,7 +343,7 @@ function islandora_book_sequence_pages_batch(FedoraObject $book, array $pages) {
  * @param array $context
  *   The context of this batch operation.
  */
-function islandora_book_sequence_pages_batch_operation(FedoraObject $book, array $pages, array &$context) {
+function islandora_book_sequence_pages_batch_operation(FedoraObject $book, array $pages, &$context) {
   module_load_include('inc', 'islandora_book', 'includes/utilities');
   $page = islandora_book_start_batch_operation($pages, $context);
   $page = islandora_object_load($page);
@@ -396,7 +396,7 @@ function islandora_book_delete_pages_batch(FedoraObject $book, array $pages) {
  * @param array $context
  *   The context of this batch operation.
  */
-function islandora_book_delete_pages_batch_operation(FedoraObject $book, array $pages, array &$context) {
+function islandora_book_delete_pages_batch_operation(FedoraObject $book, array $pages, &$context) {
   $page = islandora_book_start_batch_operation($pages, $context);
   $page = islandora_object_load($page);
   $context['message'] = t('Deleting page "@label" (@pid)', array('@label' => $page->label, '@pid' => $page->id));
