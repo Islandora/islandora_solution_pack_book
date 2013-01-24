@@ -40,12 +40,13 @@
  */
 function islandora_book_start_batch_operation(array $operands, &$context, array $message = array()) {
   if (!isset($context['sandbox']['progress'])) {
-    if (empty($context['results'])) {
+    $results =& $context['results'];
+    if (empty($results)) {
       // "files" will be deleted upon failure or success of the batch.
       // "successful" an array of boolean values indicating operation success.
       // "messages" array of messages to display on finishing the batch
       // values are used as parameters to t() and drupal_set_message().
-      $context['results'] = array(
+      $results = array(
         'files' => array(),
         'successful' => array(),
         'messages' => array(),
