@@ -352,7 +352,7 @@ function islandora_book_sequence_pages_batch_operation(FedoraObject $book, array
   islandora_book_set_relationship($page->relationships, ISLANDORA_RELS_EXT_URI, 'isSequenceNumber', $context['sandbox']['progress'] + 1, TRUE);
   // Assume it worked.
   $context['results']['successful'][] = TRUE;
-  if (islandora_book_end_batch_operation($context, array('Sequenced @label', array('@label' => $book->label)))) {
+  if (islandora_book_end_batch_operation($context, 1, array('Sequenced @label', array('@label' => $book->label)))) {
     islandora_book_update_book_thumbnail($book);
   }
   $context['message'] = t('Inserting page "@label" (@pid) at position "@pos"', array(
