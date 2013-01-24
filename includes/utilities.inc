@@ -548,7 +548,7 @@ function islandora_book_convert_to_hocr($image_file, array $options) {
   $output = array(); $ret = 0;
   $command = "{$executable} {$image_file} {$image_file} -l {$options['language']} hocr";
   exec($command, $output, $ret);
-  if ($ret != '0') {
+  if ($ret != '0' || !file_exists($out_file)) {
     $message = 'tesseract failed to create hocr<br/>Error: @ret<br/>Command: @command<br/>Output: @output';
     $variables = array(
       '@ret' => $ret,
