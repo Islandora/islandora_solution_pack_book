@@ -194,7 +194,7 @@ function islandora_book_create_pdf_book_batch_operation(FedoraObject $book, &$co
   islandora_book_start_batch_operation($context['results']['pages'], $context);
   $pdf_file = drupal_realpath("temporary://{$book->id}_PDF.pdf");
   // Combined # of pages at a time.
-  $files = array_slice($context['results']['pages'], $progress, 10);
+  $files = array_slice($context['results']['pages'], $context['sandbox']['progress'], 10);
   $append = $context['sandbox']['progress'] != 0;
   $context['results']['successful'][] = $append ? islandora_book_pdf_append($pdf_file, $files) : islandora_book_pdf_combine($files, $pdf_file);
   $finished_message = array('Created PDF with @pages pages.', array('@pages' => count($context['results']['pages'])));
