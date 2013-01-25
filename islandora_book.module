@@ -325,7 +325,7 @@ function islandora_book_form_islandora_delete_object_form_alter(array &$form, ar
  *   The Drupal form state.
  */
 function islandora_book_islandora_delete_object_form_delete_pages_submit(array $form, array &$form_state) {
-  module_load_include('inc', 'islandora_book', 'includes/delete_pages.batch');
+  module_load_include('inc', 'islandora_book', 'includes/book.batch');
   module_load_include('inc', 'islandora_book', 'includes/utilities');
   $object = $form_state['object'];
   $get_pid = function($o) {
