@@ -398,6 +398,7 @@ function islandora_book_delete_pages_batch(FedoraObject $book, array $pages) {
  *   The context of this batch operation.
  */
 function islandora_book_delete_pages_batch_operation(FedoraObject $book, array $pages, &$context) {
+  module_load_include('inc', 'islandora_book', 'includes/utilities');
   $page = islandora_book_start_batch_operation($pages, $context);
   $page = islandora_object_load($page);
   $context['message'] = t('Deleting page "@label" (@pid)', array('@label' => $page->label, '@pid' => $page->id));
