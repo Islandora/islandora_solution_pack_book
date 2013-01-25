@@ -38,3 +38,7 @@
 .islandora-book-page-list-item dl dd {
   margin: 0 0 0 130px;
 }
+.islandora-book-page-caption {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

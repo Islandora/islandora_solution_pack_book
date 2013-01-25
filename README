@@ -103,6 +103,21 @@ TROUBLESHOOTING
 F.A.Q.
 ------
 
+Q: RAW_HOCR and ENCODED_OCR are not being generated and I'm getting the
+   following error in the watchdog:
+
+ tesseract failed to create hocr
+  Error: 0
+  Command: /usr/local/bin/tesseract /tmp/islandora:123473_OBJ.tiff /tmp/islandora:123473_OBJ.tiff.html -l eng hocr 2>&1
+  Output: read_variables_file: Can't open hocr<br/>Tesseract Open Source OCR Engine with LibTiff
+
+A: In versions of Tesseract prior to 3.01 the hocr config was not packaged with
+   Tesseract. You must create the configuration yourself. Find the tessdata
+   config directory, typically /usr/local/share/tessdata/config or
+   /usr/share/tessdata/config. Goto to this directory and enter these commmands:
+
+    touch hocr
+    echo 'tessedit_create_hocr 1' > hocr
 
 CONTACT
 -------

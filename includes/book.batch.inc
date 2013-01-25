@@ -57,7 +57,7 @@ function islandora_book_start_batch_operation(array $operands, &$context, array 
     $context['results']['messages'][] = $message;
   }
   $operand_index = $context['sandbox']['progress'];
-  return $operands[$operand_index];
+  return isset($operands[$operand_index]) ? $operands[$operand_index] : FALSE;
 }
 
 /**
@@ -170,15 +170,17 @@ function islandora_book_create_pdf_batch(FedoraObject $book, array $pages, array
 function islandora_book_create_pdf_page_batch_operation(array $pages, array $options, &$context) {
   module_load_include('inc', 'islandora_book', 'includes/utilities');
   $page = islandora_book_start_batch_operation($pages, $context);
-  $page = islandora_object_load($page);
-  $pdf_file = islandora_book_page_derive_pdf($page, $options);
-  $context['results']['files'][] = $pdf_file;
-  $context['results']['pages'][] = $pdf_file;
-  $context['results']['successful'][] = islandora_book_update_datastream($page, $pdf_file, 'PDF');
-  islandora_book_end_batch_operation($context);
-  $context['message'] = t('Converting page @page of @total into a PDF', array(
-                          '@page' => $context['sandbox']['progress'],
-                          '@total' => $context['sandbox']['total']));
+  if ($page) {
+    $page = islandora_object_load($page);
+    $pdf_file = islandora_book_page_derive_pdf($page, $options);
+    $context['results']['files'][] = $pdf_file;
+    $context['results']['pages'][] = $pdf_file;
+    $context['results']['successful'][] = islandora_book_update_datastream($page, $pdf_file, 'PDF');
+    islandora_book_end_batch_operation($context);
+    $context['message'] = t('Converting page @page of @total into a PDF', array(
+                            '@page' => $context['sandbox']['progress'],
+                            '@total' => $context['sandbox']['total']));
+  }
 }
 
 /**
@@ -191,10 +193,13 @@ function islandora_book_create_pdf_page_batch_operation(array $pages, array $opt
  */
 function islandora_book_create_pdf_book_batch_operation(FedoraObject $book, &$context) {
   module_load_include('inc', 'islandora_book', 'includes/utilities');
+  if (empty($context['results']['pages'])) {
+    return;
+  }
   islandora_book_start_batch_operation($context['results']['pages'], $context);
   $pdf_file = drupal_realpath("temporary://{$book->id}_PDF.pdf");
   // Combined # of pages at a time.
-  $files = array_slice($context['results']['pages'], $progress, 10);
+  $files = array_slice($context['results']['pages'], $context['sandbox']['progress'], 10);
   $append = $context['sandbox']['progress'] != 0;
   $context['results']['successful'][] = $append ? islandora_book_pdf_append($pdf_file, $files) : islandora_book_pdf_combine($files, $pdf_file);
   $finished_message = array('Created PDF with @pages pages.', array('@pages' => count($context['results']['pages'])));
@@ -248,12 +253,14 @@ function islandora_book_create_ocr_batch(FedoraObject $book, array $pages, array
 function islandora_book_create_ocr_batch_operation(array $pages, array $options, &$context) {
   module_load_include('inc', 'islandora_book', 'includes/utilities');
   $page = islandora_book_start_batch_operation($pages, $context);
-  $page = islandora_object_load($page);
-  $context['results']['successful'][] = islandora_book_page_derive_ocr_datastreams($page, $options);
-  islandora_book_end_batch_operation($context, 1, array('Performed OCR on @successful of @total pages.'));
-  $context['message'] = t('Performing OCR on page @page of @total.', array(
-                          '@page' => $context['sandbox']['progress'],
-                          '@total' => $context['sandbox']['total']));
+  if ($page) {
+    $page = islandora_object_load($page);
+    $context['results']['successful'][] = islandora_book_page_derive_ocr_datastreams($page, $options);
+    islandora_book_end_batch_operation($context, 1, array('Performed OCR on @successful of @total pages.'));
+    $context['message'] = t('Performing OCR on page @page of @total.', array(
+                            '@page' => $context['sandbox']['progress'],
+                            '@total' => $context['sandbox']['total']));
+  }
 }
 
 /**
@@ -295,14 +302,16 @@ function islandora_book_create_images_batch(FedoraObject $book, array $pages) {
 function islandora_book_create_images_batch_operation(FedoraObject $book, array $pages, &$context) {
   module_load_include('inc', 'islandora_book', 'includes/utilities');
   $page = islandora_book_start_batch_operation($pages, $context);
-  $page = islandora_object_load($page);
-  $context['results']['successful'][] = islandora_book_page_derive_image_datastreams($page);
-  if (islandora_book_end_batch_operation($context, 1, array('Created images for @successful of @total pages.'))) {
-    islandora_book_update_book_thumbnail($book);
+  if ($page) {
+    $page = islandora_object_load($page);
+    $context['results']['successful'][] = islandora_book_page_derive_image_datastreams($page);
+    if (islandora_book_end_batch_operation($context, 1, array('Created images for @successful of @total pages.'))) {
+      islandora_book_update_book_thumbnail($book);
+    }
+    $context['message'] = t('Creating images for page @page of @total.', array(
+                            '@page' => $context['sandbox']['progress'],
+                            '@total' => $context['sandbox']['total']));
   }
-  $context['message'] = t('Creating images for page @page of @total.', array(
-                          '@page' => $context['sandbox']['progress'],
-                          '@total' => $context['sandbox']['total']));
 }
 
 /**
@@ -347,18 +356,20 @@ function islandora_book_sequence_pages_batch(FedoraObject $book, array $pages) {
 function islandora_book_sequence_pages_batch_operation(FedoraObject $book, array $pages, &$context) {
   module_load_include('inc', 'islandora_book', 'includes/utilities');
   $page = islandora_book_start_batch_operation($pages, $context);
-  $page = islandora_object_load($page);
-  // Pages are offset from 1 rather than 0.
-  islandora_book_set_relationship($page->relationships, ISLANDORA_RELS_EXT_URI, 'isSequenceNumber', $context['sandbox']['progress'] + 1, TRUE);
-  // Assume it worked.
-  $context['results']['successful'][] = TRUE;
-  if (islandora_book_end_batch_operation($context, array('Sequenced @label', array('@label' => $book->label)))) {
-    islandora_book_update_book_thumbnail($book);
+  if ($page) {
+    $page = islandora_object_load($page);
+    // Pages are offset from 1 rather than 0.
+    islandora_book_set_relationship($page->relationships, ISLANDORA_RELS_EXT_URI, 'isSequenceNumber', $context['sandbox']['progress'] + 1, TRUE);
+    // Assume it worked.
+    $context['results']['successful'][] = TRUE;
+    if (islandora_book_end_batch_operation($context, 1, array('Sequenced @label', array('@label' => $book->label)))) {
+      islandora_book_update_book_thumbnail($book);
+    }
+    $context['message'] = t('Inserting page "@label" (@pid) at position "@pos"', array(
+                            '@label' => $page->label,
+                            '@pid' => $page->id,
+                            '@pos' => $context['sandbox']['progress']));
   }
-  $context['message'] = t('Inserting page "@label" (@pid) at position "@pos"', array(
-                          '@label' => $page->label,
-                          '@pid' => $page->id,
-                          '@pos' => $context['sandbox']['progress']));
 }
 
 /**
@@ -398,11 +409,14 @@ function islandora_book_delete_pages_batch(FedoraObject $book, array $pages) {
  *   The context of this batch operation.
  */
 function islandora_book_delete_pages_batch_operation(FedoraObject $book, array $pages, &$context) {
+  module_load_include('inc', 'islandora_book', 'includes/utilities');
   $page = islandora_book_start_batch_operation($pages, $context);
-  $page = islandora_object_load($page);
-  $context['message'] = t('Deleting page "@label" (@pid)', array('@label' => $page->label, '@pid' => $page->id));
-  $context['results']['successful'][] = islandora_delete_object($page);
-  if (islandora_book_end_batch_operation($context, 1, array('Deleted @successful of @total pages.'))) {
-    islandora_book_update_book_thumbnail($book);
+  if ($page) {
+    $page = islandora_object_load($page);
+    $context['message'] = t('Deleting page "@label" (@pid)', array('@label' => $page->label, '@pid' => $page->id));
+    $context['results']['successful'][] = islandora_delete_object($page);
+    if (islandora_book_end_batch_operation($context, 1, array('Deleted @successful of @total pages.'))) {
+      islandora_book_update_book_thumbnail($book);
+    }
   }
 }

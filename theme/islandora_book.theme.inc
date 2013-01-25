@@ -31,7 +31,15 @@ function islandora_book_preprocess_islandora_book_page(array &$variables) {
   $object = $variables['object'];
   $results = $object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
   $variables['book_object_id'] = $results[0]['object']['value'];
-  $jp2_url = url("islandora/object/{$object->id}/datastream/JP2/view", array('absolute' => TRUE));
+  // Get token to allow access to XACML protected datastreams.
+  // Always use token authentication in case there is a global policy.
+  module_load_include('inc', 'islandora', 'includes/islandora_authtokens');
+  $token = islandora_get_object_token($object->id, 'JP2', 2);
+  $jp2_url = url("islandora/object/{$object->id}/datastream/JP2/view",
+             array(
+               'absolute' => TRUE,
+               'query' => array('token' => $token),
+             ));
   $viewer = islandora_get_viewer($jp2_url, 'islandora_book_page_viewers');
   if ($viewer) {
     $variables['viewer'] = $viewer;

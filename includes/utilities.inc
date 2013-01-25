@@ -465,8 +465,8 @@ function islandora_book_page_derive_ocr_datastreams(FedoraObject $object, array 
   $rels_ext = $object->relationships;
   islandora_book_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'hasLanguage', $language, TRUE);
   islandora_book_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'preprocess', $preprocess, TRUE);
-  array_map('file_unmanaged_delete', array(
-      $source_file, $hocr_file, $hocr_file, $encoded_hocr_file));
+  $files = array_filter(array($source_file, $ocr_file, $hocr_file, $encoded_hocr_file));
+  array_map('file_unmanaged_delete', $files);
   return $ret;
 }
 
@@ -516,7 +516,7 @@ function islandora_book_convert_to_ocr($image_file, array $options) {
   $out_file = "$image_file.txt";
   $executable = variable_get('islandora_book_tesseract', '/usr/bin/tesseract');
   $output = array(); $ret = 0;
-  $command = "{$executable} {$image_file} {$image_file} -l {$options['language']}";
+  $command = "{$executable} {$image_file} {$image_file} -l {$options['language']} 2>&1";
   exec($command, $output, $ret);
   if ($ret != '0') {
     $message = 'tesseract failed to create ocr<br/>Error: @ret<br/>Command: @command<br/>Output: @output';
@@ -546,9 +546,9 @@ function islandora_book_convert_to_hocr($image_file, array $options) {
   $out_file = "$image_file.html";
   $executable = variable_get('islandora_book_tesseract', '/usr/bin/tesseract');
   $output = array(); $ret = 0;
-  $command = "{$executable} {$image_file} {$image_file} -l {$options['language']} hocr";
+  $command = "{$executable} {$image_file} {$image_file} -l {$options['language']} hocr 2>&1";
   exec($command, $output, $ret);
-  if ($ret != '0') {
+  if ($ret != '0' || !file_exists($out_file)) {
     $message = 'tesseract failed to create hocr<br/>Error: @ret<br/>Command: @command<br/>Output: @output';
     $variables = array(
       '@ret' => $ret,
@@ -572,12 +572,16 @@ function islandora_book_convert_to_hocr($image_file, array $options) {
  */
 function islandora_book_encode_hocr($file) {
   $proc = new XSLTProcessor();
+  $html_string = file_get_contents($file);
+  $input = new DOMDocument();
+  // Need to load as HTML and output as XML for when tesseract doesn't close html
+  // tags, like meta.
+  $input->loadHTML($html_string);
+  $xml_string = $input->saveXML();
   // Convert the hocr from html 4.01 transitional to xhtml and lower case
   // the text.
-  $html_string = file_get_contents($file);
   $doc_type = '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">';
-  $xml_string = str_replace($doc_type, '<?xml version="1.0" encoding="UTF-8"?>', $html_string);
-  $input = new DOMDocument();
+  $xml_string = str_replace($doc_type, '', $xml_string);
   $input->loadXML($xml_string);
   $path = drupal_get_path('module', 'islandora_book');
   $xsl = new DOMDocument();
