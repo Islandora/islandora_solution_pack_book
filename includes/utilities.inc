@@ -465,8 +465,8 @@ function islandora_book_page_derive_ocr_datastreams(FedoraObject $object, array 
   $rels_ext = $object->relationships;
   islandora_book_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'hasLanguage', $language, TRUE);
   islandora_book_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'preprocess', $preprocess, TRUE);
-  array_map('file_unmanaged_delete', array(
-      $source_file, $hocr_file, $hocr_file, $encoded_hocr_file));
+  $files = array_filter(array($source_file, $hocr_file, $hocr_file, $encoded_hocr_file));
+  array_map('file_unmanaged_delete', $files);
   return $ret;
 }
 
@@ -516,7 +516,7 @@ function islandora_book_convert_to_ocr($image_file, array $options) {
   $out_file = "$image_file.txt";
   $executable = variable_get('islandora_book_tesseract', '/usr/bin/tesseract');
   $output = array(); $ret = 0;
-  $command = "{$executable} {$image_file} {$image_file} -l {$options['language']}";
+  $command = "{$executable} {$image_file} {$image_file} -l {$options['language']} 2>&1";
   exec($command, $output, $ret);
   if ($ret != '0') {
     $message = 'tesseract failed to create ocr<br/>Error: @ret<br/>Command: @command<br/>Output: @output';
@@ -546,7 +546,7 @@ function islandora_book_convert_to_hocr($image_file, array $options) {
   $out_file = "$image_file.html";
   $executable = variable_get('islandora_book_tesseract', '/usr/bin/tesseract');
   $output = array(); $ret = 0;
-  $command = "{$executable} {$image_file} {$image_file} -l {$options['language']} hocr";
+  $command = "{$executable} {$image_file} {$image_file} -l {$options['language']} hocr 2>&1";
   exec($command, $output, $ret);
   if ($ret != '0' || !file_exists($out_file)) {
     $message = 'tesseract failed to create hocr<br/>Error: @ret<br/>Command: @command<br/>Output: @output';
