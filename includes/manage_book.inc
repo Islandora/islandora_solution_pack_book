@@ -369,10 +369,12 @@ function islandora_book_manage_book_sequences_form_submit(array $form, array &$f
   module_load_include('inc', 'islandora_book', 'includes/book.batch');
   $object = $form_state['object'];
   $pages = &$form_state['values']['table']['rows'];
-  uasort($pages, 'drupal_sort_weight');
-  $pages = array_keys($pages);
-  $batch = islandora_book_sequence_pages_batch($object, $pages);
-  batch_set($batch);
+  if ($pages) {
+    uasort($pages, 'drupal_sort_weight');
+    $pages = array_keys($pages);
+    $batch = islandora_book_sequence_pages_batch($object, $pages);
+    batch_set($batch);
+  }
 }
 
 /**
