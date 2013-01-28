@@ -282,7 +282,12 @@ function islandora_book_islandora_pagecmodel_islandora_object_ingested(FedoraObj
     $success &= islandora_book_can_derive($object, 'PDF') && islandora_book_page_derive_pdf_datastream($object);
   }
   if ($derive['image']) {
-    $success &= islandora_book_can_derive($object, 'JP2') && islandora_book_page_derive_image_datastreams($object);
+    $derived_images = islandora_book_can_derive($object, 'JP2') && islandora_book_page_derive_image_datastreams($object);
+    if ($derived_images) {
+      $book_object = islandora_book_get_relationship($object->relationships, FEDORA_RELS_EXT_URI, 'isMemberOf', NULL);
+      islandora_book_update_book_thumbnail(islandora_object_load($book_object));
+    }
+    $success &= $derived_images;
   }
   if ($derive['ocr']) {
     $success &= islandora_book_can_derive($object, 'OCR') && islandora_book_page_derive_ocr_datastreams($object);
