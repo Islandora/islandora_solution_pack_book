@@ -576,7 +576,7 @@ function islandora_book_encode_hocr($file) {
   $input = new DOMDocument();
   // Need to load as HTML and output as XML for when tesseract doesn't close html
   // tags, like meta.
-  $input->loadHTML($html_string);
+  @$input->loadHTML($html_string);
   $xml_string = $input->saveXML();
   // Convert the hocr from html 4.01 transitional to xhtml and lower case
   // the text.
