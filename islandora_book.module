@@ -272,9 +272,9 @@ function islandora_book_islandora_pagecmodel_islandora_ingest_steps() {
 }
 
 /**
- * Implements hook_CMODEL_PID_islandora_ingest_post_ingest().
+ * Implements hook_CMODEL_PID_islandora_object_ingested().
  */
-function islandora_book_islandora_pagecmodel_islandora_ingest_post_ingest(FedoraObject $object) {
+function islandora_book_islandora_pagecmodel_islandora_object_ingested(FedoraObject $object) {
   module_load_include('inc', 'islandora_book', 'includes/utilities');
   $success = TRUE;
   $derive = islandora_book_get_enabled_ingest_derivatives();
