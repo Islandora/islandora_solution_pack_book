@@ -12,7 +12,7 @@
  */
 
 // Constants
-define('TESSERACT_REQUIRED_VERSION', '3.2');
+define('TESSERACT_REQUIRED_VERSION', '3.02');
 
 /**
  * Gets all the pages in the given book object.
