@@ -15,7 +15,7 @@
   <div id="book-page-image">
     <?php
       $params = array(
-        'path' => url("islandora/object/{$object->id}/datastream/JPEG/view"),
+        'path' => url("islandora/object/{$object->id}/datastream/JPG/view"),
         'attributes' => array()
       );
       print theme_image($params);

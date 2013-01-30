@@ -147,7 +147,7 @@ function islandora_book_manage_page_images_form(array $form, array &$form_state,
 function islandora_book_manage_page_images_form_submit(array $form, array &$form_state) {
   module_load_include('inc', 'islandora_book', 'includes/utilities');
   $object = $form_state['object'];
-  islandora_book_page_create_image_derivatives($object);
+  islandora_book_page_derive_image_datastreams($object);
 }
 
 /**
