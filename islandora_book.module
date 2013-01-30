@@ -336,7 +336,7 @@ function islandora_book_islandora_delete_object_form_delete_pages_submit(array $
   $get_pid = function($o) {
     return $o['pid'];
   };
-  $pages = array_map($get_pid, islandora_book_get_pages($object));
+  $pages = array_values(array_map($get_pid, islandora_book_get_pages($object)));
   batch_set(islandora_book_delete_pages_batch($object, $pages));
   // Called from within this submit handler rather than from the Drupal Form API
   // as we need the object to exist to generate the pages and if we run this.
