@@ -382,11 +382,11 @@ function islandora_book_convert_to_pdf($image_file, array $options) {
   $command_args = "{$options} {$image_file} {$pdf_file}";
   $output = array(); $ret = 0;
   if (_imagemagick_convert_exec($command_args, $output, $ret) !== TRUE) {
-    $message = 'imagemagick convert failed to create pdf<br/>Error: @ret<br/>Command: @command<br/>Output: @output';
+    $message = 'imagemagick convert failed to create pdf<br/>Error: @ret<br/>Command: @command<br/>Output: !output';
     $variables = array(
       '@ret' => $ret,
       '@command' => "convert $command_args",
-      '@output' => implode('<br/>', $output),
+      '!output' => implode('<br/>', $output),
     );
     watchdog('islandora_book', $message, $variables, WATCHDOG_ERROR);
     return FALSE;
@@ -510,11 +510,11 @@ function islandora_book_ocr_preprocess_image($source_file) {
   // Sometimes Gimp fails but returns success anyways so we check for the
   // destination files existance.
   if ($ret != '0' || !file_exists($dest_file)) {
-    $message = 'gimp failed to preproces image<br/>Error: @ret<br/>Command: @command<br/>Output: @output';
+    $message = 'gimp failed to preproces image<br/>Error: @ret<br/>Command: @command<br/>Output: !output';
     $variables = array(
       '@ret' => $ret,
       '@command' => $command,
-      '@output' => implode('<br/>', $output),
+      '!output' => implode('<br/>', $output),
     );
     watchdog('islandora_book', $message, $variables, WATCHDOG_ERROR);
     return $source_file;
@@ -540,11 +540,11 @@ function islandora_book_convert_to_ocr($image_file, array $options) {
   $command = "{$executable} {$image_file} {$image_file} -l {$options['language']} 2>&1";
   exec($command, $output, $ret);
   if ($ret != '0') {
-    $message = 'tesseract failed to create ocr<br/>Error: @ret<br/>Command: @command<br/>Output: @output';
+    $message = 'tesseract failed to create ocr<br/>Error: @ret<br/>Command: @command<br/>Output: !output';
     $variables = array(
       '@ret' => $ret,
       '@command' => $command,
-      '@output' => implode('<br/>', $output),
+      '!output' => implode('<br/>', $output),
     );
     watchdog('islandora_book', $message, $variables, WATCHDOG_ERROR);
     return FALSE;
@@ -570,22 +570,22 @@ function islandora_book_convert_to_hocr($image_file, array $options) {
   $command = "{$executable} {$image_file} {$image_file} -l {$options['language']} hocr 2>&1";
   exec($command, $output, $ret);
   if ($ret != '0' || !file_exists($out_file)) {
-    $message = 'tesseract failed to create hocr<br/>Error: @ret<br/>Command: @command<br/>Output: @output';
+    $message = 'tesseract failed to create hocr<br/>Error: @ret<br/>Command: @command<br/>Output: !output';
     $variables = array(
       '@ret' => $ret,
       '@command' => $command,
-      '@output' => implode('<br/>', $output),
+      '!output' => implode('<br/>', $output),
     );
     watchdog('islandora_book', $message, $variables, WATCHDOG_ERROR);
     return FALSE;
   }
   if (!islandora_book_hocr_valid($out_file)) {
     $message = 'tesseract failed to create valid hocr make sure to check your running a supported version of tesseract 3.2 or later.';
-    $message .= '<br/>Error: @ret<br/>Command: @command<br/>Output: @output';
+    $message .= '<br/>Error: @ret<br/>Command: @command<br/>Output: !output';
     $variables = array(
       '@ret' => $ret,
       '@command' => $command,
-      '@output' => implode('<br/>', $output),
+      '!output' => implode('<br/>', $output),
     );
     watchdog('islandora_book', $message, $variables, WATCHDOG_ERROR);
     return FALSE;
