@@ -71,7 +71,7 @@ function islandora_book_pages_access_callback($object = NULL) {
     return FALSE;
   }
   $is_book = in_array('islandora:bookCModel', $object->models);
-  return $is_book && islandora_object_access_callback(array(FEDORA_VIEW_OBJECTS), $object);
+  return $is_book && islandora_object_access_callback(FEDORA_VIEW_OBJECTS, $object);
 }
 
 /**
@@ -93,8 +93,12 @@ function islandora_book_manage_book_access_callback($object = NULL) {
     FEDORA_PURGE,
     FEDORA_INGEST,
   );
+  $can_access = function($perm) use($object) {
+    return  islandora_object_access_callback($perm, $object);
+  };
+  $can_manage = array_sum(array_map($can_access, $manage_actions)) > 0;
   $is_book = in_array('islandora:bookCModel', $object->models);
-  return $is_book && islandora_object_access_callback($manage_actions, $object);
+  return $is_book && $can_manage;
 }
 
 /**
@@ -113,8 +117,12 @@ function islandora_book_manage_page_access_callback($object = NULL) {
   $manage_actions = array(
     FEDORA_ADD_DS,
   );
+  $can_access = function($perm) use($object) {
+    return  islandora_object_access_callback($perm, $object);
+  };
+  $can_manage = array_sum(array_map($can_access, $manage_actions)) > 0;
   $is_page = in_array('islandora:pageCModel', $object->models);
-  return $is_page && islandora_object_access_callback($manage_actions, $object);
+  return $is_page && $can_manage;
 }
 
 /**
