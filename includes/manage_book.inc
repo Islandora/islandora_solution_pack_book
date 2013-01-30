@@ -178,7 +178,7 @@ function islandora_book_manage_book_ocr_form(array $form, array &$form_state, Fe
   return array(
     'description' => array(
       '#type' => 'item',
-      '#description' => t('You must have the <b>Tesseract</b> installed to perform OCR, and <b>Gimp</b> to preprocess OCR.<br/> This will update the OCR, RAW_HOCR, and ENCODED_OCR datastreams for each Page object.'),
+      '#description' => t('You must have the <b>Tesseract</b> installed to perform OCR, and <b>Gimp</b> to preprocess OCR.<br/> This will update the OCR and HOCR datastreams for each Page object.'),
     ),
     'language' => array(
       '#title' => t('Language'),

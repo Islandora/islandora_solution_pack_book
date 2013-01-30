@@ -25,10 +25,7 @@
   <dsTypeModel ID="OCR" optional="true">
     <form MIME="text/plain"/>
   </dsTypeModel>
-  <dsTypeModel ID="RAW_HOCR" optional="true">
-    <form MIME="text/xml"/>
-  </dsTypeModel>
-  <dsTypeModel ID="ENCODED_OCR" optional="true">
-    <form MIME="text/xml"/>
+  <dsTypeModel ID="HOCR" optional="true">
+    <form MIME="text/html"/>
   </dsTypeModel>
 </dsCompositeModel>
