@@ -26,6 +26,7 @@
 function islandora_book_ingest_page(FedoraObject $object) {
   module_load_include('inc', 'islandora', 'includes/utilities');
   module_load_include('inc', 'islandora', 'includes/ingest.form');
+  drupal_set_title(t('Add page to @book', array('@book' => $object->label)));
   return drupal_get_form('islandora_ingest_form', array(
       'book' => $object->id,
       'namespace' => islandora_get_namespace($object->id),
@@ -45,6 +46,7 @@ function islandora_book_ingest_page(FedoraObject $object) {
  *   book objects.
  */
 function islandora_book_manage_book_menu(FedoraObject $object) {
+  drupal_set_title($object->label);
   return array(
     'manage_book' => array(
       '#type' => 'vertical_tabs',
@@ -178,7 +180,7 @@ function islandora_book_manage_book_ocr_form(array $form, array &$form_state, Fe
   return array(
     'description' => array(
       '#type' => 'item',
-      '#description' => t('You must have the <b>Tesseract</b> installed to perform OCR, and <b>Gimp</b> to preprocess OCR.<br/> This will update the OCR, RAW_HOCR, and ENCODED_OCR datastreams for each Page object.'),
+      '#description' => t('You must have the <b>Tesseract</b> installed to perform OCR, and <b>Gimp</b> to preprocess OCR.<br/> This will update the OCR and HOCR datastreams for each Page object.'),
     ),
     'language' => array(
       '#title' => t('Language'),

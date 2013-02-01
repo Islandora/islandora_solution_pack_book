@@ -213,7 +213,7 @@ function islandora_book_create_pdf_book_batch_operation(FedoraObject $book, &$co
 }
 
 /**
- * Gets the batch definition for creating OCR, RAW_HOCR, and ENCODED_OCR.
+ * Gets the batch definition for creating OCR and HOCR.
  *
  * @param FedoraObject $book
  *   The book the pages belong to.
@@ -241,7 +241,7 @@ function islandora_book_create_ocr_batch(FedoraObject $book, array $pages, array
 }
 
 /**
- * Batch operation for createing the OCR, RAW_HOCR, and ENCODED_OCR datastreams.
+ * Batch operation for createing the OCR and HOCR.
  *
  * @param array $pages
  *   All the pages to perform OCR on.

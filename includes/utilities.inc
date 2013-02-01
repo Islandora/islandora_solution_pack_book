@@ -11,6 +11,9 @@
  *    etc.
  */
 
+// Constants
+define('TESSERACT_REQUIRED_VERSION', '3.02');
+
 /**
  * Gets all the pages in the given book object.
  *
@@ -82,6 +85,30 @@ function islandora_book_get_page_progression(FedoraObject $object) {
     return $results[0]['page_progression']['value'];
   }
   return 'lr';
+}
+
+/**
+ * Gets the versions of the given tesseract executable.
+ *
+ * @param string $tesseract
+ *   The absolute path to $tesseract executable, if not provided the variable
+ *   "islandora_book_tesseract" will be used instead.
+ *
+ * @return string
+ *   The version of the tesseract executable if successful, FALSE otherwise.
+ */
+function islandora_book_get_tesseract_version($tesseract = NULL) {
+  $tesseract = $tesseract ? $tesseract : variable_get('islandora_book_tesseract', '/usr/bin/tesseract');
+  if (is_executable($tesseract)) {
+    $ret = -1;
+    $output = array();
+    $command = "$tesseract -v 2>&1";
+    exec($command, $output, $ret);
+    if (!$ret && isset($output[0])) {
+      return str_replace(array('tesseract', ' '), '', $output[0]);
+    }
+  }
+  return FALSE;
 }
 
 /**
@@ -177,8 +204,6 @@ function islandora_book_can_derive(AbstractFedoraObject $object, $dsid) {
     $check_function = array(
       'PDF' => 'islandora_book_can_create_pdf',
       'OCR' => 'islandora_book_can_create_ocr',
-      'RAW_HOCR' => 'islandora_book_can_create_ocr',
-      'ENCODED_OCR' => 'islandora_book_can_create_ocr',
       'TN' => 'islandora_book_can_create_images',
       'JP2' => 'islandora_book_can_create_images',
       'JPEG' => 'islandora_book_can_create_images',
@@ -218,8 +243,8 @@ function islandora_book_can_combine_pdf() {
  *   TRUE if it is possible, FALSE otherwise.
  */
 function islandora_book_can_create_ocr() {
-  $tesseract = variable_get('islandora_book_tesseract', '/usr/bin/tesseract');
-  return is_executable($tesseract);
+  $version = islandora_book_get_tesseract_version();
+  return version_compare($version, TESSERACT_REQUIRED_VERSION) >= 0;
 }
 
 /**
@@ -286,8 +311,7 @@ function islandora_book_get_page_derivative_source_id($dsid) {
   $source_datastreams = array(
     'PDF' => 'OBJ',
     'OCR' => 'OBJ',
-    'RAW_HOCR' => 'OBJ',
-    'ENCODED_OCR' => 'OBJ',
+    'HOCR' => 'OBJ',
     'TN' => 'OBJ',
     'JPG' => 'OBJ',
     'JP2' => 'OBJ',
@@ -359,11 +383,11 @@ function islandora_book_convert_to_pdf($image_file, array $options) {
   $command_args = "{$options} {$image_file} {$pdf_file}";
   $output = array(); $ret = 0;
   if (_imagemagick_convert_exec($command_args, $output, $ret) !== TRUE) {
-    $message = 'imagemagick convert failed to create pdf<br/>Error: @ret<br/>Command: @command<br/>Output: @output';
+    $message = 'imagemagick convert failed to create pdf<br/>Error: @ret<br/>Command: @command<br/>Output: !output';
     $variables = array(
       '@ret' => $ret,
       '@command' => "convert $command_args",
-      '@output' => implode('<br/>', $output),
+      '!output' => implode('<br/>', $output),
     );
     watchdog('islandora_book', $message, $variables, WATCHDOG_ERROR);
     return FALSE;
@@ -436,7 +460,7 @@ function islandora_book_page_derive_image_datastreams(FedoraObject $object) {
 }
 
 /**
- * Creates and adds the OCR, RAW_HOCR, and ENCODED_OCR datastreams.
+ * Creates and adds the OCR, HOCR datastreams.
  *
  * @param FedoraObject $object
  *   The page object that the derivatives will be generated for.
@@ -456,16 +480,14 @@ function islandora_book_page_derive_ocr_datastreams(FedoraObject $object, array 
   $source_file = $options['preprocess'] ? islandora_book_ocr_preprocess_image($source_file) : $source_file;
   $ocr_file = islandora_book_convert_to_ocr($source_file, $options);
   $hocr_file = islandora_book_convert_to_hocr($source_file, $options);
-  $encoded_hocr_file = $hocr_file ? islandora_book_encode_hocr($hocr_file) : FALSE;
   $ret = $ocr_file && islandora_book_update_datastream($object, $ocr_file, 'OCR');
-  $ret &= $hocr_file && islandora_book_update_datastream($object, $hocr_file, 'RAW_HOCR');
-  $ret &= $encoded_hocr_file && islandora_book_update_datastream($object, $encoded_hocr_file, 'ENCODED_OCR');
+  $ret &= $hocr_file && islandora_book_update_datastream($object, $hocr_file, 'HOCR');
   $language = $options['language'];
   $preprocess = $options['preprocess'] ? 'true' : 'false';
   $rels_ext = $object->relationships;
   islandora_book_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'hasLanguage', $language, TRUE);
   islandora_book_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'preprocess', $preprocess, TRUE);
-  $files = array_filter(array($source_file, $ocr_file, $hocr_file, $encoded_hocr_file));
+  $files = array_filter(array($source_file, $ocr_file, $hocr_file));
   array_map('file_unmanaged_delete', $files);
   return $ret;
 }
@@ -489,11 +511,11 @@ function islandora_book_ocr_preprocess_image($source_file) {
   // Sometimes Gimp fails but returns success anyways so we check for the
   // destination files existance.
   if ($ret != '0' || !file_exists($dest_file)) {
-    $message = 'gimp failed to preproces image<br/>Error: @ret<br/>Command: @command<br/>Output: @output';
+    $message = 'gimp failed to preproces image<br/>Error: @ret<br/>Command: @command<br/>Output: !output';
     $variables = array(
       '@ret' => $ret,
       '@command' => $command,
-      '@output' => implode('<br/>', $output),
+      '!output' => implode('<br/>', $output),
     );
     watchdog('islandora_book', $message, $variables, WATCHDOG_ERROR);
     return $source_file;
@@ -519,11 +541,11 @@ function islandora_book_convert_to_ocr($image_file, array $options) {
   $command = "{$executable} {$image_file} {$image_file} -l {$options['language']} 2>&1";
   exec($command, $output, $ret);
   if ($ret != '0') {
-    $message = 'tesseract failed to create ocr<br/>Error: @ret<br/>Command: @command<br/>Output: @output';
+    $message = 'tesseract failed to create ocr<br/>Error: @ret<br/>Command: @command<br/>Output: !output';
     $variables = array(
       '@ret' => $ret,
       '@command' => $command,
-      '@output' => implode('<br/>', $output),
+      '!output' => implode('<br/>', $output),
     );
     watchdog('islandora_book', $message, $variables, WATCHDOG_ERROR);
     return FALSE;
@@ -549,11 +571,22 @@ function islandora_book_convert_to_hocr($image_file, array $options) {
   $command = "{$executable} {$image_file} {$image_file} -l {$options['language']} hocr 2>&1";
   exec($command, $output, $ret);
   if ($ret != '0' || !file_exists($out_file)) {
-    $message = 'tesseract failed to create hocr<br/>Error: @ret<br/>Command: @command<br/>Output: @output';
+    $message = 'tesseract failed to create hocr<br/>Error: @ret<br/>Command: @command<br/>Output: !output';
     $variables = array(
       '@ret' => $ret,
       '@command' => $command,
-      '@output' => implode('<br/>', $output),
+      '!output' => implode('<br/>', $output),
+    );
+    watchdog('islandora_book', $message, $variables, WATCHDOG_ERROR);
+    return FALSE;
+  }
+  if (!islandora_book_hocr_valid($out_file)) {
+    $message = 'tesseract failed to create valid hocr make sure to check your running a supported version of tesseract 3.2 or later.';
+    $message .= '<br/>Error: @ret<br/>Command: @command<br/>Output: !output';
+    $variables = array(
+      '@ret' => $ret,
+      '@command' => $command,
+      '!output' => implode('<br/>', $output),
     );
     watchdog('islandora_book', $message, $variables, WATCHDOG_ERROR);
     return FALSE;
@@ -562,36 +595,40 @@ function islandora_book_convert_to_hocr($image_file, array $options) {
 }
 
 /**
- * Encodes the given HTML OCR file as XML.
+ * Checks if the given HOCR file is valid.
+ *
+ * At the moment this only checks if the version is supported but may do more
+ * in the future.
+ *
+ * @param string $file
+ *   The absolute path to the HOCR file.
+ *
+ * @return bool
+ *   TRUE if the HOCR file is valid, FALSE otherwise.
+ */
+function islandora_book_hocr_valid($file) {
+  $version = islandora_book_hocr_version($file);
+  return version_compare($version, TESSERACT_REQUIRED_VERSION) >= 0;
+}
+
+/**
+ * Gets the version of the give HOCR file.
+ *
+ * Parses the meta tags in the given file to determine the version. Older
+ * versions of tesseract don't include the version information.
  *
  * @param string $file
  *   The absolute path to the HOCR file.
  *
  * @return string
- *   The absolute path to the encoded HOCR file if successful, FALSE otherwise.
+ *   The version if successful, FALSE otherwise.
  */
-function islandora_book_encode_hocr($file) {
-  $proc = new XSLTProcessor();
-  $html_string = file_get_contents($file);
-  $input = new DOMDocument();
-  // Need to load as HTML and output as XML for when tesseract doesn't close html
-  // tags, like meta.
-  $input->loadHTML($html_string);
-  $xml_string = $input->saveXML();
-  // Convert the hocr from html 4.01 transitional to xhtml and lower case
-  // the text.
-  $doc_type = '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">';
-  $xml_string = str_replace($doc_type, '', $xml_string);
-  $input->loadXML($xml_string);
-  $path = drupal_get_path('module', 'islandora_book');
-  $xsl = new DOMDocument();
-  $xsl->load($path . '/data/xsl/hocrToLowerhocr.xsl');
-  $xsl = $proc->importStylesheet($xsl);
-  $result = $proc->transformToDoc($input);
-  // Create new transformed file.
-  $file = "$file.xml";
-  $result->save($file);
-  return $file;
+function islandora_book_hocr_version($file) {
+  @$doc = simplexml_load_file($file);
+  $doc->registerXPathNamespace('ns', 'http://www.w3.org/1999/xhtml');
+  $version = (string) array_pop($doc->xpath('/ns:html/ns:head/ns:meta[@name="ocr-system"]/@content'));
+  $version = str_replace(array('tesseract', ' '), '', $version);
+  return empty($version) ? FALSE : $version;
 }
 
 /**

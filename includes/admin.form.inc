@@ -22,6 +22,7 @@ function islandora_book_admin_settings_form(array $form, array &$form_state) {
     return isset($form_state['values'][$name]) ? $form_state['values'][$name] : variable_get($name, $default);
   };
   $tesseract = $get_default_value('islandora_book_tesseract', '/usr/bin/tesseract');
+  $version = islandora_book_get_tesseract_version($tesseract);
   $gimp = $get_default_value('islandora_book_gimp', '/usr/bin/gimp');
   $gs = $get_default_value('islandora_book_gs', '/usr/bin/gs');
   $languages = $get_default_value('islandora_book_tesseract_enabled_languages', drupal_map_assoc(array_keys(islandora_book_get_tesseract_languages())));
@@ -51,7 +52,7 @@ function islandora_book_admin_settings_form(array $form, array &$form_state) {
         '#options' => array(
           'pdf' => t('PDF datastream. <b>Requires</b> <i>ImageMagick</i>'),
           'image' => t('Image datastreams (TN, JPEG, JP2). <b>Requires</b> <i>Large Image Solution Pack</i>'),
-          'ocr' => t('OCR datastreams (OCR, RAW_HOCR, ENCODED_OCR)'),
+          'ocr' => t('OCR datastreams (OCR, HOCR)'),
         ),
         '#default_value' => $get_default_value('islandora_book_ingest_derivatives', drupal_map_assoc(
                             array('pdf', 'image', 'ocr'))),
@@ -63,7 +64,7 @@ function islandora_book_admin_settings_form(array $form, array &$form_state) {
           '#type' => 'textfield',
           '#title' => t('GS (GhostScript)'),
           '#description' => t('GhostScript is used to combined PDF files and generate a PDF repersentation of a Book.<br/>!msg',
-                          array('!msg' => islandora_book_admin_settings_form_executable_availible_message($gs))),
+                          array('!msg' => islandora_book_admin_settings_form_executable_available_message($gs))),
           '#default_value' => $gs,
           '#prefix' => '<div id="gs-wrapper">',
           '#suffix' => '</div>',
@@ -81,7 +82,8 @@ function islandora_book_admin_settings_form(array $form, array &$form_state) {
         'islandora_book_tesseract' => array(
           '#type' => 'textfield',
           '#title' => t('Tesseract'),
-          '#description' => t('Tesseract is used to generate the OCR datastreams.<br/>!msg', array('!msg' => islandora_book_admin_settings_form_executable_availible_message($tesseract))),
+          '#description' => t('Tesseract is used to generate the OCR datastreams.<br/>!msg', array(
+                            '!msg' => islandora_book_admin_settings_form_executable_available_message($tesseract, $version, TESSERACT_REQUIRED_VERSION))),
           '#default_value' => $tesseract,
           '#prefix' => '<div id="tesseract-wrapper">',
           '#suffix' => '</div>',
@@ -96,7 +98,7 @@ function islandora_book_admin_settings_form(array $form, array &$form_state) {
           '#type' => 'textfield',
           '#title' => t('Gimp'),
           '#description' => t('Gimp is used to preprocess the source image before generating the OCR datastreams.<br/>!msg',
-                          array('!msg' => islandora_book_admin_settings_form_executable_availible_message($gimp))),
+                          array('!msg' => islandora_book_admin_settings_form_executable_available_message($gimp))),
           '#default_value' => $gimp,
           '#prefix' => '<div id="gimp-wrapper">',
           '#suffix' => '</div>',
@@ -165,15 +167,26 @@ function islandora_book_admin_settings_form_ingest_derivatives_validate(array $e
  *
  * @param string $path
  *   The path to an executable to check for availability.
+ * @param string $version
+ *   The version of exectuable.
  *
  * @return string
  *   A message in html detailing if the given executable is accessible.
  */
-function islandora_book_admin_settings_form_executable_availible_message($path) {
+function islandora_book_admin_settings_form_executable_available_message($path, $version = NULL, $required_version = NULL) {
   $available = is_executable($path);
   if ($available) {
     $image = theme_image(array('path' => 'misc/watchdog-ok.png', 'attributes' => array()));
     $message = t('Executable found at @path', array('@path' => $path));
+    if ($version) {
+      $message .= t('<br/>Version: @version', array('@version' => $version));
+    }
+    if ($required_version) {
+      $message .= t('<br/>Required Version: @version', array('@version' => $required_version));
+      if (version_compare($version, $required_version) < 0) {
+        $image = theme_image(array('path' => 'misc/watchdog-error.png', 'attributes' => array()));
+      }
+    }
   }
   else {
     $image = theme_image(array('path' => 'misc/watchdog-error.png', 'attributes' => array()));

@@ -16,6 +16,7 @@
  *   page objects.
  */
 function islandora_book_manage_page_menu(FedoraObject $object) {
+  drupal_set_title($object->label);
   return array(
     'manage_page' => array(
       '#type' => 'vertical_tabs',
@@ -103,7 +104,12 @@ function islandora_book_manage_page_ocr_form_submit(array $form, array &$form_st
     'language' => $form_state['values']['language'],
     'preprocess' => (bool) $form_state['values']['preprocess'],
   );
-  islandora_book_page_derive_ocr_datastreams($object, $options);
+  if (islandora_book_page_derive_ocr_datastreams($object, $options)) {
+    drupal_set_message(t('Successfully performed OCR.'), 'status');
+  }
+  else {
+    drupal_set_message(t('Failed to perform OCR.'), 'error');
+  }
 }
 
 /**
@@ -147,7 +153,12 @@ function islandora_book_manage_page_images_form(array $form, array &$form_state,
 function islandora_book_manage_page_images_form_submit(array $form, array &$form_state) {
   module_load_include('inc', 'islandora_book', 'includes/utilities');
   $object = $form_state['object'];
-  islandora_book_page_create_image_derivatives($object);
+  if (islandora_book_page_derive_image_datastreams($object)) {
+    drupal_set_message(t('Successfully created images.'), 'status');
+  }
+  else {
+    drupal_set_message(t('Failed to created images.'), 'error');
+  }
 }
 
 /**
@@ -201,5 +212,10 @@ function islandora_book_manage_page_pdf_form_submit(array $form, array &$form_st
     '-density' => $form_state['values']['dpi'],
     '-compress' => 'LZW',
   );
-  islandora_book_page_derive_pdf_datastream($object, $options);
+  if (islandora_book_page_derive_pdf_datastream($object, $options)) {
+    drupal_set_message(t('Successfully created PDF.'), 'status');
+  }
+  else {
+    drupal_set_message(t('Failed to created PDF.'), 'error');
+  }
 }

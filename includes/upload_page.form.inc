@@ -77,7 +77,7 @@ function islandora_book_upload_page_form_submit(array $form, array &$form_state)
   $configuration = islandora_ingest_form_get_configuration($form_state);
   $book = islandora_object_load($configuration['book']);
   $pages = islandora_book_get_pages($book);
-  $num_pages = count($pages);
+  $num_pages = count($pages) + 1;
   islandora_book_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'hasLanguage', $language, TRUE);
   islandora_book_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'preprocess', $preprocess, TRUE);
   islandora_book_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isPageOf', $book->id);
