@@ -16,6 +16,7 @@
  *   page objects.
  */
 function islandora_book_manage_page_menu(FedoraObject $object) {
+  drupal_set_title($object->label);
   return array(
     'manage_page' => array(
       '#type' => 'vertical_tabs',

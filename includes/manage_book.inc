@@ -26,6 +26,7 @@
 function islandora_book_ingest_page(FedoraObject $object) {
   module_load_include('inc', 'islandora', 'includes/utilities');
   module_load_include('inc', 'islandora', 'includes/ingest.form');
+  drupal_set_title(t('Add page to @book', array('@book' => $object->label)));
   return drupal_get_form('islandora_ingest_form', array(
       'book' => $object->id,
       'namespace' => islandora_get_namespace($object->id),
@@ -45,6 +46,7 @@ function islandora_book_ingest_page(FedoraObject $object) {
  *   book objects.
  */
 function islandora_book_manage_book_menu(FedoraObject $object) {
+  drupal_set_title($object->label);
   return array(
     'manage_book' => array(
       '#type' => 'vertical_tabs',
