@@ -311,6 +311,7 @@ function islandora_book_get_page_derivative_source_id($dsid) {
   $source_datastreams = array(
     'PDF' => 'OBJ',
     'OCR' => 'OBJ',
+    'HOCR' => 'OBJ',
     'TN' => 'OBJ',
     'JPG' => 'OBJ',
     'JP2' => 'OBJ',
