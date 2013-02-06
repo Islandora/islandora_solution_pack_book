@@ -9,12 +9,12 @@
  * Implements hook_preprocess_theme().
  */
 function islandora_book_preprocess_islandora_book_book(array &$variables) {
-  module_load_include('inc', 'islandora_book', 'includes/utilities');
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   $object = $variables['object'];
   $params = array(
     'object' => $object,
-    'pages' => array_keys(islandora_book_get_pages($object)),
-    'page_progression' => islandora_book_get_page_progression($object),
+    'pages' => array_keys(islandora_paged_content_get_pages($object)),
+    'page_progression' => islandora_paged_content_get_page_progression($object),
   );
   module_load_include('inc', 'islandora', 'includes/solution_packs');
   $viewer = islandora_get_viewer($params, 'islandora_book_viewers');
@@ -53,7 +53,7 @@ function islandora_book_preprocess_islandora_book_page(array &$variables) {
  * Implements hook_preprocess_theme().
  */
 function islandora_book_preprocess_islandora_book_pages(array &$variables) {
-  module_load_include('inc', 'islandora_book', 'includes/utilities');
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   $object = $variables['object'];
   // View Links.
   $display = (empty($_GET['display'])) ? 'grid' : $_GET['display'];
@@ -79,7 +79,7 @@ function islandora_book_preprocess_islandora_book_pages(array &$variables) {
     ),
   );
   // Pager.
-  $pages = islandora_book_get_pages($object);
+  $pages = islandora_paged_content_get_pages($object);
   $page_size = (empty($_GET['pagesize'])) ? 20 : $_GET['pagesize'];
   $total_count = count($pages);
   pager_default_initialize($total_count, $page_size);

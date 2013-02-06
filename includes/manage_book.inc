@@ -113,9 +113,9 @@ function islandora_book_manage_book_menu(FedoraObject $object) {
  *   The Drupal form.
  */
 function islandora_book_manage_book_pdf_form(array $form, array &$form_state, FedoraObject $object) {
-  module_load_include('inc', 'islandora_book', 'includes/utilities');
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   $form_state['object'] = $object;
-  $can_derive = islandora_book_can_derive($object, 'PDF');
+  $can_derive = islandora_paged_content_can_derive($object, 'PDF');
   return array(
     'description' => array(
       '#type' => 'item',
@@ -147,9 +147,10 @@ function islandora_book_manage_book_pdf_form(array $form, array &$form_state, Fe
  *   The Drupal form state.
  */
 function islandora_book_manage_book_pdf_form_submit(array $form, array &$form_state) {
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   module_load_include('inc', 'islandora_book', 'includes/book.batch');
   $object = $form_state['object'];
-  $pages = array_keys(islandora_book_get_pages($object));
+  $pages = array_keys(islandora_paged_content_get_pages($object));
   $options = array(
     '-density' => $form_state['values']['dpi'],
     '-compress' => 'LZW',
@@ -172,11 +173,10 @@ function islandora_book_manage_book_pdf_form_submit(array $form, array &$form_st
  *   The Drupal form.
  */
 function islandora_book_manage_book_ocr_form(array $form, array &$form_state, FedoraObject $object) {
-  module_load_include('inc', 'islandora_book', 'includes/utilities');
+  module_load_include('inc', 'islandora_ocr', 'includes/utilities');
   $form_state['object'] = $object;
-  $can_derive = islandora_book_can_create_ocr();
-  $can_preprocess = islandora_book_can_preprocess_ocr();
-  $languages = islandora_book_get_enabled_tesseract_languages();
+  $can_derive = islandora_ocr_can_derive_ocr();
+  $languages = islandora_ocr_get_enabled_tesseract_languages();
   return array(
     'description' => array(
       '#type' => 'item',
@@ -187,13 +187,6 @@ function islandora_book_manage_book_ocr_form(array $form, array &$form_state, Fe
       '#type' => 'select',
       '#description' => t('Please select the language that the page is written in.'),
       '#options' => $languages,
-    ),
-    'preprocess' => array(
-      '#disabled' => !$can_preprocess,
-      '#title' => t('Preprocessing for typescripts?'),
-      '#type' => 'checkbox',
-      '#description' => t('Will add additional processing for typewritten text. This script grayscales and sharpens the uploaded ingested TIFF before performing OCR processes.<br/>This has been shown to improve OCR results for some images. Use with caution. Process can be lengthly and is resource intensive.<br/>'),
-      '#default_value' => $can_preprocess,
     ),
     'submit' => array(
       '#disabled' => !$can_derive,
@@ -212,14 +205,15 @@ function islandora_book_manage_book_ocr_form(array $form, array &$form_state, Fe
  *   The Drupal form state.
  */
 function islandora_book_manage_book_ocr_form_submit(array $form, array &$form_state) {
-  module_load_include('inc', 'islandora_book', 'includes/book.batch');
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+  module_load_include('inc', 'islandora_paged_content', 'includes/batch');
   $object = $form_state['object'];
-  $pages = array_keys(islandora_book_get_pages($object));
+  $pages = array_keys(islandora_paged_content_get_pages($object));
   $options = array(
     'language' => $form_state['values']['language'],
-    'preprocess' => (bool) $form_state['values']['preprocess'],
+    'preprocess' => FALSE,
   );
-  $batch = islandora_book_create_ocr_batch($object, $pages, $options);
+  $batch = islandora_paged_content_create_ocr_batch($object, $pages, $options);
   batch_set($batch);
 }
 
@@ -237,7 +231,7 @@ function islandora_book_manage_book_ocr_form_submit(array $form, array &$form_st
  *   The Drupal form.
  */
 function islandora_book_manage_book_thumbnail_form(array $form, array &$form_state, FedoraObject $object) {
-  module_load_include('inc', 'islandora_book', 'includes/utilities');
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   $form_state['object'] = $object;
   return array(
     'description' => array(
@@ -245,7 +239,7 @@ function islandora_book_manage_book_thumbnail_form(array $form, array &$form_sta
       '#description' => t("Update the Book's thumbnail image. The book must have pages and the first page must have a TN datastream."),
     ),
     'submit' => array(
-      '#disabled' => !islandora_book_can_update_book_thumbnail($object),
+      '#disabled' => !islandora_paged_content_can_update_book_thumbnail($object),
       '#type' => 'submit',
       '#value' => t('Update Thumbnail'),
     ),
@@ -261,8 +255,8 @@ function islandora_book_manage_book_thumbnail_form(array $form, array &$form_sta
  *   The Drupal form state.
  */
 function islandora_book_manage_book_thumbnail_form_submit(array $form, array &$form_state) {
-  module_load_include('inc', 'islandora_book', 'includes/utilities');
-  islandora_book_update_book_thumbnail($form_state['object']);
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+  islandora_paged_content_update_book_thumbnail($form_state['object']);
 }
 
 /**
@@ -279,9 +273,9 @@ function islandora_book_manage_book_thumbnail_form_submit(array $form, array &$f
  *   The Drupal form.
  */
 function islandora_book_manage_book_images_form(array $form, array &$form_state, FedoraObject $object) {
-  module_load_include('inc', 'islandora_book', 'includes/utilities');
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   $form_state['object'] = $object;
-  $can_derive = islandora_book_can_create_images();
+  $can_derive = islandora_paged_content_can_create_images();
   return array(
     'description' => array(
       '#type' => 'item',
@@ -304,10 +298,11 @@ function islandora_book_manage_book_images_form(array $form, array &$form_state,
  *   The Drupal form state.
  */
 function islandora_book_manage_book_images_form_submit(array $form, array &$form_state) {
-  module_load_include('inc', 'islandora_book', 'includes/book.batch');
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+  module_load_include('inc', 'islandora_paged_content', 'includes/batch');
   $object = $form_state['object'];
-  $pages = array_keys(islandora_book_get_pages($object));
-  $batch = islandora_book_create_images_batch($object, $pages);
+  $pages = array_keys(islandora_paged_content_get_pages($object));
+  $batch = islandora_paged_content_create_images_batch($object, $pages);
   batch_set($batch);
 }
 
@@ -325,9 +320,9 @@ function islandora_book_manage_book_images_form_submit(array $form, array &$form
  *   The Drupal form.
  */
 function islandora_book_manage_book_sequences_form(array $form, array &$form_state, FedoraObject $object) {
-  module_load_include('inc', 'islandora_book', 'includes/utilities');
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   $form_state['object'] = $object;
-  $pages = islandora_book_get_pages($object);
+  $pages = islandora_paged_content_get_pages($object);
   $delta = count($pages);
   $map = function($page) use($delta) {
     return array(
@@ -368,13 +363,13 @@ function islandora_book_manage_book_sequences_form(array $form, array &$form_sta
  *   The Drupal form state.
  */
 function islandora_book_manage_book_sequences_form_submit(array $form, array &$form_state) {
-  module_load_include('inc', 'islandora_book', 'includes/book.batch');
+  module_load_include('inc', 'islandora_paged_content', 'includes/batch');
   $object = $form_state['object'];
   $pages = &$form_state['values']['table']['rows'];
   if ($pages) {
     uasort($pages, 'drupal_sort_weight');
     $pages = array_keys($pages);
-    $batch = islandora_book_sequence_pages_batch($object, $pages);
+    $batch = islandora_paged_content_sequence_pages_batch($object, $pages);
     batch_set($batch);
   }
 }
@@ -393,9 +388,9 @@ function islandora_book_manage_book_sequences_form_submit(array $form, array &$f
  *   The Drupal form.
  */
 function islandora_book_manage_book_delete_form(array $form, array &$form_state, FedoraObject $object) {
-  module_load_include('inc', 'islandora_book', 'includes/utilities');
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   $form_state['object'] = $object;
-  $pages = islandora_book_get_pages($object);
+  $pages = islandora_paged_content_get_pages($object);
   return array(
     'table' => array(
       '#type' => 'tableselect',
@@ -423,9 +418,9 @@ function islandora_book_manage_book_delete_form(array $form, array &$form_state,
  *   The Drupal form state.
  */
 function islandora_book_manage_book_delete_form_submit(array $form, array &$form_state) {
-  module_load_include('inc', 'islandora_book', 'includes/book.batch');
+  module_load_include('inc', 'islandora_paged_content', 'includes/batch');
   $object = $form_state['object'];
   $pages = array_values(array_filter($form_state['values']['table']));
-  $batch = islandora_book_delete_pages_batch($object, $pages);
+  $batch = islandora_paged_content_delete_pages_batch($object, $pages);
   batch_set($batch);
 }
