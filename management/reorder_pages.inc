@@ -67,7 +67,17 @@ function page_reorder_submit($form, &$form_state) {
     $batch['operations'][] = array('islandora_book_delete_single_page_wrapper', array($page_pid));
   }
   $batch['operations'][] = array('post_deletion_renumber_pages_wrapper', array($book_pid));
+
+  islandora_book_batch_process_pages($batch);
+}
+
+/*
+ * This function is necessary as the Drupal batch api runs out of memory when being called
+ * from a large form submit handler
+ */
+function islandora_book_batch_process_pages($batch) {
   batch_set($batch);
+  batch_process();
 }
 
 /**
