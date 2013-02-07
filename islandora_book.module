@@ -95,7 +95,7 @@ function islandora_book_manage_book_access_callback($object = NULL) {
     FEDORA_INGEST,
   );
   $can_access = function($perm) use($object) {
-    return  islandora_object_access_callback($perm, $object);
+    return islandora_object_access_callback($perm, $object);
   };
   $can_manage = count(array_filter($manage_actions, $can_access));
   $is_book = in_array('islandora:bookCModel', $object->models);
