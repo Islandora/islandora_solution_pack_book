@@ -48,10 +48,11 @@ function islandora_book_menu() {
     'islandora/object/%islandora_object/manage/page' => array(
       'title' => 'Page',
       'type' => MENU_LOCAL_TASK,
-      'page callback' => 'islandora_book_manage_page_menu',
+      'page callback' => 'islandora_paged_content_manage_page_menu',
       'page arguments' => array(2),
-      'access callback' => 'islandora_book_manage_page_access_callback',
+      'access callback' => 'islandora_paged_content_manage_page_access_callback',
       'access arguments' => array(2),
+      'file path' => drupal_get_path('module', 'islandora_paged_content'),
       'file' => 'includes/manage_page.inc',
     ),
   );
@@ -99,30 +100,6 @@ function islandora_book_manage_book_access_callback($object = NULL) {
   $can_manage = count(array_filter($manage_actions, $can_access));
   $is_book = in_array('islandora:bookCModel', $object->models);
   return $is_book && $can_manage;
-}
-
-/**
- * Determine whether or not to show this modules manage tab.
- *
- * @param FedoraObject $object
- *   The object being managed.
- *
- * @return bool
- *   TRUE if it should be shown, and FALSE if it should not be shown.
- */
-function islandora_book_manage_page_access_callback($object = NULL) {
-  if (!isset($object)) {
-    return FALSE;
-  }
-  $manage_actions = array(
-    FEDORA_ADD_DS,
-  );
-  $can_access = function($perm) use($object) {
-    return  islandora_object_access_callback($perm, $object);
-  };
-  $can_manage = count(array_filter($manage_actions, $can_access));
-  $is_page = in_array('islandora:pageCModel', $object->models);
-  return $is_page && $can_manage;
 }
 
 /**
