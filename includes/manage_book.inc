@@ -148,14 +148,14 @@ function islandora_book_manage_book_pdf_form(array $form, array &$form_state, Fe
  */
 function islandora_book_manage_book_pdf_form_submit(array $form, array &$form_state) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
-  module_load_include('inc', 'islandora_book', 'includes/book.batch');
+  module_load_include('inc', 'islandora_paged_content', 'includes/batch');
   $object = $form_state['object'];
   $pages = array_keys(islandora_paged_content_get_pages($object));
   $options = array(
     '-density' => $form_state['values']['dpi'],
     '-compress' => 'LZW',
   );
-  $batch = islandora_book_create_pdf_batch($object, $pages, $options);
+  $batch = islandora_paged_content_create_pdf_batch($object, $pages, $options);
   batch_set($batch);
 }
 
