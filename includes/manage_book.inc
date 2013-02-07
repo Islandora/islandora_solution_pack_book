@@ -239,7 +239,7 @@ function islandora_book_manage_book_thumbnail_form(array $form, array &$form_sta
       '#description' => t("Update the Book's thumbnail image. The book must have pages and the first page must have a TN datastream."),
     ),
     'submit' => array(
-      '#disabled' => !islandora_paged_content_can_update_book_thumbnail($object),
+      '#disabled' => !islandora_paged_content_can_update_paged_content_thumbnail($object),
       '#type' => 'submit',
       '#value' => t('Update Thumbnail'),
     ),
