@@ -17,15 +17,15 @@
  *   The Drupal form definition.
  */
 function islandora_book_admin_settings_form(array $form, array &$form_state) {
-  module_load_include('inc', 'islandora_book', 'includes/utilities');
+  module_load_include('inc', 'islandora_ocr', 'includes/utilities');
   $get_default_value = function($name, $default) use(&$form_state) {
     return isset($form_state['values'][$name]) ? $form_state['values'][$name] : variable_get($name, $default);
   };
   $tesseract = $get_default_value('islandora_book_tesseract', '/usr/bin/tesseract');
-  $version = islandora_book_get_tesseract_version($tesseract);
+  $version = islandora_ocr_get_tesseract_version($tesseract);
   $gimp = $get_default_value('islandora_book_gimp', '/usr/bin/gimp');
   $gs = $get_default_value('islandora_book_gs', '/usr/bin/gs');
-  $languages = $get_default_value('islandora_book_tesseract_enabled_languages', drupal_map_assoc(array_keys(islandora_book_get_tesseract_languages())));
+  $languages = $get_default_value('islandora_ocr_tesseract_enabled_languages', drupal_map_assoc(array_keys(islandora_ocr_get_tesseract_languages())));
   $form = array(
     'solr_settings' => array(
       // @todo The Solr fields are not in active use, make them inaccessible for
@@ -112,7 +112,7 @@ function islandora_book_admin_settings_form(array $form, array &$form_state) {
         'islandora_book_tesseract_enabled_languages' => array(
           '#type' => 'checkboxes',
           '#title' => t('Languages available for OCR'),
-          '#options' => islandora_book_get_tesseract_languages(),
+          '#options' => islandora_ocr_get_tesseract_languages(),
           '#description' => t('Select from the language packs available on your
                              processing server.<br/> These are normally found in
                              <strong>/usr/local/share/tessdata/</strong><br/>
@@ -146,16 +146,16 @@ function islandora_book_admin_settings_form(array $form, array &$form_state) {
  *   The Drupal form definition.
  */
 function islandora_book_admin_settings_form_ingest_derivatives_validate(array $element, array &$form_state, array $form) {
-  module_load_include('inc', 'islandora_book', 'includes/utilities');
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   // form_error() doesn't seem to work here, it prevents the submit but
   // also prevents the value from being set. So we are using
   // drupal_set_message().
-  if ($element['#value']['pdf'] && !islandora_book_can_create_pdf()) {
+  if ($element['#value']['pdf'] && !islandora_paged_content_can_create_pdf()) {
     $element['#value']['pdf'] = 0;
     form_set_value($element, $element['#value'], $form_state);
     drupal_set_message(t('ImagicMagick must be enabled to derive the PDF datastream.'), 'error');
   }
-  if ($element['#value']['image'] && !islandora_book_can_create_images()) {
+  if ($element['#value']['image'] && !islandora_paged_content_can_create_images()) {
     $element['#value']['image'] = 0;
     form_set_value($element, $element['#value'], $form_state);
     drupal_set_message(t('The Large Image solution pack must be enabled to derive image datastreams.'), 'error');

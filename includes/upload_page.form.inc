@@ -17,14 +17,13 @@
  *   The Drupal form state.
  */
 function islandora_book_upload_page_form(array $form, array &$form_state) {
-  module_load_include('inc', 'islandora_book', 'includes/utilities');
+  module_load_include('inc', 'islandora_ocr', 'includes/utilities');
   $get_default_value = function($name, $default) use(&$form_state) {
     return isset($form_state['values'][$name]) ? $form_state['values'][$name] : $default;
   };
   $upload_size = min((int) ini_get('post_max_size'), (int) ini_get('upload_max_filesize'));
   $extensions = array('tiff tif');
-  $can_preprocess = islandora_book_can_preprocess_ocr();
-  $languages = islandora_book_get_enabled_tesseract_languages();
+  $languages = islandora_ocr_get_enabled_tesseract_languages();
   return array(
     'file' => array(
       '#title' => t('Page'),
@@ -45,13 +44,6 @@ function islandora_book_upload_page_form(array $form, array &$form_state) {
       '#options' => $languages,
       '#default_value' => $get_default_value('language', NULL),
     ),
-    'preprocess' => array(
-      '#disabled' => !$can_preprocess,
-      '#title' => t('Preprocessing for typescripts?'),
-      '#type' => 'checkbox',
-      '#description' => t('Will add additional processing for typewritten text. This script grayscales and sharpens the archival TIFF before performing OCR processes.<br/>This has been shown to improve OCR results for some images. Use with caution. Process can be lengthly and is resource intensive.<br/>'),
-      '#default_value' => $get_default_value('preprocess', $can_preprocess),
-    ),
   );
 }
 
@@ -64,26 +56,24 @@ function islandora_book_upload_page_form(array $form, array &$form_state) {
  *   The Drupal form state.
  */
 function islandora_book_upload_page_form_submit(array $form, array &$form_state) {
-  module_load_include('inc', 'islandora_book', 'includes/utilities');
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   $object = islandora_ingest_form_get_object($form_state);
   $file = file_load($form_state['values']['file']);
   $object->label = $file->filename;
-  islandora_book_update_datastream($object, drupal_realpath($file->uri), 'OBJ', NULL, NULL, 'M', FALSE);
+  islandora_paged_content_update_datastream($object, drupal_realpath($file->uri), 'OBJ', NULL, NULL, 'M', FALSE);
   // Update RELS-EXT properties, page/sequence/etc, and append the page at the
   // end of the book.
   $rels_ext = $object->relationships;
   $language = $form_state['values']['language'];
-  $preprocess = $form_state['values']['preprocess'] ? 'true' : 'false';
   $configuration = islandora_ingest_form_get_configuration($form_state);
   $book = islandora_object_load($configuration['book']);
-  $pages = islandora_book_get_pages($book);
+  $pages = islandora_paged_content_get_pages($book);
   $num_pages = count($pages) + 1;
-  islandora_book_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'hasLanguage', $language, TRUE);
-  islandora_book_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'preprocess', $preprocess, TRUE);
-  islandora_book_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isPageOf', $book->id);
-  islandora_book_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isSequenceNumber', (string) $num_pages, TRUE);
-  islandora_book_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isPageNumber', (string) $num_pages, TRUE);
-  islandora_book_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isSection', '1', TRUE);
-  islandora_book_set_relationship($rels_ext, FEDORA_RELS_EXT_URI, 'isMemberOf', $book->id);
-  islandora_book_set_relationship($rels_ext, FEDORA_MODEL_URI, 'hasModel', 'islandora:pageCModel');
+  islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'hasLanguage', $language, TRUE);
+  islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isPageOf', $book->id);
+  islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isSequenceNumber', (string) $num_pages, TRUE);
+  islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isPageNumber', (string) $num_pages, TRUE);
+  islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isSection', '1', TRUE);
+  islandora_paged_content_set_relationship($rels_ext, FEDORA_RELS_EXT_URI, 'isMemberOf', $book->id);
+  islandora_paged_content_set_relationship($rels_ext, FEDORA_MODEL_URI, 'hasModel', 'islandora:pageCModel');
 }

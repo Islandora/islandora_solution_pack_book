@@ -48,10 +48,11 @@ function islandora_book_menu() {
     'islandora/object/%islandora_object/manage/page' => array(
       'title' => 'Page',
       'type' => MENU_LOCAL_TASK,
-      'page callback' => 'islandora_book_manage_page_menu',
+      'page callback' => 'islandora_paged_content_manage_page_menu',
       'page arguments' => array(2),
-      'access callback' => 'islandora_book_manage_page_access_callback',
+      'access callback' => 'islandora_paged_content_manage_page_access_callback',
       'access arguments' => array(2),
+      'file path' => drupal_get_path('module', 'islandora_paged_content'),
       'file' => 'includes/manage_page.inc',
     ),
   );
@@ -94,35 +95,11 @@ function islandora_book_manage_book_access_callback($object = NULL) {
     FEDORA_INGEST,
   );
   $can_access = function($perm) use($object) {
-    return  islandora_object_access_callback($perm, $object);
+    return islandora_object_access_callback($perm, $object);
   };
   $can_manage = count(array_filter($manage_actions, $can_access));
   $is_book = in_array('islandora:bookCModel', $object->models);
   return $is_book && $can_manage;
-}
-
-/**
- * Determine whether or not to show this modules manage tab.
- *
- * @param FedoraObject $object
- *   The object being managed.
- *
- * @return bool
- *   TRUE if it should be shown, and FALSE if it should not be shown.
- */
-function islandora_book_manage_page_access_callback($object = NULL) {
-  if (!isset($object)) {
-    return FALSE;
-  }
-  $manage_actions = array(
-    FEDORA_ADD_DS,
-  );
-  $can_access = function($perm) use($object) {
-    return  islandora_object_access_callback($perm, $object);
-  };
-  $can_manage = count(array_filter($manage_actions, $can_access));
-  $is_page = in_array('islandora:pageCModel', $object->models);
-  return $is_page && $can_manage;
 }
 
 /**
@@ -283,22 +260,22 @@ function islandora_book_islandora_pagecmodel_islandora_ingest_steps() {
  * Implements hook_CMODEL_PID_islandora_object_ingested().
  */
 function islandora_book_islandora_pagecmodel_islandora_object_ingested(FedoraObject $object) {
-  module_load_include('inc', 'islandora_book', 'includes/utilities');
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   $success = TRUE;
-  $derive = islandora_book_get_enabled_ingest_derivatives();
+  $derive = islandora_paged_content_get_enabled_ingest_derivatives('islandora_book');
   if ($derive['pdf']) {
-    $success &= islandora_book_can_derive($object, 'PDF') && islandora_book_page_derive_pdf_datastream($object);
+    $success &= islandora_paged_content_can_derive($object, 'PDF') && islandora_paged_content_page_derive_pdf_datastream($object);
   }
   if ($derive['image']) {
-    $derived_images = islandora_book_can_derive($object, 'JP2') && islandora_book_page_derive_image_datastreams($object);
+    $derived_images = islandora_paged_content_can_derive($object, 'JP2') && islandora_paged_content_page_derive_image_datastreams($object);
     if ($derived_images) {
-      $book_object = islandora_book_get_relationship($object->relationships, FEDORA_RELS_EXT_URI, 'isMemberOf', NULL);
-      islandora_book_update_book_thumbnail(islandora_object_load($book_object));
+      $book_object = islandora_paged_content_get_relationship($object->relationships, FEDORA_RELS_EXT_URI, 'isMemberOf', NULL);
+      islandora_paged_content_update_paged_content_thumbnail(islandora_object_load($book_object));
     }
     $success &= $derived_images;
   }
   if ($derive['ocr']) {
-    $success &= islandora_book_can_derive($object, 'OCR') && islandora_book_page_derive_ocr_datastreams($object);
+    $success &= islandora_paged_content_can_derive($object, 'OCR') && islandora_paged_content_page_derive_ocr_datastreams($object);
   }
   if (!$success) {
     $msg = t('Could not create all derivatives for %s, For more information please check the logs.', array(
@@ -338,14 +315,14 @@ function islandora_book_form_islandora_delete_object_form_alter(array &$form, ar
  *   The Drupal form state.
  */
 function islandora_book_islandora_delete_object_form_delete_pages_submit(array $form, array &$form_state) {
-  module_load_include('inc', 'islandora_book', 'includes/book.batch');
-  module_load_include('inc', 'islandora_book', 'includes/utilities');
+  module_load_include('inc', 'islandora_paged_content', 'includes/batch');
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   $object = $form_state['object'];
   $get_pid = function($o) {
     return $o['pid'];
   };
-  $pages = array_values(array_map($get_pid, islandora_book_get_pages($object)));
-  batch_set(islandora_book_delete_pages_batch($object, $pages));
+  $pages = array_values(array_map($get_pid, islandora_paged_content_get_pages($object)));
+  batch_set(islandora_paged_content_delete_pages_batch($object, $pages));
   // Called from within this submit handler rather than from the Drupal Form API
   // as we need the object to exist to generate the pages and if we run this.
   // batch operation from a submit handler any submit handlers to be called

@@ -11,7 +11,7 @@
  * @see islandora_book_islandora_required_objects()
  */
 function islandora_book_install() {
-  module_load_include('inc', 'islandora_book', 'includes/utilities');
+  module_load_include('inc', 'islandora_ocr', 'includes/utilities');
   module_load_include('inc', 'islandora', 'includes/solution_packs');
   islandora_install_solution_pack('islandora_book');
   $ingest_derivatives = drupal_map_assoc(array('pdf', 'image', 'ocr'));
@@ -20,7 +20,7 @@ function islandora_book_install() {
   variable_set('islandora_book_tesseract', '/usr/bin/tesseract');
   variable_set('islandora_book_gimp', '/usr/bin/gimp');
   variable_set('islandora_book_gs', '/usr/bin/gs');
-  variable_set('islandora_book_tesseract_enabled_languages', drupal_map_assoc(array_keys(islandora_book_get_tesseract_languages())));
+  variable_set('islandora_book_tesseract_enabled_languages', drupal_map_assoc(array_keys(islandora_ocr_get_tesseract_languages())));
 }
 
 /**
