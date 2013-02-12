@@ -17,31 +17,10 @@
  *   The Drupal form definition.
  */
 function islandora_book_admin_settings_form(array $form, array &$form_state) {
-  module_load_include('inc', 'islandora_ocr', 'includes/utilities');
   $get_default_value = function($name, $default) use(&$form_state) {
     return isset($form_state['values'][$name]) ? $form_state['values'][$name] : variable_get($name, $default);
   };
-  $tesseract = $get_default_value('islandora_book_tesseract', '/usr/bin/tesseract');
-  $version = islandora_ocr_get_tesseract_version($tesseract);
-  $gimp = $get_default_value('islandora_book_gimp', '/usr/bin/gimp');
-  $gs = $get_default_value('islandora_book_gs', '/usr/bin/gs');
-  $languages = $get_default_value('islandora_ocr_tesseract_enabled_languages', drupal_map_assoc(array_keys(islandora_ocr_get_tesseract_languages())));
   $form = array(
-    'solr_settings' => array(
-      // @todo The Solr fields are not in active use, make them inaccessible for
-      // now.
-      '#access' => FALSE,
-      '#disabled' => !module_exists('islandora_solr'),
-      '#type' => 'fieldset',
-      '#title' => t('SOLR Settings'),
-      '#description' => t('Various Solr fields for use to organize books. <b>Requires</b> <i>Islandora Solr</i> to be enabled.'),
-      'islandora_book_solr_subject_field' => array(
-        '#type' => 'textfield',
-        '#title' => t('Subject field'),
-        '#description' => t('The SOLR field containing the untokenized subject value, used to group books with the same subject.'),
-        '#default_value' => $get_default_value('islandora_book_solr_subject_field', 'mods.subject'),
-      ),
-    ),
     'local_derivative_settings' => array(
       '#type' => 'fieldset',
       '#title' => t('Create Page Derivatives Locally'),
@@ -52,74 +31,10 @@ function islandora_book_admin_settings_form(array $form, array &$form_state) {
         '#options' => array(
           'pdf' => t('PDF datastream. <b>Requires</b> <i>ImageMagick</i>'),
           'image' => t('Image datastreams (TN, JPEG, JP2). <b>Requires</b> <i>Large Image Solution Pack</i>'),
-          'ocr' => t('OCR datastreams (OCR, HOCR)'),
+          'ocr' => t('OCR datastreams (OCR, HOCR). <b>Requires</b> <i>Islandora OCR Module</i>'),
         ),
         '#default_value' => $get_default_value('islandora_book_ingest_derivatives', drupal_map_assoc(
                             array('pdf', 'image', 'ocr'))),
-      ),
-      'pdf_derivative_settings' => array(
-        '#type' => 'fieldset',
-        '#title' => t('PDF Settings'),
-        'islandora_book_gs' => array(
-          '#type' => 'textfield',
-          '#title' => t('GS (GhostScript)'),
-          '#description' => t('GhostScript is used to combined PDF files and generate a PDF repersentation of a Book.<br/>!msg',
-                          array('!msg' => islandora_book_admin_settings_form_executable_available_message($gs))),
-          '#default_value' => $gs,
-          '#prefix' => '<div id="gs-wrapper">',
-          '#suffix' => '</div>',
-          '#ajax' => array(
-            'callback' => 'islandora_book_admin_settings_form_gs_ajax_callback',
-            'wrapper' => 'gs-wrapper',
-            'effect' => 'fade',
-            'event' => 'change',
-          ),
-        ),
-      ),
-      'ocr_derivative_settings' => array(
-        '#type' => 'fieldset',
-        '#title' => t('OCR Settings'),
-        'islandora_book_tesseract' => array(
-          '#type' => 'textfield',
-          '#title' => t('Tesseract'),
-          '#description' => t('Tesseract is used to generate the OCR datastreams.<br/>!msg', array(
-                            '!msg' => islandora_book_admin_settings_form_executable_available_message($tesseract, $version, TESSERACT_REQUIRED_VERSION))),
-          '#default_value' => $tesseract,
-          '#prefix' => '<div id="tesseract-wrapper">',
-          '#suffix' => '</div>',
-          '#ajax' => array(
-            'callback' => 'islandora_book_admin_settings_form_tesseract_ajax_callback',
-            'wrapper' => 'tesseract-wrapper',
-            'effect' => 'fade',
-            'event' => 'change',
-          ),
-        ),
-        'islandora_book_gimp' => array(
-          '#type' => 'textfield',
-          '#title' => t('Gimp'),
-          '#description' => t('Gimp is used to preprocess the source image before generating the OCR datastreams.<br/>!msg',
-                          array('!msg' => islandora_book_admin_settings_form_executable_available_message($gimp))),
-          '#default_value' => $gimp,
-          '#prefix' => '<div id="gimp-wrapper">',
-          '#suffix' => '</div>',
-          '#ajax' => array(
-            'callback' => 'islandora_book_admin_settings_form_gimp_ajax_callback',
-            'wrapper' => 'gimp-wrapper',
-            'effect' => 'fade',
-            'event' => 'change',
-          ),
-        ),
-        'islandora_book_tesseract_enabled_languages' => array(
-          '#type' => 'checkboxes',
-          '#title' => t('Languages available for OCR'),
-          '#options' => islandora_ocr_get_tesseract_languages(),
-          '#description' => t('Select from the language packs available on your
-                             processing server.<br/> These are normally found in
-                             <strong>/usr/local/share/tessdata/</strong><br/>
-                             Check with your systems admininistrator if you are
-                             unsure of availablilty'),
-          '#default_value' => $languages,
-        ),
       ),
     ),
   );
@@ -145,97 +60,24 @@ function islandora_book_admin_settings_form(array $form, array &$form_state) {
  * @param array $form
  *   The Drupal form definition.
  */
-function islandora_book_admin_settings_form_ingest_derivatives_validate(array $element, array &$form_state, array $form) {
+function islandora_newspaper_admin_settings_form_ingest_derivatives_validate(array $element, array &$form_state, array $form) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   // form_error() doesn't seem to work here, it prevents the submit but
   // also prevents the value from being set. So we are using
   // drupal_set_message().
-  if ($element['#value']['pdf'] && !islandora_paged_content_can_create_pdf()) {
+  if (array_key_exists('pdf', $element['#value']) && !islandora_paged_content_can_create_pdf()) {
     $element['#value']['pdf'] = 0;
     form_set_value($element, $element['#value'], $form_state);
     drupal_set_message(t('ImagicMagick must be enabled to derive the PDF datastream.'), 'error');
   }
-  if ($element['#value']['image'] && !islandora_paged_content_can_create_images()) {
+  if (array_key_exists('image', $element['#value']) && !islandora_paged_content_can_create_images()) {
     $element['#value']['image'] = 0;
     form_set_value($element, $element['#value'], $form_state);
     drupal_set_message(t('The Large Image solution pack must be enabled to derive image datastreams.'), 'error');
   }
-}
-
-/**
- * Gets a message to display if the ocr program provided is accessible or not.
- *
- * @param string $path
- *   The path to an executable to check for availability.
- * @param string $version
- *   The version of exectuable.
- *
- * @return string
- *   A message in html detailing if the given executable is accessible.
- */
-function islandora_book_admin_settings_form_executable_available_message($path, $version = NULL, $required_version = NULL) {
-  $available = is_executable($path);
-  if ($available) {
-    $image = theme_image(array('path' => 'misc/watchdog-ok.png', 'attributes' => array()));
-    $message = t('Executable found at @path', array('@path' => $path));
-    if ($version) {
-      $message .= t('<br/>Version: @version', array('@version' => $version));
-    }
-    if ($required_version) {
-      $message .= t('<br/>Required Version: @version', array('@version' => $required_version));
-      if (version_compare($version, $required_version) < 0) {
-        $image = theme_image(array('path' => 'misc/watchdog-error.png', 'attributes' => array()));
-      }
-    }
+  if (array_key_exists('ocr', $element['#value']) && !(module_exists('islandora_ocr'))) {
+    $element['#value']['ocr'] = 0;
+    form_set_value($element, $element['#value'], $form_state);
+    drupal_set_message(t('The Islandora OCR Module must be enabled to derive OCR datastreams.'), 'error');
   }
-  else {
-    $image = theme_image(array('path' => 'misc/watchdog-error.png', 'attributes' => array()));
-    $message = t('Unable to locate executable at @path', array('@path' => $path));
-  }
-  return $image . $message;
-}
-
-/**
- * Ajax callback for the Tesseract textfield.
- *
- * @param array $form
- *   The Drupal form definition.
- * @param array $form_state
- *   The Drupal form state.
- *
- * @return array
- *   The element to render as part the ajax callback.
- */
-function islandora_book_admin_settings_form_tesseract_ajax_callback(array $form, array $form_state) {
-  return $form['local_derivative_settings']['ocr_derivative_settings']['islandora_book_tesseract'];
-}
-
-/**
- * Ajax callback for the Gimp textfield.
- *
- * @param array $form
- *   The Drupal form definition.
- * @param array $form_state
- *   The Drupal form state.
- *
- * @return array
- *   The element to render as part the ajax callback.
- */
-function islandora_book_admin_settings_form_gimp_ajax_callback(array $form, array $form_state) {
-  return $form['local_derivative_settings']['ocr_derivative_settings']['islandora_book_gimp'];
-}
-
-/**
- * Ajax callback for the GS textfield.
- *
- * @param array $form
- *   The Drupal form definition.
- * @param array $form_state
- *   The Drupal form state.
- *
- * @return array
- *   The element to render as part the ajax callback.
- */
-function islandora_book_admin_settings_form_gs_ajax_callback(array $form, array $form_state) {
-  return $form['local_derivative_settings']['pdf_derivative_settings']['islandora_book_gs'];
 }
