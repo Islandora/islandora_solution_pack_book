@@ -115,7 +115,7 @@ function islandora_book_manage_book_menu(FedoraObject $object) {
 function islandora_book_manage_book_pdf_form(array $form, array &$form_state, FedoraObject $object) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   $form_state['object'] = $object;
-  $can_derive = islandora_paged_content_can_derive($object, 'PDF');
+  $can_derive = islandora_paged_content_can_create_pdf() && islandora_paged_content_can_combine_pdf();
   return array(
     'description' => array(
       '#type' => 'item',

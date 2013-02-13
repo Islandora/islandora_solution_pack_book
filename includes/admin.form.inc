@@ -60,7 +60,7 @@ function islandora_book_admin_settings_form(array $form, array &$form_state) {
  * @param array $form
  *   The Drupal form definition.
  */
-function islandora_newspaper_admin_settings_form_ingest_derivatives_validate(array $element, array &$form_state, array $form) {
+function islandora_book_admin_settings_form_ingest_derivatives_validate(array $element, array &$form_state, array $form) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   // form_error() doesn't seem to work here, it prevents the submit but
   // also prevents the value from being set. So we are using
