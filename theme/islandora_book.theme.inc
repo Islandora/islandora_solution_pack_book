@@ -33,7 +33,7 @@ function islandora_book_preprocess_islandora_book_page(array &$variables) {
   $variables['book_object_id'] = $results[0]['object']['value'];
   // Get token to allow access to XACML protected datastreams.
   // Always use token authentication in case there is a global policy.
-  module_load_include('inc', 'islandora', 'includes/islandora_authtokens');
+  module_load_include('inc', 'islandora', 'includes/authtokens');
   $token = islandora_get_object_token($object->id, 'JP2', 2);
   $jp2_url = url("islandora/object/{$object->id}/datastream/JP2/view",
              array(
