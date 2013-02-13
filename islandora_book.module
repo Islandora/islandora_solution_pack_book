@@ -195,6 +195,12 @@ function islandora_book_islandora_required_objects(IslandoraTuque $connection) {
   $datastream->mimetype = 'text/xml';
   $datastream->setContentFromFile("$datastreams_path/islandora_bookCModel_ds_composite_model.xml", FALSE);
   $book_content_model->ingestDatastream($datastream);
+  // ISLANDORA-CM Datastream.
+  $datastream = $book_content_model->constructDatastream('ISLANDORACM', 'M');
+  $datastream->label = 'Islandora content model information';
+  $datastream->mimetype = 'text/xml';
+  $datastream->setContentFromFile("$datastreams_path/islandora_book_cm.xml", FALSE);
+  $book_content_model->ingestDatastream($datastream);
   // Book Collection.
   $book_collection = $connection->repository->constructObject('islandora:bookCollection');
   $book_collection->owner = 'fedoraAdmin';
