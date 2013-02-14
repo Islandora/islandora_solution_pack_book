@@ -109,32 +109,32 @@ function islandora_book_theme() {
   return array(
     'islandora_book_book' => array(
       'arguments' => array('object' => NULL),
-      'file' => 'theme/islandora_book.theme.inc',
+      'file' => 'theme/theme.inc',
       'template' => 'theme/islandora-book',
     ),
     'islandora_book_page' => array(
       'arguments' => array('object' => NULL),
-      'file' => 'theme/islandora_book.theme.inc',
+      'file' => 'theme/theme.inc',
       'template' => 'theme/islandora-page',
     ),
     'islandora_book_pages' => array(
       'arguments' => array('object' => NULL),
-      'file' => 'theme/islandora_book.theme.inc',
+      'file' => 'theme/theme.inc',
       'template' => 'theme/islandora-pages',
     ),
     'islandora_book_pages_grid' => array(
       'arguments' => array('object' => NULL),
-      'file' => 'theme/islandora_book.theme.inc',
+      'file' => 'theme/theme.inc',
       'template' => 'theme/islandora-pages-grid',
     ),
     'islandora_book_pages_list' => array(
       'arguments' => array('object' => NULL),
-      'file' => 'theme/islandora_book.theme.inc',
+      'file' => 'theme/theme.inc',
       'template' => 'theme/islandora-pages-list',
     ),
     'islandora_book_manage_book_sequences_form' => array(
       'render element' => 'form',
-      'file' => 'theme/islandora_book.theme.inc',
+      'file' => 'theme/theme.inc',
     ),
   );
 }
