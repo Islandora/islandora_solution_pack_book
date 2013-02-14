@@ -30,18 +30,8 @@ uploaded TIFF.
 REQUIREMENTS
 ------------
 
-Tesseract: (Optional, Require for OCR generation)
- http://code.google.com/p/tesseract-ocr/
-
-Gimp: (Optional, Required for Preprocessing images to be used by Tesseract)
- http://www.gimp.org
-
-Large Image Solution Pack (Optional, Required for creating Images/PDF files)
- http://github.com/Islandora/islandora_solution_pack_large_image
-
-Ghost Script (Optional, Required for creating Book PDF's files)
- Ghost script is often included with ImageMagick.
- http://pages.cs.wisc.edu/~ghost/
+  * Islandora
+  * Islandora Paged Content
 
 INSTALLATION
 ------------
