@@ -93,12 +93,12 @@ function islandora_book_preprocess_islandora_book_pages(array &$variables) {
   $map = function($o) {
     $object_url = "islandora/object/{$o['pid']}";
     $img = theme_image(array('path' => url("$object_url/datastream/TN/view"), 'attributes' => array()));
-    $dc = DublinCore::import_from_xml_string(islandora_datastream_load('DC', $o['pid'])->content);
+    $dc = DublinCore::importFromXMLString(islandora_datastream_load('DC', $o['pid'])->content);
     return $o + array(
       'class' => drupal_strtolower(preg_replace('/[^A-Za-z0-9]/', '-', $o['pid'])),
       'link' => l($o['label'], $object_url, array('html' => TRUE, 'attributes' => array('title' => $o['label']))),
       'image' => l($img, $object_url, array('html' => TRUE, 'attributes' => array('title' => $o['label']))),
-      'DC' => $dc->as_formatted_array(),
+      'DC' => $dc->asArray(),
     );
   };
   $pages = array_map($map, $pages);
