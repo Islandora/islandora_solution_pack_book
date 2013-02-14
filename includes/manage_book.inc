@@ -256,7 +256,12 @@ function islandora_book_manage_book_thumbnail_form(array $form, array &$form_sta
  */
 function islandora_book_manage_book_thumbnail_form_submit(array $form, array &$form_state) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
-  islandora_paged_content_update_book_thumbnail($form_state['object']);
+  if (islandora_paged_content_update_paged_content_thumbnail($form_state['object'])) {
+    drupal_set_message(t('Thumbnail successfully updated.'), 'status');
+  }
+  else {
+    drupal_set_message(t('Failed to update thumbnail'), 'error');
+  }
 }
 
 /**
