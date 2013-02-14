@@ -3,5 +3,6 @@ description = "Provides book interface for book objects."
 package = Islandora
 dependencies[] = islandora
 dependencies[] = file
+dependencies[] = islandora_paged_content
 version = 7.x-dev
 core = 7.x
