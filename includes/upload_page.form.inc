@@ -65,8 +65,8 @@ function islandora_book_upload_page_form_submit(array $form, array &$form_state)
   // end of the book.
   $rels_ext = $object->relationships;
   $language = $form_state['values']['language'];
-  $configuration = islandora_ingest_form_get_configuration($form_state);
-  $book = islandora_object_load($configuration['book']);
+  $shared_storage = islandora_ingest_form_get_shared_storage($form_state);
+  $book = islandora_object_load($shared_storage['book']);
   $pages = islandora_paged_content_get_pages($book);
   $num_pages = count($pages) + 1;
   islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'hasLanguage', $language, TRUE);
