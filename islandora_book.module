@@ -276,7 +276,10 @@ function islandora_book_islandora_pagecmodel_islandora_object_ingested(FedoraObj
     $derived_images = islandora_paged_content_can_derive($object, 'JP2') && islandora_paged_content_page_derive_image_datastreams($object);
     if ($derived_images) {
       $book_object = islandora_paged_content_get_relationship($object->relationships, FEDORA_RELS_EXT_URI, 'isMemberOf', NULL);
-      islandora_paged_content_update_paged_content_thumbnail(islandora_object_load($book_object));
+      $book_object = islandora_object_load($book_object);
+      if ($book_object) {
+        islandora_paged_content_update_paged_content_thumbnail($book_object);
+      }
     }
     $success &= $derived_images;
   }
