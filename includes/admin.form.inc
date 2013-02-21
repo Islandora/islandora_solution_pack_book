@@ -40,7 +40,7 @@ function islandora_book_admin_settings_form(array $form, array &$form_state) {
   );
 
   // Solr field containing the parent book PID.
-  $form['parent_book_solr_field'] = array(
+  $form['islandora_book_parent_book_solr_field'] = array(
     '#type' => 'textfield',
     '#title' => t('Parent Solr Field'),
     '#description' => t("Holds the Solr field that contains the parent book's PID."),
@@ -49,7 +49,7 @@ function islandora_book_admin_settings_form(array $form, array &$form_state) {
   );
 
   // Solr field containing the page number.
-  $form['page_number_solr_field'] = array(
+  $form['islandora_book_page_number_solr_field'] = array(
     '#type' => 'textfield',
     '#title' => t('Page Number Solr Field'),
     '#description' => t("Holds the Solr field that contains the page number of the current object."),
@@ -66,6 +66,7 @@ function islandora_book_admin_settings_form(array $form, array &$form_state) {
   $form['page_viewers'] = $form['viewers'];
   $form['page_viewers']['#title'] = t('Page Viewers');
   unset($form['viewers']);
+
   return system_settings_form($form);
 }
 
