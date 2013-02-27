@@ -175,25 +175,36 @@ function islandora_book_manage_book_pdf_form_submit(array $form, array &$form_st
 function islandora_book_manage_book_ocr_form(array $form, array &$form_state, FedoraObject $object) {
   module_load_include('inc', 'islandora_ocr', 'includes/utilities');
   $form_state['object'] = $object;
-  $can_derive = islandora_ocr_can_derive_ocr();
-  $languages = islandora_ocr_get_enabled_tesseract_languages();
-  return array(
-    'description' => array(
-      '#type' => 'item',
-      '#description' => t('You must have the <b>Tesseract</b> installed to perform OCR, and <b>Gimp</b> to preprocess OCR.<br/> This will update the OCR and HOCR datastreams for each Page object.'),
-    ),
-    'language' => array(
-      '#title' => t('Language'),
-      '#type' => 'select',
-      '#description' => t('Please select the language that the page is written in.'),
-      '#options' => $languages,
-    ),
-    'submit' => array(
-      '#disabled' => !$can_derive,
-      '#type' => 'submit',
-      '#value' => t('Create OCR'),
-    ),
-  );
+  if (module_exists('islandora_ocr')) {
+    $can_derive = islandora_ocr_can_derive_ocr();
+    $languages = islandora_ocr_get_enabled_tesseract_languages();
+    return array(
+      'description' => array(
+        '#type' => 'item',
+        '#description' => t('You must have the <b>Tesseract</b> installed to perform OCR, and <b>Gimp</b> to preprocess OCR.<br/> This will update the OCR and HOCR datastreams for each Page object.'),
+      ),
+      'language' => array(
+        '#title' => t('Language'),
+        '#type' => 'select',
+        '#description' => t('Please select the language that the page is written in.'),
+        '#options' => $languages,
+      ),
+      'submit' => array(
+        '#disabled' => !$can_derive,
+        '#type' => 'submit',
+        '#value' => t('Create OCR'),
+      ),
+    );
+  }
+  else {
+    return array(
+      'sorry' => array(
+        '#type' => 'item',
+        '#markup' => t('The OCR module must be installed and enabled in ' .
+          'order for this form to be used.'),
+      ),
+    );
+  }
 }
 
 /**
