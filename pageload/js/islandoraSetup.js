@@ -21,7 +21,6 @@ $(function () {
   var base = here.split(splitter);
   base = base[0];
   var url = base + '/islandora/book/upload_setup/' + PID;
-
   $.ajax({
     url: url,
     async:false,
@@ -29,7 +28,7 @@ $(function () {
       book_params = data;
     },
     error: function() {
-      alert("AJAX call failed");
+      alert("Book setup failed");
     },
     dataType: 'json'
   });
