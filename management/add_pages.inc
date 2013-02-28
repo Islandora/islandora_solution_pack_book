@@ -6,7 +6,7 @@ function book_add_pages(&$form_state, $pid) {
   drupal_add_css($path . '/css/islandora_book.css');
   $list = array(
     l(t("Append or Insert Pages"), "islandora/book/upload/$pid"),
-   // l(t("Create Digital Page"), "islandora/book/borndigital/$pid")
+      // l(t("Create Digital Page"), "islandora/book/borndigital/$pid")
   );
   $form['link'] = array(
     '#type' => 'item',
@@ -320,9 +320,17 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
     $image_width = $xml->xpath('//fits:imageWidth');
     $image_width = (string) $image_width[0];
     $page_item->add_datastream_from_string($TECHMD, 'TECHMD', 'TECHMD', 'text/xml', 'M');
-    $page_item->add_dsid_relationship('JPEG', 'islandora-book:height', $image_height, 'info:islandora/islandora-system:def/pageinfo#', 3);
-    $page_item->add_dsid_relationship('JPEG', 'islandora-book:width', $image_width, 'info:islandora/islandora-system:def/pageinfo#', 3);
   }
+  else {
+    $data = getimagesize($page_file);
+    $dimensions = $data[3];
+    $dimensions = explode(" ", $dimensions);
+    $image_width = preg_replace("/[^0-9]/", "", $dimensions[0]);
+    $image_height = preg_replace("/[^0-9]/", "", $dimensions[1]);
+  }
+  $page_item->add_dsid_relationship('JPEG', 'islandora-book:height', $image_height, 'info:islandora/islandora-system:def/pageinfo#', 3);
+  $page_item->add_dsid_relationship('JPEG', 'islandora-book:width', $image_width, 'info:islandora/islandora-system:def/pageinfo#', 3);
+
   // add original image
   if (strtolower($ext) == 'tif') {
     $ext = 'TIFF';
@@ -397,7 +405,7 @@ function ibook_add_single_page_object($book_pid, $page_file, $page_num = 1, $pag
     else {
       $page_item->add_datastream_from_string('No OCR available', 'OCR', 'Scanned Text', 'text/plain', 'M');
     }
-    islandora_book_viewer_create_hocr($executable, $page_file, $language, &$page_item);
+    islandora_book_viewer_create_hocr($executable, $page_file, $language, $page_item);
   }
   unlink($page_file);
 }
