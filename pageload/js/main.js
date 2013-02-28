@@ -54,10 +54,11 @@ $(function () {
       url: book_params['delete_callback'],
       async:false,
       success: function(data, status, xhr) {
+    
          location.reload();
       },
       error: function() {
-        alert("AJAX call failed");
+        alert("Deletion failed");
       },
       dataType: 'json'
 
