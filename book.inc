@@ -106,7 +106,7 @@ XML;
       '#title' => t('About'),
       '#weight' => 1,
       // This will be the content of the tab.
-      //'#content' => islandora_book_create_book_view($this->pid),
+      '#selected' => !$hasPage,
       '#content' => $this->create_book_view(),
     );
 
@@ -114,6 +114,7 @@ XML;
       $tabset['second_tab'] = array(
         '#type' => 'tabpage',
         '#title' => t('Reading Edition'),
+        '#selected' => 1,
         '#content' => $html,
         '#weight' => -10,
       );
