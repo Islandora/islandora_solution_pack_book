@@ -275,10 +275,9 @@ function islandora_book_islandora_pageCModel_islandora_solr_object_result_alter(
     $page_number = $search_results['solr_doc'][$page_number_field_name][0];
     $search_results['object_url'] = "islandora/object/$book_pid";
 
-    // XXX: Probably should escape the query string.
     // XXX: Won't handle fielded searches nicely... then again, if our
     // highlighting field is not the one being search on, this makes sense?
-    $search_results['object_url_fragment'] = "page/$page_number/mode/1up/search/" . $query_processor->solrQuery;
+    $search_results['object_url_fragment'] = "page/$page_number/mode/1up/search/" . rawurlencode($query_processor->solrQuery);
   }
 }
 
