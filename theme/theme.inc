@@ -13,7 +13,7 @@ function islandora_book_preprocess_islandora_book_book(array &$variables) {
   $object = $variables['object'];
   $params = array(
     'object' => $object,
-    'pages' => array_keys(islandora_paged_content_get_pages($object)),
+    'pages' => islandora_paged_content_get_pages($object),
     'page_progression' => islandora_paged_content_get_page_progression($object),
   );
   module_load_include('inc', 'islandora', 'includes/solution_packs');
