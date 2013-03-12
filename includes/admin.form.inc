@@ -44,16 +44,7 @@ function islandora_book_admin_settings_form(array $form, array &$form_state) {
     '#type' => 'textfield',
     '#title' => t('Parent Solr Field'),
     '#description' => t("Holds the Solr field that contains the parent book's PID."),
-    '#default_value' => variable_get('islandora_book_parent_book_solr_field', 'RELS_EXT_isPageOf_uri_ms'),
-    '#size' => 30,
-  );
-
-  // Solr field containing the page number.
-  $form['islandora_book_page_number_solr_field'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Page Number Solr Field'),
-    '#description' => t("Holds the Solr field that contains the page number of the current object."),
-    '#default_value' => variable_get('islandora_book_page_number_solr_field', 'RELS_EXT_isPageNumber_literal_ms'),
+    '#default_value' => variable_get('islandora_book_parent_book_solr_field', 'RELS_EXT_isMemberOf_uri_ms'),
     '#size' => 30,
   );
 
