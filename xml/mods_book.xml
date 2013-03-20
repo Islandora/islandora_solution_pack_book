@@ -562,7 +562,7 @@
                             <schema/>
                             <type>xml</type>
                             <prefix>NULL</prefix>
-                            <value> &lt;language&gt;&lt;languageTerm authority="iso639-2b"
+                            <value>&lt;language&gt;&lt;languageTerm authority="iso639-2b"
                                 type="code"&gt;%value%&lt;/languageTerm&gt;&lt;/language&gt;</value>
                         </create>
                         <read>
