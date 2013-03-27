@@ -76,21 +76,6 @@ function islandora_book_theme() {
       'file' => 'theme/theme.inc',
       'template' => 'theme/islandora-page',
     ),
-    'islandora_book_pages' => array(
-      'arguments' => array('object' => NULL),
-      'file' => 'theme/theme.inc',
-      'template' => 'theme/islandora-pages',
-    ),
-    'islandora_book_pages_grid' => array(
-      'arguments' => array('object' => NULL),
-      'file' => 'theme/theme.inc',
-      'template' => 'theme/islandora-pages-grid',
-    ),
-    'islandora_book_pages_list' => array(
-      'arguments' => array('object' => NULL),
-      'file' => 'theme/theme.inc',
-      'template' => 'theme/islandora-pages-list',
-    ),
   );
 }
 
@@ -340,6 +325,7 @@ function islandora_book_islandora_delete_object_form_delete_pages_submit(array $
  *   The HTML repersentation of the given books pages.
  */
 function islandora_book_pages_menu(FedoraObject $object) {
-  return theme('islandora_book_pages', array('object' => $object));
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+  $pages = islandora_paged_content_get_pages($object);
+  return theme('islandora_objects', array('objects' => array_keys($pages)));
 }
-
