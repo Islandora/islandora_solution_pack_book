@@ -24,17 +24,20 @@ function islandora_book_menu() {
       'type' => MENU_LOCAL_TASK,
       'page callback' => 'islandora_book_pages_menu',
       'page arguments' => array(2),
-      'access callback' => 'islandora_book_pages_access_callback',
-      'access arguments' => array(2),
+      'access callback' => 'islandora_user_access',
+      'access arguments' => array(
+        2, array(FEDORA_VIEW_OBJECTS), array('islandora:bookCModel'),
+      ),
     ),
     'islandora/object/%islandora_object/manage/book' => array(
       'title' => 'Book',
       'type' => MENU_LOCAL_TASK,
-      'page callback' => 'islandora_book_manage_book_menu',
+      'page callback' => 'islandora_paged_content_manage_pages_menu',
       'page arguments' => array(2),
-      'access callback' => 'islandora_book_manage_book_access_callback',
-      'access arguments' => array(2),
-      'file' => 'includes/manage_book.inc',
+      'access callback' => 'islandora_paged_content_manage_pages_access_callback',
+      'access arguments' => array(2, array('islandora:bookCModel')),
+      'file path' => drupal_get_path('module', 'islandora_paged_content'),
+      'file' => 'includes/manage_pages.inc',
     ),
     'islandora/object/%islandora_object/manage/book/ingest' => array(
       'title' => 'Add Page',
@@ -51,55 +54,11 @@ function islandora_book_menu() {
       'page callback' => 'islandora_paged_content_manage_page_menu',
       'page arguments' => array(2),
       'access callback' => 'islandora_paged_content_manage_page_access_callback',
-      'access arguments' => array(2),
+      'access arguments' => array(2, array('islandora:pageCModel')),
       'file path' => drupal_get_path('module', 'islandora_paged_content'),
       'file' => 'includes/manage_page.inc',
     ),
   );
-}
-
-/**
- * Determine whether or not to show this modules pages tab.
- *
- * @param FedoraObject $object
- *   The book object.
- *
- * @return bool
- *   TRUE if it should be shown, and FALSE if it should not be shown.
- */
-function islandora_book_pages_access_callback($object = NULL) {
-  if (!isset($object)) {
-    return FALSE;
-  }
-  $is_book = in_array('islandora:bookCModel', $object->models);
-  return $is_book && islandora_object_access_callback(FEDORA_VIEW_OBJECTS, $object);
-}
-
-/**
- * Determine whether or not to show this modules manage tab.
- *
- * @param FedoraObject $object
- *   The object being managed.
- *
- * @return bool
- *   TRUE if it should be shown, and FALSE if it should not be shown.
- */
-function islandora_book_manage_book_access_callback($object = NULL) {
-  if (!isset($object)) {
-    return FALSE;
-  }
-  $manage_actions = array(
-    FEDORA_ADD_DS,
-    FEDORA_METADATA_EDIT,
-    FEDORA_PURGE,
-    FEDORA_INGEST,
-  );
-  $can_access = function($perm) use($object) {
-    return islandora_object_access_callback($perm, $object);
-  };
-  $can_manage = count(array_filter($manage_actions, $can_access));
-  $is_book = in_array('islandora:bookCModel', $object->models);
-  return $is_book && $can_manage;
 }
 
 /**
@@ -116,25 +75,6 @@ function islandora_book_theme() {
       'arguments' => array('object' => NULL),
       'file' => 'theme/theme.inc',
       'template' => 'theme/islandora-page',
-    ),
-    'islandora_book_pages' => array(
-      'arguments' => array('object' => NULL),
-      'file' => 'theme/theme.inc',
-      'template' => 'theme/islandora-pages',
-    ),
-    'islandora_book_pages_grid' => array(
-      'arguments' => array('object' => NULL),
-      'file' => 'theme/theme.inc',
-      'template' => 'theme/islandora-pages-grid',
-    ),
-    'islandora_book_pages_list' => array(
-      'arguments' => array('object' => NULL),
-      'file' => 'theme/theme.inc',
-      'template' => 'theme/islandora-pages-list',
-    ),
-    'islandora_book_manage_book_sequences_form' => array(
-      'render element' => 'form',
-      'file' => 'theme/theme.inc',
     ),
   );
 }
@@ -285,12 +225,14 @@ function islandora_book_islandora_pageCModel_islandora_solr_object_result_alter(
  * Implements hook_islandora_ingest_steps().
  */
 function islandora_book_islandora_pagecmodel_islandora_ingest_steps() {
+  $shared_storage = islandora_ingest_form_get_shared_storage($form_state);
   return array(
-    'islandora_book_upload_pages' => array(
+    'islandora_newspaper_upload_pages' => array(
       'weight' => 10,
       'type' => 'form',
-      'form_id' => 'islandora_book_upload_page_form',
-      'module' => 'islandora_book',
+      'form_id' => 'islandora_paged_content_upload_page_form',
+      'args' => array($shared_storage['book']),
+      'module' => 'islandora_paged_content',
       'file' => 'includes/upload_page.form.inc',
     ),
   );
@@ -383,6 +325,7 @@ function islandora_book_islandora_delete_object_form_delete_pages_submit(array $
  *   The HTML repersentation of the given books pages.
  */
 function islandora_book_pages_menu(FedoraObject $object) {
-  return theme('islandora_book_pages', array('object' => $object));
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+  $pages = islandora_paged_content_get_pages($object);
+  return theme('islandora_objects', array('objects' => array_keys($pages)));
 }
-
