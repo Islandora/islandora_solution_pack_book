@@ -317,9 +317,18 @@ function islandora_book_islandora_pagecmodel_islandora_object_ingested(FedoraObj
     }
     $success &= $derived_images;
   }
-  if ($derive['ocr']) {
+
+  // Logic for OCR generation from islandora_book_batch.
+  $generate_ocr = 'true';
+  $batch_ocr = $object->relationships->get('http://islandora.ca/ontology/relsext#', 'generate_ocr');
+  if ($batch_ocr) {
+    $generate_ocr = $batch_ocr[0]['object']['value'];
+  }
+
+  if ($derive['ocr'] && $generate_ocr == 'true') {
     $success &= islandora_paged_content_can_derive($object, 'OCR') && islandora_paged_content_page_derive_ocr_datastreams($object);
   }
+
   if (!$success) {
     $msg = t('Could not create all derivatives for %s, For more information please check the logs.', array(
              '%s' => $object->id));
