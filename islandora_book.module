@@ -12,7 +12,7 @@ function islandora_book_menu() {
   return array(
     'admin/islandora/book' => array(
       'title' => 'Book Collection',
-      'description' => 'Configuration the Book solution pack.',
+      'description' => 'Configuration the Book Solution Pack.',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('islandora_book_admin_settings_form'),
       'access arguments' => array('administer site configuration'),
@@ -263,7 +263,7 @@ function islandora_book_islandora_pagecmodel_islandora_object_ingested(FedoraObj
     $success &= islandora_paged_content_can_derive($object, 'OCR') && islandora_paged_content_page_derive_ocr_datastreams($object);
   }
   if (!$success) {
-    $msg = t('Could not create all derivatives for %s, For more information please check the logs.', array(
+    $msg = t('Could not create all derivatives for %s, For more information, please check the logs.', array(
              '%s' => $object->id));
     drupal_set_message($msg, 'error');
     return FALSE;
