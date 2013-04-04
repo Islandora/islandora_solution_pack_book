@@ -15,16 +15,17 @@
  *   The HTML repersentation of the ingest page form.
  */
 function islandora_book_ingest_page(FedoraObject $object) {
+  global $user;
   module_load_include('inc', 'islandora', 'includes/utilities');
   module_load_include('inc', 'islandora', 'includes/ingest.form');
   $tuque = islandora_get_tuque_connection();
-  $page = $tuque->repository->constructObject(islandora_get_namespace($issue->id));
+  $page = $tuque->repository->constructObject(islandora_get_namespace($object->id));
   $page->owner = $user->name;
   $page->label = 'New Page';
   $page->models = 'islandora:pageCModel';
   drupal_set_title(t('Add page to @book', array('@book' => $object->label)));
   return drupal_get_form('islandora_ingest_form', array(
-      'book' => $object->id,
+      'book' => $object,
       'models' => array('islandora:pageCModel'),
       'object' => $page,
     )
