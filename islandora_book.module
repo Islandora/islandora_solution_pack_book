@@ -262,7 +262,7 @@ function islandora_book_islandora_pagecmodel_islandora_object_ingested(FedoraObj
 
   // Logic for OCR generation from islandora_book_batch.
   $generate_ocr = 'true';
-  $batch_ocr = $object->relationships->get('http://islandora.ca/ontology/relsext#', 'generate_ocr');
+  $batch_ocr = $object->relationships->get(ISLANDORA_RELS_EXT_URI, 'generate_ocr');
   if ($batch_ocr) {
     $generate_ocr = $batch_ocr[0]['object']['value'];
   }
