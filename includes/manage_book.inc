@@ -28,6 +28,7 @@ function islandora_book_ingest_page(FedoraObject $object) {
       'book' => $object,
       'models' => array('islandora:pageCModel'),
       'object' => $page,
+      'parent' => $object->id,
     )
   );
 }
