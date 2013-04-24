@@ -333,6 +333,8 @@ function islandora_book_islandora_delete_object_form_delete_pages_submit(array $
  *   The HTML repersentation of the given books pages.
  */
 function islandora_book_pages_menu(FedoraObject $object) {
+  module_load_include('inc', 'islandora', 'includes/breadcrumb');
+  drupal_set_breadcrumb(islandora_get_breadcrumbs($object));
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   $pages = islandora_paged_content_get_pages($object);
   return theme('islandora_objects', array('objects' => array_keys($pages)));

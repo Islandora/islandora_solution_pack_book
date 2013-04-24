@@ -16,6 +16,8 @@
  */
 function islandora_book_ingest_page(FedoraObject $object) {
   global $user;
+  module_load_include('inc', 'islandora', 'includes/breadcrumb');
+  drupal_set_breadcrumb(islandora_get_breadcrumbs($object));
   module_load_include('inc', 'islandora', 'includes/utilities');
   module_load_include('inc', 'islandora', 'includes/ingest.form');
   $tuque = islandora_get_tuque_connection();
