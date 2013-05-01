@@ -256,13 +256,12 @@ function ibook_create_page_objects($pid, $image_list = array(), $page_cmodel = '
   $page_num = $start_page;
   $book_title = $book->objectProfile->objLabel;
   $batch['operations'][] = array('wrap_renumber_pages', array($start_page, $pid, $image_count));
+  if (variable_get('islandora_create_book_pdf', FALSE)) {
+    $batch['operations'][] = array('makePDF', array($pid, $image_list, $tmpDir));
+  }
   foreach ($image_list as $image_path) {
     $batch['operations'][] = array('ibook_add_single_page_object', array($pid, $image_path, $page_num, "$book_title - Page " . sprintf("%03d", $page_num), $page_cmodel, $relation, $language, $preprocess));
     $page_num++;
-  }
-  $batch['operations'][] = array('deleteDirectory', array($tmpDir));
-  if (variable_get('islandora_create_book_pdf', FALSE)) {
-    $batch['operations'][] = array('makePDF', array($pid, $image_list, $tmpDir));
   }
   $batch['operations'][] = array('deleteDirectory', array($tmpDir));
   $collection = get_collection_from_pid($pid);
