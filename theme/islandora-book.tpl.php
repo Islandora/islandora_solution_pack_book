@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- *
+ * Template file to style output.
  */
 ?>
 <?php if (isset($viewer)): ?>
