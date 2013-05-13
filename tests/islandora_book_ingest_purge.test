@@ -5,7 +5,7 @@
  * Attempts to ingest a book and page into a randomly generated book collection.
  */
 
-class IslandoraBookPageIngestTestCase extends CollectionWebTestCase {
+class IslandoraBookPageIngestTestCase extends IslandoraCollectionWebTestCase {
 
   /**
    * Get test information.
