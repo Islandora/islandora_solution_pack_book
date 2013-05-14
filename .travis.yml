@@ -18,6 +18,7 @@ before_install:
   - ln -s $TRAVIS_BUILD_DIR sites/all/modules/islandora_solution_pack_book
   - ln -s $HOME/islandora_paged_content sites/all/modules/islandora_paged_content
   - ln -s $HOME/islandora_solution_pack_collection sites/all/modules/islandora_solution_pack_collection
+  - drush en --user=1 --yes islandora_solution_pack_collection
   - drush en --user=1 --yes islandora_book
 script:
   - ant -buildfile sites/all/modules/islandora_solution_pack_book/build.xml lint
