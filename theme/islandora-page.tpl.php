@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Template file to style output.
+ *
  */
 ?>
 <?php
@@ -16,7 +16,7 @@
     <?php
       $params = array(
         'path' => url("islandora/object/{$object->id}/datastream/JPG/view"),
-        'attributes' => array(),
+        'attributes' => array()
       );
       print theme_image($params);
     ?>

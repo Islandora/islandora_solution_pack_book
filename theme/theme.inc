@@ -40,7 +40,9 @@ function islandora_book_preprocess_islandora_book_page(array &$variables) {
                'absolute' => TRUE,
                'query' => array('token' => $token),
              ));
-  $params = array('jp2_url' => $jp2_url);
+  $params = array(
+    'jp2_url' => $jp2_url,
+  );
   $viewer = islandora_get_viewer($params, 'islandora_book_page_viewers');
   if ($viewer) {
     $variables['viewer'] = $viewer;
