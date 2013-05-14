@@ -48,7 +48,6 @@ function islandora_book_menu() {
       'access arguments' => array(FEDORA_INGEST, 2),
       'file' => 'includes/manage_book.inc',
     ),
-    
     'islandora/object/%islandora_object/manage/book/ingest_zipped' => array(
       'title' => 'Add Zipped Pages',
       'page callback' => 'islandora_book_ingest_zipped_pages',
@@ -322,8 +321,8 @@ function islandora_book_islandora_delete_object_form_delete_pages_submit(array $
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   $object = $form_state['object'];
   $get_pid = function($o) {
-        return $o['pid'];
-      };
+    return $o['pid'];
+  };
   $pages = array_values(array_map($get_pid, islandora_paged_content_get_pages($object)));
   batch_set(islandora_paged_content_delete_pages_batch($object, $pages));
   // Called from within this submit handler rather than from the Drupal Form API
