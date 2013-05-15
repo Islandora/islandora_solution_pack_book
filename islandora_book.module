@@ -226,8 +226,11 @@ function islandora_book_islandora_pageCModel_islandora_solr_object_result_alter(
  */
 function islandora_book_islandora_pagecmodel_islandora_ingest_steps(array $form_state) {
   $shared_storage = islandora_ingest_form_get_shared_storage($form_state);
+  if (empty($shared_storage['book'])) {
+    return;
+  }
   return array(
-    'islandora_newspaper_upload_pages' => array(
+    'islandora_book_upload_pages' => array(
       'weight' => 10,
       'type' => 'form',
       'form_id' => 'islandora_paged_content_upload_page_form',
