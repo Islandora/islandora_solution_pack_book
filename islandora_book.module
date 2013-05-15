@@ -253,7 +253,7 @@ function islandora_book_islandora_pagecmodel_islandora_ingest_steps(array $form_
 /**
  * Implements hook_CMODEL_PID_islandora_object_ingested().
  */
-function islandora_book_islandora_pagecmodel_islandora_object_ingested(FedoraObject $object) {
+function islandora_book_islandora_pagecmodel_islandora_object_ingested(AbstractObject $object) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   $success = TRUE;
   $derive = islandora_paged_content_get_enabled_ingest_derivatives('islandora_book');
@@ -338,13 +338,13 @@ function islandora_book_islandora_delete_object_form_delete_pages_submit(array $
 /**
  * Renders the Pages local menu task.
  *
- * @param FedoraObject $object
+ * @param AbstractObject $object
  *   The book object to fetch the pages from.
  *
  * @return string
  *   The HTML repersentation of the given books pages.
  */
-function islandora_book_pages_menu(FedoraObject $object) {
+function islandora_book_pages_menu(AbstractObject $object) {
   module_load_include('inc', 'islandora', 'includes/breadcrumb');
   drupal_set_breadcrumb(islandora_get_breadcrumbs($object));
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
