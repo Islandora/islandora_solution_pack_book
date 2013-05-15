@@ -8,13 +8,13 @@
 /**
  * Local menu action to present an ingest page form.
  *
- * @param FedoraObject $object
+ * @param AbstractObject $object
  *   The book to ingest into.
  *
  * @return string
  *   The HTML representation of the ingest page form.
  */
-function islandora_book_ingest_page(FedoraObject $object) {
+function islandora_book_ingest_page(AbstractObject $object) {
   global $user;
   module_load_include('inc', 'islandora', 'includes/breadcrumb');
   drupal_set_breadcrumb(islandora_get_breadcrumbs($object));
