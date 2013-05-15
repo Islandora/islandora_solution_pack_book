@@ -62,17 +62,20 @@ function islandora_book_update_derived_submit($form, &$form_state) {
   $tiff_file_path = save_datastream_as_tempfile($pid, 'TIFF');
   $language = $form_state['values']['language'];
   $preprocess = $form_state['values']['preprocess'];
-  if ($form_state['values']['do_ocr']) {
+  if ($form_state['values']['do_ocr'] && $tiff_file_path) {
     $success = refresh_ocr($tiff_file_path, $item, $language, $preprocess);
     if ($success) {
       drupal_set_message(t("OCR refreshed for this page"));
     }
   }
-  if ($form_state['values']['recreate_derivatives']) {
+  if ($form_state['values']['recreate_derivatives'] && $tiff_file_path) {
     $success = refresh_images($tiff_file_path, $item);
     drupal_set_message("Refreshed $success of 3 image files for this page.");
   }
-  file_delete($tiff_file_path);
+  if($tiff_file_path) {
+    file_delete($tiff_file_path);
+  }
+
   drupal_goto("fedora/repository/$pid");
 }
 

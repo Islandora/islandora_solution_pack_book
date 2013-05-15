@@ -168,7 +168,7 @@ function update_individual_pages($page_pid, $do_ocr, $refresh_images, $language,
     $ext = '.jpg';
   }
   $tiff_file_path = save_datastream_as_tempfile($page_pid, $stream, $ext);
-  if ($do_ocr) {
+  if ($do_ocr && $tiff_file_path) {
     refresh_ocr($tiff_file_path, $item, $language, $preprocess);
   }
   if ($refresh_images) {
@@ -181,13 +181,15 @@ function replace_cover_thumbnail($book_pid, $page_pid) {
   module_load_include('inc', 'fedora_repository', 'api/fedora_item');
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   $file = save_datastream_as_tempfile($page_pid, 'TN');
-  $item = new fedora_item($book_pid);
-  $datastreams = $item->get_datastreams_list_as_array();
-  if (array_key_exists('TN', $datastreams)) {
-    $item->purge_datastream('TN');
+  if($file) {
+    $item = new fedora_item($book_pid);
+    $datastreams = $item->get_datastreams_list_as_array();
+    if (array_key_exists('TN', $datastreams)) {
+      $item->purge_datastream('TN');
+    }
+    $item->add_datastream_from_file("$file", 'TN', 'Thumbnail', 'image/jpeg', 'M');
+    file_delete($file);
   }
-  $item->add_datastream_from_file("$file", 'TN', 'Thumbnail', 'image/jpeg', 'M');
-  file_delete($file);
 }
 
 function recreate_pdf($book_pid) {
