@@ -66,7 +66,7 @@ class IslandoraBookPageIngestTestCase extends IslandoraCollectionWebTestCase {
     $this->assertText('New Object', 'Book was created', 'Islandora');
 
     // Checks for book datastream creation.
-    $book_object = $this->getPidFromPath($this->url);
+    $book_object = $this->getObjectFromPath($this->url);
     $datastreams = array(
       'RELS-EXT',
       'DC',
@@ -82,7 +82,7 @@ class IslandoraBookPageIngestTestCase extends IslandoraCollectionWebTestCase {
     $this->drupalPost($path, $edit, t('Ingest'));
 
     // Checks for page datastream creation.
-    $page_object = $this->getPidFromPath($this->url);
+    $page_object = $this->getObjectFromPath($this->url);
     $datastreams = array(
       'RELS-EXT',
       'OBJ',
