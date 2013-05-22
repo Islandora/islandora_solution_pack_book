@@ -168,11 +168,20 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
     return;
   }
   $zip->close();
-  $ignore = array('.', '..', '__MACOSX');
-  $callback = function($element) use ($ignore) {
-    return (!in_array($element, $ignore)) ? TRUE : FALSE;
+  $allowed_extensions = array('tif', 'tiff', 'jpg', 'jpeg');
+  $callback = function($element) use ($allowed_extensions) {
+    $valid = TRUE;
+    $ext = pathinfo($element, PATHINFO_EXTENSION);
+    if (!in_array($ext, $allowed_extensions) ||preg_match('/__MACOSX/', $element)) {
+      $valid = FALSE;
+    }
+    return $valid;
   };
-  $unfiltered = scandir($destination_dir);
+
+  $objects = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($destination_dir), RecursiveIteratorIterator::SELF_FIRST);
+  foreach ($objects as $file => $object) {
+    $unfiltered[] = $file;
+  }
   $files_to_add = array_values(array_filter($unfiltered, $callback));
   $batch = array(
     'title' => t("Adding new pages to book."),
