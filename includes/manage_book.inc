@@ -8,13 +8,13 @@
 /**
  * Local menu action to present an ingest page form.
  *
- * @param FedoraObject $object
+ * @param AbstractObject $object
  *   The book to ingest into.
  *
  * @return string
  *   The HTML representation of the ingest page form.
  */
-function islandora_book_ingest_page(FedoraObject $object) {
+function islandora_book_ingest_page(AbstractObject $object) {
   global $user;
   module_load_include('inc', 'islandora', 'includes/breadcrumb');
   drupal_set_breadcrumb(islandora_get_breadcrumbs($object));
@@ -47,7 +47,6 @@ function islandora_book_ingest_page(FedoraObject $object) {
 function islandora_book_ingest_zipped_pages(FedoraObject $object) {
   module_load_include('inc', 'islandora', 'includes/breadcrumb');
   module_load_include('inc', 'islandora', 'includes/utilities');
-  module_load_include('inc', 'islandora', 'includes/ingest.form');
   drupal_set_breadcrumb(islandora_get_breadcrumbs($object));
   return drupal_get_form('islandora_book_zipped_upload_form', $object->id);
 }
@@ -100,7 +99,7 @@ function islandora_book_zipped_upload_form(array $form, array &$form_state, $boo
   );
   $form['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Add files to book.'),
+    '#value' => t('Add files to book'),
   );
   return $form;
 }
@@ -196,5 +195,5 @@ function islandora_book_add_pages($repository, $config) {
   islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isPageNumber', (string) $config['page_number'], TRUE);
   islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isSection', '1', TRUE);
   islandora_paged_content_set_relationship($rels_ext, FEDORA_RELS_EXT_URI, 'isMemberOf', $parent);
-  $fedora_object = islandora_add_object($object);
+  islandora_add_object($object);
 }
