@@ -230,9 +230,8 @@ function islandora_book_add_pages($repository, $config) {
 
   // Create object.
   $object = $repository->constructObject($config['namespace']);
-  $object->label = $config['image'];
-  $file_location = $config['destination_dir'] . '/' . $config['image'];
-  islandora_paged_content_update_datastream($object, $file_location, 'OBJ', NULL, NULL, 'M', FALSE);
+  $object->label = pathinfo($config['image'], PATHINFO_FILENAME);;
+  islandora_paged_content_update_datastream($object, $config['image'], 'OBJ', NULL, NULL, 'M', FALSE);
   $rels_ext = $object->relationships;
   $parent = $config['book_pid'];
   $object->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'islandora:pageCModel');
