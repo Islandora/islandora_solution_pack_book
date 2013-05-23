@@ -38,13 +38,13 @@ function islandora_book_ingest_page(AbstractObject $object) {
 /**
  * Local menu action to present a zipped file ingest form.
  *
- * @param FedoraObject $object
+ * @param AbstractObject $object
  *   The book to ingest into.
  *
  * @return string
  *   The HTML representation of the ingest page form.
  */
-function islandora_book_ingest_zipped_pages(FedoraObject $object) {
+function islandora_book_ingest_zipped_pages(AbstractObject $object) {
   module_load_include('inc', 'islandora', 'includes/breadcrumb');
   module_load_include('inc', 'islandora', 'includes/utilities');
   drupal_set_breadcrumb(islandora_get_breadcrumbs($object));
@@ -66,12 +66,19 @@ function islandora_book_ingest_zipped_pages(FedoraObject $object) {
  */
 function islandora_book_zipped_upload_form(array $form, array &$form_state, $book_pid) {
   module_load_include('inc', 'islandora_ocr', 'includes/utilities');
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+  $book_object = islandora_object_load($book_pid);
+  $current_pages = islandora_paged_content_get_pages($book_object);
+  $last_page_number = count($current_pages);
   $languages = module_exists('islandora_ocr') ? islandora_ocr_get_enabled_tesseract_languages() : array();
   $upload_size = min((int) ini_get('post_max_size'), (int) ini_get('upload_max_filesize'));
   $extensions = array('zip');
   $form = array();
   $derivatives = variable_get('islandora_book_ingest_derivatives', array('ocr'));
   $do_ocr = in_array('ocr', $derivatives);
+  $message = t("This sequence currently has @count pages. Additional pages will be appended to the end of the sequence by default. !break", array("@count" => $last_page_number, '!break' => '<br />'));
+  $message .= t("Choose a number lower than @count to insert page(s) at a specific location in the sequence.", array("@count" => $last_page_number, '!break' => '<br />'));
+
   $form['language'] = array(
     '#access' => module_exists('islandora_ocr') && $do_ocr,
     '#title' => t('Language'),
@@ -81,8 +88,23 @@ function islandora_book_zipped_upload_form(array $form, array &$form_state, $boo
     '#default_value' => 'English',
   );
 
+  if ($current_pages) {
+    $form['insertion_point'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Last sequence number'),
+      '#default_value' => $last_page_number,
+      '#description' => $message,
+      '#size' => 5,
+    );
+  }
+
+  $form['current_pages'] = array(
+    '#type' => 'hidden',
+    '#value' => $current_pages,
+  );
+
   $form['file'] = array(
-    '#title' => t('Compressed image file.'),
+    '#title' => t('Compressed images file.'),
     '#type' => 'managed_file',
     '#required' => TRUE,
     '#description' => t('Select file to upload.<br/>Files must be less than <b>@size MB.</b><br/>Allowed file types: <b>@ext.</b>', array('@size' => $upload_size, '@ext' => $extensions[0])),
@@ -99,11 +121,10 @@ function islandora_book_zipped_upload_form(array $form, array &$form_state, $boo
   );
   $form['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Add files to book'),
+    '#value' => t('Add files to book.'),
   );
   return $form;
 }
-
 
 /**
  * Submit handler for uploaded zip files.
@@ -125,8 +146,15 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
     drupal_set_message(t("This book does not exist in this repository"), 'warning');
     return;
   }
-  $current_pages = islandora_paged_content_get_pages($book_object);
-  $last_page_number = count($current_pages);
+  $current_pages = $form_state['values']['current_pages'];
+  $insertion_point = isset($form_state['values']['insertion_point']) ? (int) $form_state['values']['insertion_point'] : 0;
+  $pages_to_renumber = array();
+  foreach ($current_pages as $current_page) {
+    if ((int) $current_page['page'] > $insertion_point) {
+      $pages_to_renumber[] = $current_page;
+    }
+  }
+
   // Extract file.
   $zip_file = file_load($form_state['values']['file']);
   $zip_uri = drupal_realpath($zip_file->uri);
@@ -140,11 +168,20 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
     return;
   }
   $zip->close();
-  $ignore = array('.', '..', '__MACOSX');
-  $callback = function($element) use ($ignore) {
-    return (!in_array($element, $ignore)) ? TRUE : FALSE;
+  $allowed_extensions = array('tif', 'tiff', 'jpg', 'jpeg');
+  $callback = function($element) use ($allowed_extensions) {
+    $valid = TRUE;
+    $ext = pathinfo($element, PATHINFO_EXTENSION);
+    if (!in_array($ext, $allowed_extensions) ||preg_match('/__MACOSX/', $element)) {
+      $valid = FALSE;
+    }
+    return $valid;
   };
-  $unfiltered = scandir($destination_dir);
+
+  $objects = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($destination_dir), RecursiveIteratorIterator::SELF_FIRST);
+  foreach ($objects as $file => $object) {
+    $unfiltered[] = $file;
+  }
   $files_to_add = array_values(array_filter($unfiltered, $callback));
   $batch = array(
     'title' => t("Adding new pages to book."),
@@ -158,8 +195,17 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
     'namespace' => $namespace,
     'language' => $form_state['values']['language'],
   );
+  $offset = count($files_to_add);
+  if (isset($pages_to_renumber[0])) {
+    foreach ($pages_to_renumber as $page) {
+      $batch['operations'][] = array(
+        'islandora_book_insert_sequence_gap',
+        array($page, $offset),
+      );
+    }
+  }
   foreach ($files_to_add as $image) {
-    $config['page_number'] = ++$last_page_number;
+    $config['page_number'] = ++$insertion_point;
     $config['image'] = $image;
     $batch['operations'][] = array(
       'islandora_book_add_pages',
@@ -184,9 +230,8 @@ function islandora_book_add_pages($repository, $config) {
 
   // Create object.
   $object = $repository->constructObject($config['namespace']);
-  $object->label = $config['image'];
-  $file_location = $config['destination_dir'] . '/' . $config['image'];
-  islandora_paged_content_update_datastream($object, $file_location, 'OBJ', NULL, NULL, 'M', FALSE);
+  $object->label = pathinfo($config['image'], PATHINFO_FILENAME);;
+  islandora_paged_content_update_datastream($object, $config['image'], 'OBJ', NULL, NULL, 'M', FALSE);
   $rels_ext = $object->relationships;
   $parent = $config['book_pid'];
   $object->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'islandora:pageCModel');
@@ -196,4 +241,21 @@ function islandora_book_add_pages($repository, $config) {
   islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isSection', '1', TRUE);
   islandora_paged_content_set_relationship($rels_ext, FEDORA_RELS_EXT_URI, 'isMemberOf', $parent);
   islandora_add_object($object);
+}
+
+/**
+ * Alters page and sequence number of page object to allow for inserted pages.
+ *
+ * @param array $page_to_reindex
+ *   Array Containing page pid and current page number
+ * @param int $offset
+ *   Offset to determine new page number.
+ */
+function islandora_book_insert_sequence_gap($page_to_reindex, $offset) {
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+  $new_page_num = (int) $page_to_reindex['page'] + $offset;
+  $page_object = islandora_object_load($page_to_reindex['pid']);
+  $rels_ext = $page_object->relationships;
+  islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isSequenceNumber', (string) $new_page_num, TRUE);
+  islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isPageNumber', (string) $new_page_num, TRUE);
 }
