@@ -92,7 +92,7 @@ function islandora_book_zipped_upload_form(array $form, array &$form_state, $boo
     $form['insertion_point'] = array(
       '#type' => 'textfield',
       '#title' => t('Last sequence number'),
-      '#default_value' => array($last_page_number),
+      '#default_value' => $last_page_number,
       '#description' => $message,
       '#size' => 5,
     );
@@ -112,7 +112,7 @@ function islandora_book_zipped_upload_form(array $form, array &$form_state, $boo
       'file_validate_size' => array($upload_size * 1024 * 1024),
     ),
   );
-  //$extensions
+
   $form['book_pid'] = array(
     '#type' => 'hidden',
     '#value' => $book_pid,
