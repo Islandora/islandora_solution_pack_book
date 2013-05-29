@@ -98,10 +98,7 @@ function islandora_book_zipped_upload_form(array $form, array &$form_state, $boo
     );
   }
 
-  $form['current_pages'] = array(
-    '#type' => 'hidden',
-    '#value' => $current_pages,
-  );
+  $form_state['storage']['islandora_solution_pack_book_current_pages'] = $current_pages;
 
   $form['file'] = array(
     '#title' => t('Compressed images file.'),
@@ -115,6 +112,7 @@ function islandora_book_zipped_upload_form(array $form, array &$form_state, $boo
       'file_validate_size' => array($upload_size * 1024 * 1024),
     ),
   );
+
   $form['book_pid'] = array(
     '#type' => 'hidden',
     '#value' => $book_pid,
@@ -146,7 +144,7 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
     drupal_set_message(t("This book does not exist in this repository"), 'warning');
     return;
   }
-  $current_pages = $form_state['values']['current_pages'];
+  $current_pages = $form_state['storage']['islandora_solution_pack_book_current_pages'];
   $insertion_point = isset($form_state['values']['insertion_point']) ? (int) $form_state['values']['insertion_point'] : 0;
   $pages_to_renumber = array();
   foreach ($current_pages as $current_page) {
@@ -169,7 +167,7 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
   }
   $zip->close();
   $allowed_extensions = array('tif', 'tiff', 'jpg', 'jpeg');
-  $callback = function($element) use ($allowed_extensions) {
+  $callback = function($element) use($allowed_extensions) {
     $valid = TRUE;
     $ext = pathinfo($element, PATHINFO_EXTENSION);
     if (!in_array($ext, $allowed_extensions) ||preg_match('/__MACOSX/', $element)) {
