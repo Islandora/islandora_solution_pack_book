@@ -161,7 +161,7 @@ class IslandoraBookPageDerivativesIngestTestCase extends IslandoraCollectionWebT
       $this->assertTrue(substr_count($hocr, 'TEST') == 14 && substr_count($hocr, 'TIFF') == 14, 'HOCR datastream contains the words \'TEST TIFF\' repeated 14 times', 'Islandora');
     }
 
-    $this->deleteObject($book_object);
+    $this->deleteObject($book_object, 'Delete Book');
     $this->deleteTestCollection($collectionpid);
   }
 }
