@@ -93,7 +93,7 @@ class IslandoraBookPageIngestTestCase extends IslandoraCollectionWebTestCase {
     );
     $this->assertDatastreams($page_object, $datastreams);
 
-    $this->deleteObject($book_object);
+    $this->deleteObject($book_object, 'Delete Book');
     $this->deleteTestCollection($collectionpid);
   }
 }
