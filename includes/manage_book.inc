@@ -100,7 +100,7 @@ function islandora_book_zipped_upload_form(array $form, array &$form_state, $boo
 
   $form['current_pages'] = array(
     '#type' => 'hidden',
-    '#value' => $current_pages,
+    '#value' => serialize($current_pages),
   );
 
   $form['file'] = array(
@@ -111,9 +111,10 @@ function islandora_book_zipped_upload_form(array $form, array &$form_state, $boo
     '#default_value' => isset($form_state['values']['files']) ? $form_state['values']['files'] : NULL,
     '#upload_location' => 'temporary://',
     '#upload_validators' => array(
-      'file_validate_extensions' => $extensions,
+      'file_validate_extensions' => array('zip'),
       'file_validate_size' => array($upload_size * 1024 * 1024),
     ),
+
   );
   $form['book_pid'] = array(
     '#type' => 'hidden',
@@ -146,7 +147,7 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
     drupal_set_message(t("This book does not exist in this repository"), 'warning');
     return;
   }
-  $current_pages = $form_state['values']['current_pages'];
+  $current_pages = unserialize($form_state['values']['current_pages']);
   $insertion_point = isset($form_state['values']['insertion_point']) ? (int) $form_state['values']['insertion_point'] : 0;
   $pages_to_renumber = array();
   foreach ($current_pages as $current_page) {
