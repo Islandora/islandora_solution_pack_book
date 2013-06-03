@@ -72,7 +72,6 @@ function islandora_book_zipped_upload_form(array $form, array &$form_state, $boo
   $last_page_number = count($current_pages);
   $languages = module_exists('islandora_ocr') ? islandora_ocr_get_enabled_tesseract_languages() : array();
   $upload_size = min((int) ini_get('post_max_size'), (int) ini_get('upload_max_filesize'));
-  $extensions = array('zip');
   $form = array();
   $derivatives = variable_get('islandora_book_ingest_derivatives', array('ocr'));
   $do_ocr = in_array('ocr', $derivatives);
