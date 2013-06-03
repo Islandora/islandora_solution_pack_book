@@ -183,6 +183,13 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
     $unfiltered[] = $file;
   }
   $files_to_add = array_values(array_filter($unfiltered, $callback));
+  // Sort files based on name.
+  $comparator = function ($a, $b) {
+    $file_a = pathinfo($a, PATHINFO_FILENAME);
+    $file_b = pathinfo($b, PATHINFO_FILENAME);
+    return ($file_a < $file_b) ? -1 : 1;
+  };
+  usort($files_to_add, $comparator);
   $batch = array(
     'title' => t("Adding new pages to book."),
     'progress_message' => t('Added @current pages out of @total.'),
