@@ -72,6 +72,7 @@ function islandora_book_zipped_upload_form(array $form, array &$form_state, $boo
   $last_page_number = count($current_pages);
   $languages = module_exists('islandora_ocr') ? islandora_ocr_get_enabled_tesseract_languages() : array();
   $upload_size = min((int) ini_get('post_max_size'), (int) ini_get('upload_max_filesize'));
+  $extensions = array('zip');
   $form = array();
   $derivatives = variable_get('islandora_book_ingest_derivatives', array('ocr'));
   $do_ocr = in_array('ocr', $derivatives);
@@ -97,12 +98,11 @@ function islandora_book_zipped_upload_form(array $form, array &$form_state, $boo
     );
   }
 
-
+  // Value behaves more consistently when passed as a string.
   $form['current_pages'] = array(
     '#type' => 'hidden',
     '#value' => serialize($current_pages),
   );
-
 
   $form['file'] = array(
     '#title' => t('Compressed images file.'),
@@ -112,7 +112,7 @@ function islandora_book_zipped_upload_form(array $form, array &$form_state, $boo
     '#default_value' => isset($form_state['values']['files']) ? $form_state['values']['files'] : NULL,
     '#upload_location' => 'temporary://',
     '#upload_validators' => array(
-      'file_validate_extensions' => array('zip'),
+      'file_validate_extensions' => $extensions ,
       'file_validate_size' => array($upload_size * 1024 * 1024),
     ),
 
