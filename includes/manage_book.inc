@@ -98,7 +98,11 @@ function islandora_book_zipped_upload_form(array $form, array &$form_state, $boo
     );
   }
 
-  $form_state['storage']['islandora_solution_pack_book_current_pages'] = $current_pages;
+  // Value behaves more consistently when passed as a string.
+  $form['current_pages'] = array(
+    '#type' => 'hidden',
+    '#value' => serialize($current_pages),
+  );
 
   $form['file'] = array(
     '#title' => t('Compressed images file.'),
@@ -108,9 +112,10 @@ function islandora_book_zipped_upload_form(array $form, array &$form_state, $boo
     '#default_value' => isset($form_state['values']['files']) ? $form_state['values']['files'] : NULL,
     '#upload_location' => 'temporary://',
     '#upload_validators' => array(
-      'file_validate_extensions' => $extensions,
+      'file_validate_extensions' => $extensions ,
       'file_validate_size' => array($upload_size * 1024 * 1024),
     ),
+
   );
 
   $form['book_pid'] = array(
@@ -144,7 +149,9 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
     drupal_set_message(t("This book does not exist in this repository"), 'warning');
     return;
   }
-  $current_pages = $form_state['storage']['islandora_solution_pack_book_current_pages'];
+
+  $current_pages = unserialize($form_state['values']['current_pages']);
+
   $insertion_point = isset($form_state['values']['insertion_point']) ? (int) $form_state['values']['insertion_point'] : 0;
   $pages_to_renumber = array();
   foreach ($current_pages as $current_page) {
@@ -183,6 +190,13 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
     $unfiltered[] = $file;
   }
   $files_to_add = array_values(array_filter($unfiltered, $callback));
+  // Sort files based on name.
+  $comparator = function ($a, $b) {
+    $file_a = pathinfo($a, PATHINFO_FILENAME);
+    $file_b = pathinfo($b, PATHINFO_FILENAME);
+    return ($file_a < $file_b) ? -1 : 1;
+  };
+  usort($files_to_add, $comparator);
   $batch = array(
     'title' => t("Adding new pages to book."),
     'progress_message' => t('Added @current pages out of @total.'),
