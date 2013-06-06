@@ -98,7 +98,11 @@ function islandora_book_zipped_upload_form(array $form, array &$form_state, $boo
     );
   }
 
-  $form_state['storage']['islandora_solution_pack_book_current_pages'] = $current_pages;
+  // Value behaves more consistently when passed as a string.
+  $form['current_pages'] = array(
+    '#type' => 'hidden',
+    '#value' => serialize($current_pages),
+  );
 
   $form['file'] = array(
     '#title' => t('Compressed images file.'),
@@ -108,9 +112,10 @@ function islandora_book_zipped_upload_form(array $form, array &$form_state, $boo
     '#default_value' => isset($form_state['values']['files']) ? $form_state['values']['files'] : NULL,
     '#upload_location' => 'temporary://',
     '#upload_validators' => array(
-      'file_validate_extensions' => $extensions,
+      'file_validate_extensions' => $extensions ,
       'file_validate_size' => array($upload_size * 1024 * 1024),
     ),
+
   );
 
   $form['book_pid'] = array(
@@ -144,7 +149,9 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
     drupal_set_message(t("This book does not exist in this repository"), 'warning');
     return;
   }
-  $current_pages = $form_state['storage']['islandora_solution_pack_book_current_pages'];
+
+  $current_pages = unserialize($form_state['values']['current_pages']);
+
   $insertion_point = isset($form_state['values']['insertion_point']) ? (int) $form_state['values']['insertion_point'] : 0;
   $pages_to_renumber = array();
   foreach ($current_pages as $current_page) {
@@ -166,6 +173,8 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
     return;
   }
   $zip->close();
+  file_delete($zip_file);
+
   $allowed_extensions = array('tif', 'tiff', 'jpg', 'jpeg');
   $callback = function($element) use($allowed_extensions) {
     $valid = TRUE;
@@ -193,6 +202,7 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
     'progress_message' => t('Added @current pages out of @total.'),
     'operations' => array(),
     'file' => drupal_get_path('module', 'islandora_book') . '/includes/manage_book.inc',
+    'finished' => 'islandora_book_zipped_upload_ingest_finished',
   );
   $config = array(
     'book_pid' => $book_pid,
@@ -214,9 +224,10 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
     $config['image'] = $image;
     $batch['operations'][] = array(
       'islandora_book_add_pages',
-      array($repository, $config),
+      array($repository, $config, $destination_dir),
     );
   }
+
   batch_set($batch);
   batch_process();
 }
@@ -228,10 +239,14 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
  *   Active repository object to build NewFedoraObject
  * @param array $config
  *   Associative array of required values.
+ * @param string $pages_directory
+ *   This is a hack.  The finished callback needs this value so it can delete
+ *   the temporary directory used to store book pages.
  */
-function islandora_book_add_pages($repository, $config) {
+function islandora_book_add_pages($repository, $config, $pages_directory, &$context) {
   module_load_include('inc', 'islandora', 'includes/IslandoraTuque');
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+  $context['results']['pages_directory'] = $pages_directory;
 
   // Create object.
   $object = $repository->constructObject($config['namespace']);
@@ -263,4 +278,13 @@ function islandora_book_insert_sequence_gap($page_to_reindex, $offset) {
   $rels_ext = $page_object->relationships;
   islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isSequenceNumber', (string) $new_page_num, TRUE);
   islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isPageNumber', (string) $new_page_num, TRUE);
+}
+
+/**
+ * Batch 'finished' callback.
+ *
+ * Deletes the temporary files associated with the ingested pages.
+ */
+function islandora_book_zipped_upload_ingest_finished($success, $results, $operations) {
+  file_unmanaged_delete_recursive($results['pages_directory']);
 }
