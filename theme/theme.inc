@@ -31,16 +31,21 @@ function islandora_book_preprocess_islandora_book_page(array &$variables) {
   $object = $variables['object'];
   $results = $object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
   $variables['book_object_id'] = $results[0]['object']['value'];
-  // Get token to allow access to XACML protected datastreams.
-  // Always use token authentication in case there is a global policy.
-  module_load_include('inc', 'islandora', 'includes/authtokens');
-  $token = islandora_get_object_token($object->id, 'JP2', 2);
-  $jp2_url = url("islandora/object/{$object->id}/datastream/JP2/view",
-             array(
-               'absolute' => TRUE,
-               'query' => array('token' => $token),
-             ));
-  $params = array('jp2_url' => $jp2_url);
+
+  $params = array();
+  if (isset($object['JP2']) && islandora_datastream_access(FEDORA_VIEW_OBJECTS, $object['JP2'])) {
+    // Get token to allow access to XACML protected datastreams.
+    // Always use token authentication in case there is a global policy.
+    module_load_include('inc', 'islandora', 'includes/authtokens');
+    $token = islandora_get_object_token($object->id, 'JP2', 2);
+    $jp2_url = url("islandora/object/{$object->id}/datastream/JP2/view",
+               array(
+                 'absolute' => TRUE,
+                 'query' => array('token' => $token),
+               ));
+    $params['jp2_url'] = $jp2_url;
+  }
+
   $viewer = islandora_get_viewer($params, 'islandora_book_page_viewers');
   if ($viewer) {
     $variables['viewer'] = $viewer;

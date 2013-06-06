@@ -31,8 +31,7 @@ function islandora_book_ingest_page(AbstractObject $object) {
     'models' => array('islandora:pageCModel'),
     'object' => $page,
     'parent' => $object->id,
-      )
-  );
+  ));
 }
 
 /**
