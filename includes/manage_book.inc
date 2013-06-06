@@ -159,7 +159,6 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
       $pages_to_renumber[] = $current_page;
     }
   }
-
   // Extract file.
   $zip_file = file_load($form_state['values']['file']);
   $zip_uri = drupal_realpath($zip_file->uri);
@@ -197,13 +196,20 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
     return ($file_a < $file_b) ? -1 : 1;
   };
   usort($files_to_add, $comparator);
+  $renumber_count = count($pages_to_renumber);
+  $add_count = count($files_to_add);
+  $status_message = t("adding @add page(s) to book.", array('@add' => $add_count));
+  if ($renumber_count) {
+    $status_message = t("renumbering @pages page(s) and", array('@pages' => $renumber_count)) . " " . $status_message;
+  }
   $batch = array(
-    'title' => t("Adding new pages to book."),
-    'progress_message' => t('Added @current pages out of @total.'),
+    'title' => ucfirst($status_message),
+    'progress_message' => t('Completed @current operations out of @total.'),
     'operations' => array(),
     'file' => drupal_get_path('module', 'islandora_book') . '/includes/manage_book.inc',
     'finished' => 'islandora_book_zipped_upload_ingest_finished',
   );
+  $file_count = count($files_to_add);
   $config = array(
     'book_pid' => $book_pid,
     'destination_dir' => $destination_dir,
