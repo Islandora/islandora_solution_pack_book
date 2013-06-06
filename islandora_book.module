@@ -72,7 +72,7 @@ function islandora_book_menu() {
       'page callback' => 'islandora_book_mods_view',
       'page arguments' => array(2),
       'type' => MENU_LOCAL_TASK,
-      'access callback' => 'access_metadata',
+      'access callback' => 'islandora_book_access_metadata',
       'access arguments' => array(2),
     ),
   );
@@ -87,7 +87,7 @@ function islandora_book_menu() {
  * @return bool
  *   Returns TRUE if should be made available.
  */
-function access_metadata($object) {
+function islandora_book_access_metadata(AbstractObject $object) {
   if (in_array('islandora:bookCModel', $object->models)) {
     return TRUE;
   }
@@ -120,8 +120,7 @@ function islandora_book_theme() {
  * @return array
  *   Returns an array of block data to be rendered.
  */
-function islandora_book_mods_view($object) {
-  $xml_obj = simplexml_load_string($object['MODS']->content);
+function islandora_book_mods_view(AbstractObject $object) {
   $block = array();
   $block['content'] = array(
     '#markup' => islandora_book_mods_markup($object),
@@ -138,13 +137,12 @@ function islandora_book_mods_view($object) {
  * @return unknown
  *   Returns rendered html content.
  */
-function islandora_book_mods_markup($object) {
+function islandora_book_mods_markup(AbstractObject $object) {
   $form = array(
     'collection_metadata' => array(),
   );
   if (isset($object['MODS'])) {
     $content = $object['MODS']->content;
-    $rels = $object->relationships->get();
     $metadata = drupal_get_form('Islandora Book MODS Read Only', $content);
     $form['collection_metadata']['metadata'] = $metadata;
   }
