@@ -93,7 +93,7 @@ function islandora_book_zipped_upload_form(array $form, array &$form_state, $boo
       '#type' => 'textfield',
       '#title' => t('Last sequence number'),
       '#default_value' => $last_page_number,
-      '#description' => $message,
+      '#description' => check_plain($message),
       '#size' => 5,
     );
   }
@@ -169,7 +169,7 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
   }
   $zip->close();
   $allowed_extensions = array('tif', 'tiff', 'jpg', 'jpeg');
-  $callback = function($element) use ($allowed_extensions) {
+  $callback = function($element) use($allowed_extensions) {
     $valid = TRUE;
     $ext = pathinfo($element, PATHINFO_EXTENSION);
     if (!in_array($ext, $allowed_extensions) ||preg_match('/__MACOSX/', $element)) {

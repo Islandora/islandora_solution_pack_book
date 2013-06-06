@@ -67,9 +67,32 @@ function islandora_book_menu() {
       'file path' => drupal_get_path('module', 'islandora_paged_content'),
       'file' => 'includes/manage_page.inc',
     ),
+    'islandora/object/%islandora_object/Metadata' => array(
+      'title' => 'Metadata',
+      'page callback' => 'islandora_book_mods_view',
+      'page arguments' => array(2),
+      'type' => MENU_LOCAL_TASK,
+      'access callback' => 'access_metadata',
+      'access arguments' => array(2),
+    ),
   );
 }
 
+/**
+ * Only show the metadata tab for bookCModel.
+ *
+ * @param AbstractObject $object
+ *   The fedora object to run the check on.
+ *
+ * @return bool
+ *   Returns TRUE if should be made available.
+ */
+function access_metadata($object) {
+  if (in_array('islandora:bookCModel', $object->models)) {
+    return TRUE;
+  }
+  return FALSE;
+}
 /**
  * Implements hook_theme().
  */
@@ -88,6 +111,46 @@ function islandora_book_theme() {
   );
 }
 
+/**
+ * Returns the block array to be rendered with MODS metadata.
+ *
+ * @param abstractobject $object
+ *   Fedora object to generate MODs forms for
+ *
+ * @return array
+ *   Returns an array of block data to be rendered.
+ */
+function islandora_book_mods_view($object) {
+  $xml_obj = simplexml_load_string($object['MODS']->content);
+  $block = array();
+  $block['content'] = array(
+    '#markup' => islandora_book_mods_markup($object),
+  );
+  return $block;
+}
+
+/**
+ * Generate the markup for the given fedora objects metadata.
+ *
+ * @param AbstractObject $object
+ *   The fedora object to get a read only form for.
+ *
+ * @return unknown
+ *   Returns rendered html content.
+ */
+function islandora_book_mods_markup($object) {
+  $form = array(
+    'collection_metadata' => array(),
+  );
+  if (isset($object['MODS'])) {
+    $content = $object['MODS']->content;
+    $rels = $object->relationships->get();
+    $metadata = drupal_get_form('Islandora Book MODS Read Only', $content);
+    $form['collection_metadata']['metadata'] = $metadata;
+  }
+  $output = drupal_render($form);
+  return $output;
+}
 /**
  * Implements hook_islandora_xml_form_builder_form_associations().
  */
@@ -112,6 +175,9 @@ function islandora_book_islandora_xml_form_builder_forms() {
   return array(
     'Islandora Book MODS Form' => array(
       'form_file' => "$module_path/data/forms/book_form_mods.xml",
+    ),
+    'Islandora Book MODS Read Only' => array(
+      'form_file' => "$module_path/data/forms/book_form_mods_read_only.xml",
     ),
   );
 }

@@ -36,10 +36,10 @@ function islandora_book_preprocess_islandora_book_page(array &$variables) {
   module_load_include('inc', 'islandora', 'includes/authtokens');
   $token = islandora_get_object_token($object->id, 'JP2', 2);
   $jp2_url = url("islandora/object/{$object->id}/datastream/JP2/view",
-             array(
-               'absolute' => TRUE,
-               'query' => array('token' => $token),
-             ));
+    array(
+      'absolute' => TRUE,
+      'query' => array('token' => $token),
+    ));
   $params = array('jp2_url' => $jp2_url);
   $viewer = islandora_get_viewer($params, 'islandora_book_page_viewers');
   if ($viewer) {
