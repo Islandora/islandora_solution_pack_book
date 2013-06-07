@@ -114,9 +114,6 @@ function islandora_book_islandora_xml_form_builder_forms() {
     'Islandora Book MODS Form' => array(
       'form_file' => "$module_path/data/forms/book_form_mods.xml",
     ),
-    'Islandora Book MODS Read Only' => array(
-      'form_file' => "$module_path/data/forms/book_form_mods_read_only.xml",
-    ),
   );
 }
 
@@ -210,8 +207,6 @@ function islandora_book_islandora_pageCModel_islandora_solr_object_result_alter(
   // Grab the names of the appropriate solr fields from the db.
   $parent_book_field_name = variable_get('islandora_book_parent_book_solr_field', 'RELS_EXT_isMemberOf_uri_ms');
   $page_number_field_name = variable_get('islandora_paged_content_page_number_solr_field', 'RELS_EXT_isSequenceNumber_literal_ms');
-
-  
   // If:
   // there's an object url AND
   // there's a solr doc AND
