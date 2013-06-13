@@ -41,7 +41,7 @@ Tesseract:
 Tesseract is an OCR engine that was developed at HP Labs between 1985 and 1995
 it is currently being developed at Google. Recognized as one of the most
 accurate open source OCR engines available, Tesseract will read binary, grey, or
-colour images and output text.
+colour images and output the text.
 
 A TIFF reader that will read uncompressed TIFF images is also included.
 Islandora Book Solution Pack currently uses Tesseract version 3.2, which can be

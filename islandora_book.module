@@ -48,6 +48,15 @@ function islandora_book_menu() {
       'access arguments' => array(FEDORA_INGEST, 2),
       'file' => 'includes/manage_book.inc',
     ),
+    'islandora/object/%islandora_object/manage/book/ingest_zipped' => array(
+      'title' => 'Add Zipped Pages',
+      'page callback' => 'islandora_book_ingest_zipped_pages',
+      'page arguments' => array(2),
+      'type' => MENU_LOCAL_ACTION,
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(FEDORA_INGEST, 2),
+      'file' => 'includes/manage_book.inc',
+    ),
     'islandora/object/%islandora_object/manage/page' => array(
       'title' => 'Page',
       'type' => MENU_LOCAL_TASK,
@@ -272,7 +281,7 @@ function islandora_book_islandora_pagecmodel_islandora_object_ingested(FedoraObj
 
   if (!$success) {
     $msg = t('Could not create all derivatives for %s, For more information, please check the logs.', array(
-             '%s' => $object->id));
+      '%s' => $object->id));
     drupal_set_message($msg, 'error');
     return FALSE;
   }

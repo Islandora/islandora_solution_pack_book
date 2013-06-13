@@ -2,18 +2,18 @@
   float: right;
 }
 .islandora-book-pages {
+  margin: 0 auto;
   overflow: hidden;
   width: 100%;
-  margin: 0 auto;
 }
 .islandora-book-pages-grid dl {
-  width: 20%;
-  min-width: 100px;
-  min-height: 180px;
   display: -moz-inline-stack;
   display: inline-block;
-  vertical-align: top;
   margin: 1.5em 1.84%;
+  min-height: 180px;
+  min-width: 100px;
+  vertical-align: top;
+  width: 20%;
   zoom: 1;
 }
 .islandora-book-pages-grid dd {
@@ -21,12 +21,12 @@
   padding: 0;
 }
 .islandora-book-page-object dd {
-  padding-top: 2px;
   padding-bottom: 2px;
+  padding-top: 2px;
 }
 .islandora-book-page-list-item {
-  padding-bottom: 1.5em;
   border-bottom: 1px solid #ddd;
+  padding-bottom: 1.5em;
 }
 .islandora-book-page-list-item dl dt {
   clear: left;
