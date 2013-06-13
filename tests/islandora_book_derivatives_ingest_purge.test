@@ -73,7 +73,7 @@ class IslandoraBookPageDerivativesIngestTestCase extends IslandoraCollectionWebT
     $this->drupalPost('admin/islandora/book', $edit, 'Save configuration');
     $edit = array(
       'islandora_ocr_tesseract' => $this->islandora_ocr_tesseract,
-      );
+    );
     $this->drupalPost('admin/islandora/ocr', $edit, 'Save configuration');
     $edit = array(
       'islandora_ocr_tesseract_enabled_languages[eng]' => TRUE,
