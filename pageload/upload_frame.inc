@@ -3,7 +3,7 @@
 function upload_pages($pid) {
   global $base_url;
   $path = drupal_get_path('module', 'islandora_book');
-  $url = "$base_url/$path/pageload/loader.php?PID=$pid";
+  $url = "$base_url/$path/pageload/loader.php?PID=$pid&path=$base_url/$path";
   $html = '<iframe src="' . $url . '" scrolling="0" frameborder="0" style="width: 100%; height: 800px;">Errors: unable to load viewer</iframe>';
   return $html;
 }
@@ -82,5 +82,5 @@ function delete_book_page_files($pid) {
   module_load_include('inc', 'islandora_book', 'book_pack_utils');
   $dir = file_directory_path() . "/$pid";
   islandora_recursive_directory_delete($dir);
- 
+
 }
