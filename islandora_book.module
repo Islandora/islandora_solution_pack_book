@@ -346,6 +346,8 @@ function islandora_book_islandora_delete_object_form_delete_pages_submit(array $
  */
 function islandora_book_pages_menu(AbstractObject $object) {
   module_load_include('inc', 'islandora', 'includes/breadcrumb');
+  module_load_include('inc', 'islandora', 'includes/utilities');
+  drupal_set_title(t($object->label));
   drupal_set_breadcrumb(islandora_get_breadcrumbs($object));
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   $pages = islandora_paged_content_get_pages($object);
