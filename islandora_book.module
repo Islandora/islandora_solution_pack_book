@@ -44,7 +44,7 @@ function islandora_book_menu() {
       'page callback' => 'islandora_book_ingest_page',
       'page arguments' => array(2),
       'type' => MENU_LOCAL_ACTION,
-      'access callback' => 'islandora_object_access_callback',
+      'access callback' => 'islandora_object_access',
       'access arguments' => array(FEDORA_INGEST, 2),
       'file' => 'includes/manage_book.inc',
     ),
@@ -53,11 +53,11 @@ function islandora_book_menu() {
       'page callback' => 'islandora_book_ingest_zipped_pages',
       'page arguments' => array(2),
       'type' => MENU_LOCAL_ACTION,
-      'access callback' => 'islandora_object_access_callback',
+      'access callback' => 'islandora_object_access',
       'access arguments' => array(FEDORA_INGEST, 2),
       'file' => 'includes/manage_book.inc',
     ),
-    'islandora/object/%islandora_object/manage/page' => array(
+    'islandora/object/%islandora_object/manage/book_page' => array(
       'title' => 'Page',
       'type' => MENU_LOCAL_TASK,
       'page callback' => 'islandora_paged_content_manage_page_menu',
@@ -222,11 +222,14 @@ function islandora_book_islandora_pageCModel_islandora_solr_object_result_alter(
     // number as a fragment.
     $book_pid = preg_replace('/info\:fedora\//', '', $search_results['solr_doc'][$parent_book_field_name][0], 1);
     $page_number = $search_results['solr_doc'][$page_number_field_name][0];
-    $search_results['object_url'] = "islandora/object/$book_pid";
 
-    // XXX: Won't handle fielded searches nicely... then again, if our
-    // highlighting field is not the one being search on, this makes sense?
-    $search_results['object_url_fragment'] = "page/$page_number/mode/1up/search/" . rawurlencode($query_processor->solrQuery);
+    if (islandora_object_access(FEDORA_VIEW_OBJECTS, islandora_object_load($book_pid))) {
+      $search_results['object_url'] = "islandora/object/$book_pid";
+
+      // XXX: Won't handle fielded searches nicely... then again, if our
+      // highlighting field is not the one being search on, this makes sense?
+      $search_results['object_url_fragment'] = "page/$page_number/mode/1up/search/" . rawurlencode($query_processor->solrQuery);
+    }
   }
 }
 
