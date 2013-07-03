@@ -1,5 +1,5 @@
 name = "Islandora Book Solution Pack"
-description = "Provides book interface for book objects."
+description = "Provides an interface for book objects."
 package = Islandora
 dependencies[] = islandora
 dependencies[] = file

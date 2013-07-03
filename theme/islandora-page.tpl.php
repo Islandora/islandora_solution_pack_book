@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- *
+ * Template file to style output.
  */
 ?>
 <?php
@@ -11,14 +11,14 @@
   <div id="book-page-viewer">
     <?php print $viewer; ?>
   </div>
-<?php else: ?>
+<?php elseif (isset($object['JPG']) && islandora_datastream_access(FEDORA_VIEW_OBJECTS, $object['JPG'])): ?>
   <div id="book-page-image">
     <?php
       $params = array(
         'path' => url("islandora/object/{$object->id}/datastream/JPG/view"),
-        'attributes' => array()
+        'attributes' => array(),
       );
-      print theme_image($params);
+      print theme('image', $params);
     ?>
   </div>
 <?php endif; ?>

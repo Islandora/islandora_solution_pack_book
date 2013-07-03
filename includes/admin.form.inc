@@ -24,14 +24,14 @@ function islandora_book_admin_settings_form(array $form, array &$form_state) {
     'local_derivative_settings' => array(
       '#type' => 'fieldset',
       '#title' => t('Create Page Derivatives Locally'),
-      '#description' => t('When ingesting pages automatically create derivative datastreams on this server. If you intend to only use microservices to generate derivatives you should not have any of these settings enabled.'),
+      '#description' => t('These options allow you to create derivatives automatically when ingesting pages, using this server. If you intend to only use microservices to generate derivatives, you should not have any of these settings enabled.'),
       'islandora_book_ingest_derivatives' => array(
         '#type' => 'checkboxes',
         '#element_validate' => array('islandora_book_admin_settings_form_ingest_derivatives_validate'),
         '#options' => array(
           'pdf' => t('PDF datastream. <b>Requires</b> <i>ImageMagick</i>'),
           'image' => t('Image datastreams (TN, JPEG, JP2). <b>Requires</b> <i>Large Image Solution Pack</i>'),
-          'ocr' => t('OCR datastreams (OCR, HOCR). <b>Requires</b> <i>Islandora OCR Module</i>'),
+          'ocr' => t('OCR datastreams (OCR, HOCR). <b>Requires</b> <i>Islandora OCR module</i>'),
         ),
         '#default_value' => $get_default_value('islandora_book_ingest_derivatives', drupal_map_assoc(
                             array('pdf', 'image', 'ocr'))),
@@ -43,17 +43,8 @@ function islandora_book_admin_settings_form(array $form, array &$form_state) {
   $form['islandora_book_parent_book_solr_field'] = array(
     '#type' => 'textfield',
     '#title' => t('Parent Solr Field'),
-    '#description' => t("Holds the Solr field that contains the parent book's PID."),
-    '#default_value' => variable_get('islandora_book_parent_book_solr_field', 'RELS_EXT_isPageOf_uri_ms'),
-    '#size' => 30,
-  );
-
-  // Solr field containing the page number.
-  $form['islandora_book_page_number_solr_field'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Page Number Solr Field'),
-    '#description' => t("Holds the Solr field that contains the page number of the current object."),
-    '#default_value' => variable_get('islandora_book_page_number_solr_field', 'RELS_EXT_isPageNumber_literal_ms'),
+    '#description' => t("Solr field containing the parent book's PID."),
+    '#default_value' => variable_get('islandora_book_parent_book_solr_field', 'RELS_EXT_isMemberOf_uri_ms'),
     '#size' => 30,
   );
 
@@ -88,16 +79,16 @@ function islandora_book_admin_settings_form_ingest_derivatives_validate(array $e
   if (array_key_exists('pdf', $element['#value']) && !islandora_paged_content_can_create_pdf()) {
     $element['#value']['pdf'] = 0;
     form_set_value($element, $element['#value'], $form_state);
-    drupal_set_message(t('ImagicMagick must be enabled to derive the PDF datastream.'), 'error');
+    drupal_set_message(t('ImageMagick must be enabled to derive the PDF datastream.'), 'error');
   }
   if (array_key_exists('image', $element['#value']) && !islandora_paged_content_can_create_images()) {
     $element['#value']['image'] = 0;
     form_set_value($element, $element['#value'], $form_state);
-    drupal_set_message(t('The Large Image solution pack must be enabled to derive image datastreams.'), 'error');
+    drupal_set_message(t('The Large Image Solution Pack must be enabled to derive image datastreams.'), 'error');
   }
   if (array_key_exists('ocr', $element['#value']) && !(module_exists('islandora_ocr'))) {
     $element['#value']['ocr'] = 0;
     form_set_value($element, $element['#value'], $form_state);
-    drupal_set_message(t('The Islandora OCR Module must be enabled to derive OCR datastreams.'), 'error');
+    drupal_set_message(t('The Islandora OCR module must be enabled to derive OCR datastreams.'), 'error');
   }
 }
