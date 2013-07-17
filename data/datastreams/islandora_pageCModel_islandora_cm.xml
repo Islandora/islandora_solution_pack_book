@@ -1,0 +1,24 @@
+<content_model xmlns="http://www.islandora.ca" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="book" xsi:schemaLocation="http://www.islandora.ca http://137.149.200.50/sites/all/modules/islandora/islandoracm.xsd">
+    <mimetypes>
+      <type>text/xml</type>
+      <type>image/tiff</type>
+      <type>image/jp2</type>
+      <type>image/jpg</type>
+      <type>text/plain</type>
+      <type>text/html</type>
+      <type>application/pdf</type>
+      <type>application/xml</type>
+    </mimetypes>
+    <ingest_rules></ingest_rules>
+    <datastreams>
+      <datastream dsid="ABBYY"></datastream>
+      <datastream dsid="TEI"></datastream>
+      <datastream dsid="DC"></datastream>
+      <datastream dsid="RELS-EXT"></datastream>
+      <datastream dsid="PDF"></datastream>
+      <datastream dsid="OCR"></datastream>
+      <datastream dsid="TN">
+        <display_method class="PageViewer" file="book_page_viewer.inc" method="showPage" module="islandora_book"></display_method>
+      </datastream>
+    </datastreams>
+</content_model>
