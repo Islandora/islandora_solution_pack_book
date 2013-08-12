@@ -287,8 +287,10 @@ function islandora_book_islandora_bookcmodel_islandora_derivative() {
   return $derivatives;
 }
 
+/**
+ * Implements hook_islandora_derivative().
+ */
 function islandora_book_islandora_pagecmodel_islandora_derivative() {
-  $mod_path = drupal_get_path('module', 'islandora_book');
   $pc_mod_path = drupal_get_path('module', 'islandora_paged_content');
   $li_mod_path = drupal_get_path('module', 'islandora_large_image');
   $ocr_mod_path = drupal_get_path('module', 'islandora_ocr');
