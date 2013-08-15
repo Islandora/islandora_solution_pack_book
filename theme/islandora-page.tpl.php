@@ -11,7 +11,7 @@
   <div id="book-page-viewer">
     <?php print $viewer; ?>
   </div>
-<?php elseif (isset($object['JPG']) && islandora_datastream_access(FEDORA_VIEW_OBJECTS, $object['JPG'])): ?>
+<?php elseif (isset($object['JPG']) && islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $object['JPG'])): ?>
   <div id="book-page-image">
     <?php
       $params = array(
