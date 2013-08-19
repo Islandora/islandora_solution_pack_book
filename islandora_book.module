@@ -26,7 +26,7 @@ function islandora_book_menu() {
       'page arguments' => array(2),
       'access callback' => 'islandora_user_access',
       'access arguments' => array(
-        2, array(FEDORA_VIEW_OBJECTS), array('islandora:bookCModel'),
+        2, array(ISLANDORA_VIEW_OBJECTS), array('islandora:bookCModel'),
       ),
     ),
     'islandora/object/%islandora_object/manage/book' => array(
