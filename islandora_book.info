@@ -4,5 +4,5 @@ package = Islandora
 dependencies[] = islandora
 dependencies[] = file
 dependencies[] = islandora_paged_content
-version = 7.x-1.2-RC2
+version = 7.x-1.2
 core = 7.x
