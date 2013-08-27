@@ -259,7 +259,7 @@ function islandora_book_islandora_pagecmodel_islandora_ingest_steps(array $form_
  */
 function islandora_book_form_islandora_paged_content_upload_page_form_alter(&$form, &$form_state) {
   $upload_size = min((int) ini_get('post_max_size'), (int) ini_get('upload_max_filesize'));
-  $extensions = array('tiff tif');
+  $extensions = array('tiff tif jpg jpeg');
   $description = t('Select an image to upload.<br/>Files must be less than <b>@size MB.</b><br/>Allowed file types: <b>@ext.</b>', array('@size' => $upload_size, '@ext' => $extensions[0]));
   $form['file']['#upload_validators']['file_validate_extensions'][0] = 'tiff tif jpg jpeg';
   $form['file']['#description'] = $description;
