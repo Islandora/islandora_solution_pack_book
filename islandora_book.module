@@ -76,7 +76,7 @@ function islandora_book_menu() {
 function islandora_book_theme() {
   return array(
     'islandora_book_book' => array(
-      'arguments' => array('object' => NULL),
+      'variables' => array('object' => NULL),
       'file' => 'theme/theme.inc',
       'template' => 'theme/islandora-book',
     ),
