@@ -134,12 +134,9 @@ class IslandoraBookPageDerivativesIngestTestCase extends IslandoraCollectionWebT
     );
     $this->assertImageDatastreams($page_object, $datastreams);
 
-    // Attempts to match more complex image signatures to expected values.
-    $datastreams = array(
-      array('JP2', IMAGETYPE_JP2),
-      array('OBJ', IMAGETYPE_TIFF_II),
-    );
-    $this->assertImageDatastreamType($page_object, $datastreams);
+    // Attempts to verify the OBJ and JP2 datastreams.
+    $this->assertTiffDatastreams($page_object, array('OBJ'));
+    $this->assertJp2Datastreams($page_object, array('JP2'));
 
     // Determines whether or not the PDF datastream is valid.
     if (isset($page_object['PDF'])) {
