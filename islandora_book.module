@@ -26,7 +26,7 @@ function islandora_book_menu() {
       'page arguments' => array(2),
       'access callback' => 'islandora_user_access',
       'access arguments' => array(
-        2, array(FEDORA_VIEW_OBJECTS), array('islandora:bookCModel'),
+        2, array(ISLANDORA_VIEW_OBJECTS), array('islandora:bookCModel'),
       ),
     ),
     'islandora/object/%islandora_object/manage/book' => array(
@@ -44,8 +44,8 @@ function islandora_book_menu() {
       'page callback' => 'islandora_book_ingest_page',
       'page arguments' => array(2),
       'type' => MENU_LOCAL_ACTION,
-      'access callback' => 'islandora_object_access_callback',
-      'access arguments' => array(FEDORA_INGEST, 2),
+      'access callback' => 'islandora_object_access',
+      'access arguments' => array(ISLANDORA_INGEST, 2),
       'file' => 'includes/manage_book.inc',
     ),
     'islandora/object/%islandora_object/manage/book/ingest_zipped' => array(
@@ -53,11 +53,11 @@ function islandora_book_menu() {
       'page callback' => 'islandora_book_ingest_zipped_pages',
       'page arguments' => array(2),
       'type' => MENU_LOCAL_ACTION,
-      'access callback' => 'islandora_object_access_callback',
-      'access arguments' => array(FEDORA_INGEST, 2),
+      'access callback' => 'islandora_object_access',
+      'access arguments' => array(ISLANDORA_INGEST, 2),
       'file' => 'includes/manage_book.inc',
     ),
-    'islandora/object/%islandora_object/manage/page' => array(
+    'islandora/object/%islandora_object/manage/book_page' => array(
       'title' => 'Page',
       'type' => MENU_LOCAL_TASK,
       'page callback' => 'islandora_paged_content_manage_page_menu',
@@ -76,7 +76,7 @@ function islandora_book_menu() {
 function islandora_book_theme() {
   return array(
     'islandora_book_book' => array(
-      'arguments' => array('object' => NULL),
+      'variables' => array('object' => NULL),
       'file' => 'theme/theme.inc',
       'template' => 'theme/islandora-book',
     ),
@@ -103,6 +103,7 @@ function islandora_book_islandora_xml_form_builder_form_associations() {
     ),
   );
 }
+
 
 /**
  * Implements hook_islandora_xml_form_builder_forms().
@@ -132,6 +133,12 @@ function islandora_book_islandora_required_objects(IslandoraTuque $connection) {
   $datastream->label = 'DS-COMPOSITE-MODEL';
   $datastream->mimetype = 'text/xml';
   $datastream->setContentFromFile("$datastreams_path/islandora_pageCModel_ds_composite_model.xml", FALSE);
+  $page_content_model->ingestDatastream($datastream);
+  // ISLANDORA-CM Datastream.
+  $datastream = $page_content_model->constructDatastream('ISLANDORACM', 'M');
+  $datastream->label = 'Islandora content model information';
+  $datastream->mimetype = 'text/xml';
+  $datastream->setContentFromFile("$datastreams_path/islandora_pageCModel_islandora_cm.xml", FALSE);
   $page_content_model->ingestDatastream($datastream);
   // Book Content Model.
   $book_content_model = $connection->repository->constructObject('islandora:bookCModel');
@@ -206,7 +213,6 @@ function islandora_book_islandora_pageCModel_islandora_solr_object_result_alter(
   // Grab the names of the appropriate solr fields from the db.
   $parent_book_field_name = variable_get('islandora_book_parent_book_solr_field', 'RELS_EXT_isMemberOf_uri_ms');
   $page_number_field_name = variable_get('islandora_paged_content_page_number_solr_field', 'RELS_EXT_isSequenceNumber_literal_ms');
-
   // If:
   // there's an object url AND
   // there's a solr doc AND
@@ -222,11 +228,14 @@ function islandora_book_islandora_pageCModel_islandora_solr_object_result_alter(
     // number as a fragment.
     $book_pid = preg_replace('/info\:fedora\//', '', $search_results['solr_doc'][$parent_book_field_name][0], 1);
     $page_number = $search_results['solr_doc'][$page_number_field_name][0];
-    $search_results['object_url'] = "islandora/object/$book_pid";
 
-    // XXX: Won't handle fielded searches nicely... then again, if our
-    // highlighting field is not the one being search on, this makes sense?
-    $search_results['object_url_fragment'] = "page/$page_number/mode/1up/search/" . rawurlencode($query_processor->solrQuery);
+    if (islandora_object_access(ISLANDORA_VIEW_OBJECTS, islandora_object_load($book_pid))) {
+      $search_results['object_url'] = "islandora/object/$book_pid";
+
+      // XXX: Won't handle fielded searches nicely... then again, if our
+      // highlighting field is not the one being search on, this makes sense?
+      $search_results['object_url_fragment'] = "page/$page_number/mode/1up/search/" . rawurlencode($query_processor->solrQuery);
+    }
   }
 }
 
@@ -251,43 +260,116 @@ function islandora_book_islandora_pagecmodel_islandora_ingest_steps(array $form_
 }
 
 /**
- * Implements hook_CMODEL_PID_islandora_object_ingested().
+ * Implements hook_islandora_derivative().
+ *
+ * XXX: Should add in ability to regenerate PDFs as well... No reliable way to
+ * kick off a batch though...
  */
-function islandora_book_islandora_pagecmodel_islandora_object_ingested(AbstractObject $object) {
+function islandora_book_islandora_bookcmodel_islandora_derivative() {
+  $pc_mod_path = drupal_get_path('module', 'islandora_paged_content');
+
+  $derivatives = array();
+
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
-  $success = TRUE;
   $derive = islandora_paged_content_get_enabled_ingest_derivatives('islandora_book');
+
+  if ($derive['image']) {
+    $derivatives[] = array(
+      'source_dsid' => NULL,
+      'destination_dsid' => 'TN',
+      'function' => array(
+        'islandora_paged_content_derive_thumbnail_of_parent',
+      ),
+      'file' => "$pc_mod_path/includes/derivatives.inc",
+    );
+  }
+
+  return $derivatives;
+}
+
+/**
+ * Implements hook_islandora_derivative().
+ */
+function islandora_book_islandora_pagecmodel_islandora_derivative() {
+  $pc_mod_path = drupal_get_path('module', 'islandora_paged_content');
+  $li_mod_path = drupal_get_path('module', 'islandora_large_image');
+  $ocr_mod_path = drupal_get_path('module', 'islandora_ocr');
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+  $derive = islandora_paged_content_get_enabled_ingest_derivatives('islandora_book');
+  $derivatives = array();
+
   if ($derive['pdf']) {
-    $success &= islandora_paged_content_can_derive($object, 'PDF') && islandora_paged_content_page_derive_pdf_datastream($object);
+    $derivatives[] = array(
+      'source_dsid' => 'OBJ',
+      'destination_dsid' => 'PDF',
+      'function' => array(
+        'islandora_paged_content_derivatives_pdf',
+      ),
+      'file' => "$pc_mod_path/includes/derivatives.inc",
+    );
   }
   if ($derive['image']) {
-    $derived_images = islandora_paged_content_can_derive($object, 'JP2') && islandora_paged_content_page_derive_image_datastreams($object);
-    if ($derived_images) {
-      $book_pid = islandora_paged_content_get_relationship($object->relationships, FEDORA_RELS_EXT_URI, 'isMemberOf', NULL);
-      $book_object = islandora_object_load($book_pid);
-      if ($book_object) {
-        islandora_paged_content_update_paged_content_thumbnail($book_object);
-      }
-    }
-    $success &= $derived_images;
+    $derivatives[] = array(
+      'source_dsid' => 'OBJ',
+      'destination_dsid' => 'TN',
+      'function' => array(
+        'islandora_large_image_create_tn_derivative',
+      ),
+      'file' => "$li_mod_path/includes/derivatives.inc",
+    );
+    $derivatives[] = array(
+      'source_dsid' => 'OBJ',
+      'destination_dsid' => 'JPG',
+      'function' => array(
+        'islandora_large_image_create_jpg_derivative',
+      ),
+      'file' => "$li_mod_path/includes/derivatives.inc",
+    );
+    $derivatives[] = array(
+      'source_dsid' => 'OBJ',
+      'destination_dsid' => 'JP2',
+      'function' => array(
+        'islandora_large_image_create_jp2_derivative',
+      ),
+      'file' => "$li_mod_path/includes/derivatives.inc",
+    );
+    $derivatives[] = array(
+      'source_dsid' => 'JP2',
+      'destination_dsid' => NULL,
+      'function' => array(
+        'islandora_paged_content_add_dimensions_relationships',
+      ),
+      'file' => "$pc_mod_path/includes/utilities.inc",
+    );
+    $derivatives[] = array(
+      'source_dsid' => 'TN',
+      'destination_dsid' => NULL,
+      'function' => array(
+        'islandora_paged_content_derive_thumbnail_on_parent',
+      ),
+      'file' => "$pc_mod_path/includes/derivatives.inc",
+    );
+  }
+  if ($derive['ocr']) {
+    $derivatives[] = array(
+      'source_dsid' => 'OBJ',
+      'destination_dsid' => 'OCR',
+      'function' => array(
+        'islandora_ocr_derive_ocr',
+      ),
+      'file' => "$ocr_mod_path/includes/derivatives.inc",
+    );
+    $derivatives[] = array(
+      'source_dsid' => 'OBJ',
+      'destination_dsid' => 'HOCR',
+      'function' => array(
+        'islandora_ocr_derive_hocr',
+      ),
+      'file' => "$ocr_mod_path/includes/derivatives.inc",
+    );
   }
 
-  // Logic for OCR generation from islandora_book_batch.
-  $generate_ocr = 'TRUE';
-  $batch_ocr = $object->relationships->get(ISLANDORA_RELS_EXT_URI, 'generate_ocr');
-  if ($batch_ocr) {
-    $generate_ocr = $batch_ocr[0]['object']['value'];
-  }
-  if ($derive['ocr'] && $generate_ocr == 'TRUE') {
-    $success &= islandora_paged_content_can_derive($object, 'OCR') && islandora_paged_content_page_derive_ocr_datastreams($object);
-  }
-
-  if (!$success) {
-    $msg = t('Could not create all derivatives for %s, For more information, please check the logs.', array(
-      '%s' => $object->id));
-    drupal_set_message($msg, 'error');
-    return FALSE;
-  }
+  return $derivatives;
 }
 
 /**

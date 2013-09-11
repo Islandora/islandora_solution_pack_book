@@ -31,8 +31,7 @@ function islandora_book_ingest_page(AbstractObject $object) {
     'models' => array('islandora:pageCModel'),
     'object' => $page,
     'parent' => $object->id,
-      )
-  );
+  ));
 }
 
 /**
@@ -93,14 +92,15 @@ function islandora_book_zipped_upload_form(array $form, array &$form_state, $boo
       '#type' => 'textfield',
       '#title' => t('Last sequence number'),
       '#default_value' => $last_page_number,
-      '#description' => $message,
+      '#description' => check_plain($message),
       '#size' => 5,
     );
   }
 
+  // Value behaves more consistently when passed as a string.
   $form['current_pages'] = array(
     '#type' => 'hidden',
-    '#value' => $current_pages,
+    '#value' => serialize($current_pages),
   );
 
   $form['file'] = array(
@@ -111,10 +111,12 @@ function islandora_book_zipped_upload_form(array $form, array &$form_state, $boo
     '#default_value' => isset($form_state['values']['files']) ? $form_state['values']['files'] : NULL,
     '#upload_location' => 'temporary://',
     '#upload_validators' => array(
-      'file_validate_extensions' => $extensions,
+      'file_validate_extensions' => $extensions ,
       'file_validate_size' => array($upload_size * 1024 * 1024),
     ),
+
   );
+
   $form['book_pid'] = array(
     '#type' => 'hidden',
     '#value' => $book_pid,
@@ -146,7 +148,9 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
     drupal_set_message(t("This book does not exist in this repository"), 'warning');
     return;
   }
-  $current_pages = $form_state['values']['current_pages'];
+
+  $current_pages = unserialize($form_state['values']['current_pages']);
+
   $insertion_point = isset($form_state['values']['insertion_point']) ? (int) $form_state['values']['insertion_point'] : 0;
   $pages_to_renumber = array();
   foreach ($current_pages as $current_page) {
@@ -154,7 +158,6 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
       $pages_to_renumber[] = $current_page;
     }
   }
-
   // Extract file.
   $zip_file = file_load($form_state['values']['file']);
   $zip_uri = drupal_realpath($zip_file->uri);
@@ -168,8 +171,10 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
     return;
   }
   $zip->close();
+  file_delete($zip_file);
+
   $allowed_extensions = array('tif', 'tiff', 'jpg', 'jpeg');
-  $callback = function($element) use ($allowed_extensions) {
+  $callback = function($element) use($allowed_extensions) {
     $valid = TRUE;
     $ext = pathinfo($element, PATHINFO_EXTENSION);
     if (!in_array($ext, $allowed_extensions) ||preg_match('/__MACOSX/', $element)) {
@@ -183,12 +188,27 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
     $unfiltered[] = $file;
   }
   $files_to_add = array_values(array_filter($unfiltered, $callback));
+  // Sort files based on name.
+  $comparator = function ($a, $b) {
+    $file_a = pathinfo($a, PATHINFO_FILENAME);
+    $file_b = pathinfo($b, PATHINFO_FILENAME);
+    return ($file_a < $file_b) ? -1 : 1;
+  };
+  usort($files_to_add, $comparator);
+  $renumber_count = count($pages_to_renumber);
+  $add_count = count($files_to_add);
+  $status_message = t("adding @add page(s) to book.", array('@add' => $add_count));
+  if ($renumber_count) {
+    $status_message = t("renumbering @pages page(s) and", array('@pages' => $renumber_count)) . " " . $status_message;
+  }
   $batch = array(
-    'title' => t("Adding new pages to book."),
-    'progress_message' => t('Added @current pages out of @total.'),
+    'title' => ucfirst($status_message),
+    'progress_message' => t('Completed @current operations out of @total.'),
     'operations' => array(),
     'file' => drupal_get_path('module', 'islandora_book') . '/includes/manage_book.inc',
+    'finished' => 'islandora_book_zipped_upload_ingest_finished',
   );
+  $file_count = count($files_to_add);
   $config = array(
     'book_pid' => $book_pid,
     'destination_dir' => $destination_dir,
@@ -209,9 +229,10 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
     $config['image'] = $image;
     $batch['operations'][] = array(
       'islandora_book_add_pages',
-      array($repository, $config),
+      array($repository, $config, $destination_dir),
     );
   }
+
   batch_set($batch);
   batch_process();
 }
@@ -223,10 +244,14 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
  *   Active repository object to build NewFedoraObject
  * @param array $config
  *   Associative array of required values.
+ * @param string $pages_directory
+ *   This is a hack.  The finished callback needs this value so it can delete
+ *   the temporary directory used to store book pages.
  */
-function islandora_book_add_pages($repository, $config) {
+function islandora_book_add_pages($repository, $config, $pages_directory, &$context) {
   module_load_include('inc', 'islandora', 'includes/IslandoraTuque');
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+  $context['results']['pages_directory'] = $pages_directory;
 
   // Create object.
   $object = $repository->constructObject($config['namespace']);
@@ -258,4 +283,13 @@ function islandora_book_insert_sequence_gap($page_to_reindex, $offset) {
   $rels_ext = $page_object->relationships;
   islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isSequenceNumber', (string) $new_page_num, TRUE);
   islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isPageNumber', (string) $new_page_num, TRUE);
+}
+
+/**
+ * Batch 'finished' callback.
+ *
+ * Deletes the temporary files associated with the ingested pages.
+ */
+function islandora_book_zipped_upload_ingest_finished($success, $results, $operations) {
+  file_unmanaged_delete_recursive($results['pages_directory']);
 }
