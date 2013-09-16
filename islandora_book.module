@@ -45,7 +45,7 @@ function islandora_book_menu() {
       'page arguments' => array(2),
       'type' => MENU_LOCAL_ACTION,
       'access callback' => 'islandora_object_access',
-      'access arguments' => array(FEDORA_INGEST, 2),
+      'access arguments' => array(ISLANDORA_INGEST, 2),
       'file' => 'includes/manage_book.inc',
     ),
     'islandora/object/%islandora_object/manage/book/ingest_zipped' => array(
@@ -54,7 +54,7 @@ function islandora_book_menu() {
       'page arguments' => array(2),
       'type' => MENU_LOCAL_ACTION,
       'access callback' => 'islandora_object_access',
-      'access arguments' => array(FEDORA_INGEST, 2),
+      'access arguments' => array(ISLANDORA_INGEST, 2),
       'file' => 'includes/manage_book.inc',
     ),
     'islandora/object/%islandora_object/manage/book_page' => array(
@@ -103,6 +103,7 @@ function islandora_book_islandora_xml_form_builder_form_associations() {
     ),
   );
 }
+
 
 /**
  * Implements hook_islandora_xml_form_builder_forms().
@@ -224,7 +225,7 @@ function islandora_book_islandora_pageCModel_islandora_solr_object_result_alter(
     $book_pid = preg_replace('/info\:fedora\//', '', $search_results['solr_doc'][$parent_book_field_name][0], 1);
     $page_number = $search_results['solr_doc'][$page_number_field_name][0];
 
-    if (islandora_object_access(FEDORA_VIEW_OBJECTS, islandora_object_load($book_pid))) {
+    if (islandora_object_access(ISLANDORA_VIEW_OBJECTS, islandora_object_load($book_pid))) {
       $search_results['object_url'] = "islandora/object/$book_pid";
 
       // XXX: Won't handle fielded searches nicely... then again, if our
@@ -252,17 +253,6 @@ function islandora_book_islandora_pagecmodel_islandora_ingest_steps(array $form_
       'file' => 'includes/upload_page.form.inc',
     ),
   );
-}
-
-/**
- * Implements hook_form_alter().
- */
-function islandora_book_form_islandora_paged_content_upload_page_form_alter(&$form, &$form_state) {
-  $upload_size = min((int) ini_get('post_max_size'), (int) ini_get('upload_max_filesize'));
-  $extensions = array('tiff tif jpg jpeg');
-  $description = t('Select an image to upload.<br/>Files must be less than <b>@size MB.</b><br/>Allowed file types: <b>@ext.</b>', array('@size' => $upload_size, '@ext' => $extensions[0]));
-  $form['file']['#upload_validators']['file_validate_extensions'][0] = $extensions[0];
-  $form['file']['#description'] = $description;
 }
 
 /**
@@ -341,6 +331,12 @@ function islandora_book_islandora_pagecmodel_islandora_derivative(AbstractObject
       'function' => array('islandora_paged_content_add_dimensions_relationships'),
       'file' => "$pc_mod_path/includes/utilities.inc",
     );
+    $derivatives[] = array(
+      'source_dsid' => 'TN',
+      'destination_dsid' => NULL,
+      'function' => array('islandora_paged_content_derive_thumbnail_on_parent'),
+      'file' => "$pc_mod_path/includes/derivatives.inc",
+    );
   }
 
   if ($derive['image'] && $is_tiff) {
@@ -377,13 +373,14 @@ function islandora_book_islandora_pagecmodel_islandora_derivative(AbstractObject
   return $derivatives;
 }
 
+
 /**
  * Implements hook_form_islandora_object_properties_form_alter().
  */
 function islandora_book_form_islandora_object_properties_form_alter(array &$form, array &$form_state) {
   $object = $form_state['object'];
   if (in_array('islandora:bookCModel', $object->models)) {
-    $form['delete']['#value'] = t('Permanently Delete Book');
+    $form['delete']['#value'] = t('Delete Book');
   }
 }
 
@@ -423,13 +420,6 @@ function islandora_book_islandora_delete_object_form_delete_pages_submit(array $
 }
 
 /**
- * Implements hook_islandora_update_related_objects_properties().
- */
-function islandora_book_islandora_bookCModel_islandora_update_related_objects_properties($object) {
-  return islandora_book_get_page_objects($object);
-}
-
-/**
  * Renders the Pages local menu task.
  *
  * @param AbstractObject $object
@@ -444,22 +434,4 @@ function islandora_book_pages_menu(AbstractObject $object) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   $pages = islandora_paged_content_get_pages($object);
   return theme('islandora_objects', array('objects' => array_keys($pages)));
-}
-
-/**
- * Gets all page objects associated with book object.
- *
- * @param AbstractObject $object
- *   book object
- *
- * @return array
- *   Array of pids identifying page objects assoivated with this book
- */
-function islandora_book_get_page_objects(AbstractObject $object) {
-  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
-  $get_pid = function($o) {
-    return $o['pid'];
-  };
-  $pages = array_values(array_map($get_pid, islandora_paged_content_get_pages($object)));
-  return $pages;
 }
