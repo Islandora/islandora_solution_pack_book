@@ -127,36 +127,17 @@ class IslandoraBookPageDerivativesIngestTestCase extends IslandoraCollectionWebT
     );
     $this->assertDatastreams($page_object, $datastreams);
 
-    // Attempts to verify basic image datastreams.
     $datastreams = array(
-      'JPG',
-      'TN',
+      array('OBJ', 'tiff'),
+      array('PDF', 'pdf'),
+      array('JP2', 'jp2'),
+      array('JPG', 'image'),
+      array('TN', 'image'),
+      array('OCR', 'text', array('TEST TIFF', 14)),
+      array('HOCR', 'text', array('TEST', 14)),
+      array('HOCR', 'text', array('TIFF', 14)),
     );
-    $this->assertImageDatastreams($page_object, $datastreams);
-
-    // Attempts to verify the OBJ and JP2 datastreams.
-    $this->assertTiffDatastreams($page_object, array('OBJ'));
-    $this->assertJp2Datastreams($page_object, array('JP2'));
-
-    // Determines whether or not the PDF datastream is valid.
-    if (isset($page_object['PDF'])) {
-      $pdf = $page_object['PDF']->content;
-      $pdf_version = substr($pdf, 5, 3);
-      $this->assertTrue(substr($pdf, 0, 5) == '%PDF-', "PDF datastream asserts that it is a valid PDF file using PDF version {$pdf_version}", 'Islandora');
-      $pdf_streams = substr_count(bin2hex($pdf), '0a73747265616d0a');
-      $this->assertTrue($pdf_streams, "PDF datastream reports the existence of {$pdf_streams} PDF streams. An extremely low number could still indicate corruption.", 'Islandora');
-      $this->assertTrue(strpos(bin2hex($pdf), '0a2525454f460a'), 'PDF datastream reports the existence of the closing \'EOF\' tag required at the end of PDFs', 'Islandora');
-    }
-
-    // Determines if OCR and HOCR extraction was successful.
-    if (isset($page_object['OCR'])) {
-      $ocr = $page_object['OCR']->content;
-      $this->assertTrue(substr_count($ocr, 'TEST TIFF') == 14, 'OCR datastream contains the words \'TEST TIFF\' repeated 14 times', 'Islandora');
-    }
-    if (isset($page_object['HOCR'])) {
-      $hocr = $page_object['HOCR']->content;
-      $this->assertTrue(substr_count($hocr, 'TEST') == 14 && substr_count($hocr, 'TIFF') == 14, 'HOCR datastream contains the words \'TEST TIFF\' repeated 14 times', 'Islandora');
-    }
+    $this->validateDatastreams($page_object, $datastreams);
 
     $this->deleteObject($book_object, 'Delete Book');
     $this->deleteTestCollection($collectionpid);
