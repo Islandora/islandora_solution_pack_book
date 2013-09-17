@@ -194,12 +194,26 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
     return ($file_a < $file_b) ? -1 : 1;
   };
   usort($files_to_add, $comparator);
+
   $renumber_count = count($pages_to_renumber);
   $add_count = count($files_to_add);
-  $status_message = t("adding @add page(s) to book.", array('@add' => $add_count));
+  $status_message = format_plural(
+    $add_count,
+    'adding 1 page to book',
+    'adding @count pages to book'
+  );
+
   if ($renumber_count) {
-    $status_message = t("renumbering @pages page(s) and", array('@pages' => $renumber_count)) . " " . $status_message;
+    $status_message = format_plural(
+      $renumber_count,
+      'Renumbering 1 page and @adding_message.',
+      'Renumbering @count pages and @adding_message.',
+      array(
+        '@adding_message' => $status_message,
+      )
+    );
   }
+
   $batch = array(
     'title' => ucfirst($status_message),
     'progress_message' => t('Completed @current operations out of @total.'),
