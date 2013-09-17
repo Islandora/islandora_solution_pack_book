@@ -174,10 +174,11 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
   file_delete($zip_file);
 
   $allowed_extensions = array('tif', 'tiff', 'jpg', 'jpeg');
-  $callback = function($element) use($allowed_extensions) {
+  $callback = function ($element) use ($allowed_extensions) {
     $valid = TRUE;
     $ext = pathinfo($element, PATHINFO_EXTENSION);
-    if (!in_array($ext, $allowed_extensions) ||preg_match('/__MACOSX/', $element)) {
+    $ext = drupal_strtolower($ext);
+    if (!in_array($ext, $allowed_extensions) || preg_match('/__MACOSX/', $element)) {
       $valid = FALSE;
     }
     return $valid;
