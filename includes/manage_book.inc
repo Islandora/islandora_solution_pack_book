@@ -175,13 +175,11 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
 
   $allowed_extensions = array('tif', 'tiff', 'jpg', 'jpeg');
   $callback = function ($element) use ($allowed_extensions) {
-    $valid = TRUE;
     $ext = pathinfo($element, PATHINFO_EXTENSION);
     $ext = drupal_strtolower($ext);
-    if (!in_array($ext, $allowed_extensions) || preg_match('/__MACOSX/', $element)) {
-      $valid = FALSE;
-    }
-    return $valid;
+
+    // An allowed extension and does /not/ contain __MACOSX.
+    return in_array($ext, $allowed_extensions) && preg_match('/__MACOSX/', $element) === 0;
   };
 
   $objects = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($destination_dir), RecursiveIteratorIterator::SELF_FIRST);
