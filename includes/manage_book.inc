@@ -214,40 +214,44 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
     );
   }
 
-  $batch = array(
-    'title' => ucfirst($status_message),
-    'progress_message' => t('Completed @current operations out of @total.'),
-    'operations' => array(),
-    'file' => drupal_get_path('module', 'islandora_book') . '/includes/manage_book.inc',
-    'finished' => 'islandora_book_zipped_upload_ingest_finished',
-  );
-  $file_count = count($files_to_add);
-  $config = array(
-    'book_pid' => $book_pid,
-    'destination_dir' => $destination_dir,
-    'namespace' => $namespace,
-    'language' => $form_state['values']['language'],
-  );
-  $offset = count($files_to_add);
-  if (isset($pages_to_renumber[0])) {
-    foreach ($pages_to_renumber as $page) {
+  if ($add_count > 0) {
+    $batch = array(
+      'title' => ucfirst($status_message),
+      'progress_message' => t('Completed @current operations out of @total.'),
+      'operations' => array(),
+      'file' => drupal_get_path('module', 'islandora_book') . '/includes/manage_book.inc',
+      'finished' => 'islandora_book_zipped_upload_ingest_finished',
+    );
+    $file_count = count($files_to_add);
+    $config = array(
+      'book_pid' => $book_pid,
+      'destination_dir' => $destination_dir,
+      'namespace' => $namespace,
+      'language' => $form_state['values']['language'],
+    );
+    $offset = count($files_to_add);
+    if (isset($pages_to_renumber[0])) {
+      foreach ($pages_to_renumber as $page) {
+        $batch['operations'][] = array(
+          'islandora_book_insert_sequence_gap',
+          array($page, $offset),
+        );
+      }
+    }
+    foreach ($files_to_add as $image) {
+      $config['page_number'] = ++$insertion_point;
+      $config['image'] = $image;
       $batch['operations'][] = array(
-        'islandora_book_insert_sequence_gap',
-        array($page, $offset),
+        'islandora_book_add_pages',
+        array($repository, $config, $destination_dir),
       );
     }
+   
+    batch_set($batch);
   }
-  foreach ($files_to_add as $image) {
-    $config['page_number'] = ++$insertion_point;
-    $config['image'] = $image;
-    $batch['operations'][] = array(
-      'islandora_book_add_pages',
-      array($repository, $config, $destination_dir),
-    );
+  else {
+    drupal_set_message(t('No files were found to add, in the provided ZIP file.'), 'warning');
   }
-
-  batch_set($batch);
-  batch_process();
 }
 
 /**
