@@ -246,7 +246,7 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
         array($repository, $config, $destination_dir),
       );
     }
-   
+
     batch_set($batch);
   }
   else {
