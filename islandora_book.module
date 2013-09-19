@@ -255,24 +255,13 @@ function islandora_book_islandora_pagecmodel_islandora_ingest_steps(array $form_
 }
 
 /**
- * Implements hook_form_alter().
- */
-function islandora_book_form_islandora_paged_content_upload_page_form_alter(&$form, &$form_state) {
-  $upload_size = min((int) ini_get('post_max_size'), (int) ini_get('upload_max_filesize'));
-  $extensions = array('tiff tif jpg jpeg');
-  $description = t('Select an image to upload.<br/>Files must be less than <b>@size MB.</b><br/>Allowed file types: <b>@ext.</b>', array('@size' => $upload_size, '@ext' => $extensions[0]));
-  $form['file']['#upload_validators']['file_validate_extensions'][0] = $extensions[0];
-  $form['file']['#description'] = $description;
-}
-
-/**
  * Implements hook_islandora_derivative().
  *
  * XXX: Should add in ability to regenerate PDFs as well... No reliable way to
  * kick off a batch though...
  */
 function islandora_book_islandora_bookcmodel_islandora_derivative() {
-  $pc_mod_path = drupal_get_path('module', 'islandora_paged_content');
+  $pc_module_path = drupal_get_path('module', 'islandora_paged_content');
 
   $derivatives = array();
 
@@ -284,7 +273,7 @@ function islandora_book_islandora_bookcmodel_islandora_derivative() {
       'source_dsid' => NULL,
       'destination_dsid' => 'TN',
       'function' => array('islandora_paged_content_derive_thumbnail_of_parent'),
-      'file' => "$pc_mod_path/includes/derivatives.inc",
+      'file' => "$pc_module_path/includes/derivatives.inc",
     );
   }
 
@@ -295,92 +284,8 @@ function islandora_book_islandora_bookcmodel_islandora_derivative() {
  * Implements hook_islandora_derivative().
  */
 function islandora_book_islandora_pagecmodel_islandora_derivative(AbstractObject $object = NULL) {
-  $is_tiff = preg_match('/image\/tif?f/i', $object['OBJ']->mimeType);
-  $is_jpg = preg_match('/image\/jpe?g/i', $object['OBJ']->mimeType);
-  $pc_mod_path = drupal_get_path('module', 'islandora_paged_content');
-  $li_mod_path = drupal_get_path('module', 'islandora_large_image');
-  $basic_image_mod_path = drupal_get_path('module', 'islandora_basic_image');
-  $ocr_mod_path = drupal_get_path('module', 'islandora_ocr');
-  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
-  $derive = islandora_paged_content_get_enabled_ingest_derivatives('islandora_book');
-  $derivatives = array();
-
-  if ($derive['pdf']) {
-    $derivatives[] = array(
-      'source_dsid' => 'OBJ',
-      'destination_dsid' => 'PDF',
-      'function' => array('islandora_paged_content_derivatives_pdf'),
-      'file' => "$pc_mod_path/includes/derivatives.inc",
-    );
-  }
-
-  if ($derive['ocr']) {
-    $derivatives[] = array(
-      'source_dsid' => 'OBJ',
-      'destination_dsid' => 'OCR',
-      'function' => array('islandora_ocr_derive_ocr'),
-      'file' => "$ocr_mod_path/includes/derivatives.inc",
-    );
-    $derivatives[] = array(
-      'source_dsid' => 'OBJ',
-      'destination_dsid' => 'HOCR',
-      'function' => array('islandora_ocr_derive_hocr'),
-      'file' => "$ocr_mod_path/includes/derivatives.inc",
-    );
-  }
-  if ($derive['image']) {
-    $derivatives[] = array(
-      'source_dsid' => 'OBJ',
-      'destination_dsid' => 'JP2',
-      'function' => array('islandora_large_image_create_jp2_derivative'),
-      'file' => "$li_mod_path/includes/derivatives.inc",
-    );
-    $derivatives[] = array(
-      'source_dsid' => 'JP2',
-      'destination_dsid' => NULL,
-      'function' => array('islandora_paged_content_add_dimensions_relationships'),
-      'file' => "$pc_mod_path/includes/utilities.inc",
-    );
-    $derivatives[] = array(
-      'source_dsid' => 'TN',
-      'destination_dsid' => NULL,
-      'function' => array('islandora_paged_content_derive_thumbnail_on_parent'),
-      'file' => "$pc_mod_path/includes/derivatives.inc",
-    );
-  }
-
-  if ($derive['image'] && $is_tiff) {
-    $derivatives[] = array(
-      'source_dsid' => 'OBJ',
-      'destination_dsid' => 'TN',
-      'function' => array('islandora_large_image_create_tn_derivative'),
-      'file' => "$li_mod_path/includes/derivatives.inc",
-    );
-    $derivatives[] = array(
-      'source_dsid' => 'OBJ',
-      'destination_dsid' => 'JPG',
-      'function' => array('islandora_large_image_create_jpg_derivative'),
-      'file' => "$li_mod_path/includes/derivatives.inc",
-    );
-  }
-
-  if ($derive['image'] && $is_jpg) {
-    $derivatives[] = array(
-      'source_dsid' => 'OBJ',
-      'destination_dsid' => 'TN',
-      'function' => array('islandora_basic_image_create_thumbnail'),
-      'file' => "$basic_image_mod_path/includes/derivatives.inc",
-    );
-
-    $derivatives[] = array(
-      'source_dsid' => 'OBJ',
-      'destination_dsid' => 'JPG',
-      'function' => array('islandora_basic_image_create_medium_size'),
-      'file' => "$basic_image_mod_path/includes/derivatives.inc",
-    );
-  }
-
-  return $derivatives;
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilties');
+  return islandora_paged_content_page_derivatives($object);
 }
 
 /**
@@ -444,3 +349,4 @@ function islandora_book_pages_menu(AbstractObject $object) {
   $pages = islandora_paged_content_get_pages($object);
   return theme('islandora_objects', array('objects' => array_keys($pages)));
 }
+
