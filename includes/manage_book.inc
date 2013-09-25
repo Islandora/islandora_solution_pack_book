@@ -173,7 +173,7 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
   $zip->close();
   file_delete($zip_file);
 
-  $allowed_extensions = array('tif', 'tiff', 'jpg', 'jpeg');
+  $allowed_extensions = array('tif', 'tiff', 'jpg', 'jpeg', 'jp2');
   $callback = function($element) use($allowed_extensions) {
     $valid = TRUE;
     $ext = pathinfo($element, PATHINFO_EXTENSION);
