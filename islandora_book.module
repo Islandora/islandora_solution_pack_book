@@ -294,7 +294,7 @@ function islandora_book_islandora_pagecmodel_islandora_derivative(AbstractObject
 function islandora_book_form_islandora_object_properties_form_alter(array &$form, array &$form_state) {
   $object = $form_state['object'];
   if (in_array('islandora:bookCModel', $object->models)) {
-    $form['delete']['#value'] = t('Permanently Delete Book');
+    $form['delete']['#value'] = t('Delete Book');
   }
 }
 
