@@ -173,14 +173,13 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
   $zip->close();
   file_delete($zip_file);
 
-  $allowed_extensions = array('tif', 'tiff', 'jpg', 'jpeg');
-  $callback = function($element) use($allowed_extensions) {
-    $valid = TRUE;
+  $allowed_extensions = array('tif', 'tiff', 'jpg', 'jpeg', 'jp2');
+  $callback = function ($element) use ($allowed_extensions) {
     $ext = pathinfo($element, PATHINFO_EXTENSION);
-    if (!in_array($ext, $allowed_extensions) ||preg_match('/__MACOSX/', $element)) {
-      $valid = FALSE;
-    }
-    return $valid;
+    $ext = drupal_strtolower($ext);
+
+    // An allowed extension and does /not/ contain __MACOSX.
+    return in_array($ext, $allowed_extensions) && preg_match('/__MACOSX/', $element) === 0;
   };
 
   $objects = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($destination_dir), RecursiveIteratorIterator::SELF_FIRST);
@@ -195,46 +194,64 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
     return ($file_a < $file_b) ? -1 : 1;
   };
   usort($files_to_add, $comparator);
+
   $renumber_count = count($pages_to_renumber);
   $add_count = count($files_to_add);
-  $status_message = t("adding @add page(s) to book.", array('@add' => $add_count));
+  $status_message = format_plural(
+    $add_count,
+    'adding 1 page to book',
+    'adding @count pages to book'
+  );
+
   if ($renumber_count) {
-    $status_message = t("renumbering @pages page(s) and", array('@pages' => $renumber_count)) . " " . $status_message;
-  }
-  $batch = array(
-    'title' => ucfirst($status_message),
-    'progress_message' => t('Completed @current operations out of @total.'),
-    'operations' => array(),
-    'file' => drupal_get_path('module', 'islandora_book') . '/includes/manage_book.inc',
-    'finished' => 'islandora_book_zipped_upload_ingest_finished',
-  );
-  $file_count = count($files_to_add);
-  $config = array(
-    'book_pid' => $book_pid,
-    'destination_dir' => $destination_dir,
-    'namespace' => $namespace,
-    'language' => $form_state['values']['language'],
-  );
-  $offset = count($files_to_add);
-  if (isset($pages_to_renumber[0])) {
-    foreach ($pages_to_renumber as $page) {
-      $batch['operations'][] = array(
-        'islandora_book_insert_sequence_gap',
-        array($page, $offset),
-      );
-    }
-  }
-  foreach ($files_to_add as $image) {
-    $config['page_number'] = ++$insertion_point;
-    $config['image'] = $image;
-    $batch['operations'][] = array(
-      'islandora_book_add_pages',
-      array($repository, $config, $destination_dir),
+    $status_message = format_plural(
+      $renumber_count,
+      'Renumbering 1 page and @adding_message.',
+      'Renumbering @count pages and @adding_message.',
+      array(
+        '@adding_message' => $status_message,
+      )
     );
   }
 
-  batch_set($batch);
-  batch_process();
+  if ($add_count > 0) {
+    $batch = array(
+      'title' => ucfirst($status_message),
+      'progress_message' => t('Completed @current operations out of @total.'),
+      'operations' => array(),
+      'file' => drupal_get_path('module', 'islandora_book') . '/includes/manage_book.inc',
+      'finished' => 'islandora_book_zipped_upload_ingest_finished',
+    );
+    $file_count = count($files_to_add);
+    $config = array(
+      'book_pid' => $book_pid,
+      'destination_dir' => $destination_dir,
+      'namespace' => $namespace,
+      'language' => $form_state['values']['language'],
+    );
+    $offset = count($files_to_add);
+    if (isset($pages_to_renumber[0])) {
+      foreach ($pages_to_renumber as $page) {
+        $batch['operations'][] = array(
+          'islandora_book_insert_sequence_gap',
+          array($page, $offset),
+        );
+      }
+    }
+    foreach ($files_to_add as $image) {
+      $config['page_number'] = ++$insertion_point;
+      $config['image'] = $image;
+      $batch['operations'][] = array(
+        'islandora_book_add_pages',
+        array($repository, $config, $destination_dir),
+      );
+    }
+
+    batch_set($batch);
+  }
+  else {
+    drupal_set_message(t('No files were found to add, in the provided ZIP file.'), 'warning');
+  }
 }
 
 /**
