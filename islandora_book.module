@@ -104,17 +104,12 @@ function islandora_book_islandora_xml_form_builder_form_associations() {
   );
 }
 
-
 /**
  * Implements hook_islandora_xml_form_builder_forms().
  */
 function islandora_book_islandora_xml_form_builder_forms() {
   $module_path = drupal_get_path('module', 'islandora_book');
-  return array(
-    'Islandora Book MODS Form' => array(
-      'form_file' => "$module_path/data/forms/book_form_mods.xml",
-    ),
-  );
+  return array('Islandora Book MODS Form' => array('form_file' => "$module_path/data/forms/book_form_mods.xml"));
 }
 
 /**
@@ -266,7 +261,7 @@ function islandora_book_islandora_pagecmodel_islandora_ingest_steps(array $form_
  * kick off a batch though...
  */
 function islandora_book_islandora_bookcmodel_islandora_derivative() {
-  $pc_mod_path = drupal_get_path('module', 'islandora_paged_content');
+  $pc_module_path = drupal_get_path('module', 'islandora_paged_content');
 
   $derivatives = array();
 
@@ -277,10 +272,8 @@ function islandora_book_islandora_bookcmodel_islandora_derivative() {
     $derivatives[] = array(
       'source_dsid' => NULL,
       'destination_dsid' => 'TN',
-      'function' => array(
-        'islandora_paged_content_derive_thumbnail_of_parent',
-      ),
-      'file' => "$pc_mod_path/includes/derivatives.inc",
+      'function' => array('islandora_paged_content_derive_thumbnail_of_parent'),
+      'file' => "$pc_module_path/includes/derivatives.inc",
     );
   }
 
@@ -290,86 +283,9 @@ function islandora_book_islandora_bookcmodel_islandora_derivative() {
 /**
  * Implements hook_islandora_derivative().
  */
-function islandora_book_islandora_pagecmodel_islandora_derivative() {
-  $pc_mod_path = drupal_get_path('module', 'islandora_paged_content');
-  $li_mod_path = drupal_get_path('module', 'islandora_large_image');
-  $ocr_mod_path = drupal_get_path('module', 'islandora_ocr');
+function islandora_book_islandora_pagecmodel_islandora_derivative(AbstractObject $object = NULL) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
-  $derive = islandora_paged_content_get_enabled_ingest_derivatives('islandora_book');
-  $derivatives = array();
-
-  if ($derive['pdf']) {
-    $derivatives[] = array(
-      'source_dsid' => 'OBJ',
-      'destination_dsid' => 'PDF',
-      'function' => array(
-        'islandora_paged_content_derivatives_pdf',
-      ),
-      'file' => "$pc_mod_path/includes/derivatives.inc",
-    );
-  }
-  if ($derive['image']) {
-    $derivatives[] = array(
-      'source_dsid' => 'OBJ',
-      'destination_dsid' => 'TN',
-      'function' => array(
-        'islandora_large_image_create_tn_derivative',
-      ),
-      'file' => "$li_mod_path/includes/derivatives.inc",
-    );
-    $derivatives[] = array(
-      'source_dsid' => 'OBJ',
-      'destination_dsid' => 'JPG',
-      'function' => array(
-        'islandora_large_image_create_jpg_derivative',
-      ),
-      'file' => "$li_mod_path/includes/derivatives.inc",
-    );
-    $derivatives[] = array(
-      'source_dsid' => 'OBJ',
-      'destination_dsid' => 'JP2',
-      'function' => array(
-        'islandora_large_image_create_jp2_derivative',
-      ),
-      'file' => "$li_mod_path/includes/derivatives.inc",
-    );
-    $derivatives[] = array(
-      'source_dsid' => 'JP2',
-      'destination_dsid' => NULL,
-      'function' => array(
-        'islandora_paged_content_add_dimensions_relationships',
-      ),
-      'file' => "$pc_mod_path/includes/utilities.inc",
-    );
-    $derivatives[] = array(
-      'source_dsid' => 'TN',
-      'destination_dsid' => NULL,
-      'function' => array(
-        'islandora_paged_content_derive_thumbnail_on_parent',
-      ),
-      'file' => "$pc_mod_path/includes/derivatives.inc",
-    );
-  }
-  if ($derive['ocr']) {
-    $derivatives[] = array(
-      'source_dsid' => 'OBJ',
-      'destination_dsid' => 'OCR',
-      'function' => array(
-        'islandora_ocr_derive_ocr',
-      ),
-      'file' => "$ocr_mod_path/includes/derivatives.inc",
-    );
-    $derivatives[] = array(
-      'source_dsid' => 'OBJ',
-      'destination_dsid' => 'HOCR',
-      'function' => array(
-        'islandora_ocr_derive_hocr',
-      ),
-      'file' => "$ocr_mod_path/includes/derivatives.inc",
-    );
-  }
-
-  return $derivatives;
+  return islandora_paged_content_page_derivatives($object, 'islandora_book');
 }
 
 /**
