@@ -349,3 +349,34 @@ function islandora_book_pages_menu(AbstractObject $object) {
   $pages = islandora_paged_content_get_pages($object);
   return theme('islandora_objects', array('objects' => array_keys($pages)));
 }
+
+/**
+ * Implements hook_islandora_update_related_objects_properties().
+ *
+ * @param FedoraObject $object
+ *   FedoraObject representing the book.
+ *
+ * @return array
+ *   Array of pids representing page objects associated with the book object.
+ */
+function islandora_book_islandora_bookCModel_islandora_update_related_objects_properties($object) {
+  return islandora_book_get_page_objects($object);
+}
+
+/**
+ * Gets all page objects associated with book object.
+ *
+ * @param FedoraObject $object
+ *   book object
+ *
+ * @return array
+ *   Array of pids identifying page objects associated with this book
+ */
+function islandora_book_get_page_objects($object) {
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+  $get_pid = function($o) {
+    return $o['pid'];
+  };
+  $pages = array_values(array_map($get_pid, islandora_paged_content_get_pages($object)));
+  return $pages;
+}
