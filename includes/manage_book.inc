@@ -208,9 +208,7 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
       $renumber_count,
       'Renumbering 1 page and @adding_message.',
       'Renumbering @count pages and @adding_message.',
-      array(
-        '@adding_message' => $status_message,
-      )
+      array('@adding_message' => $status_message)
     );
   }
 
