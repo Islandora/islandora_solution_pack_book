@@ -238,10 +238,6 @@ function islandora_drush_update_book_rels_stream($book_pid, $action = 'UPDATE') 
       $item->forget();
     }
 
-
-
-//islandora_update_book_create_rels($book_pid, $pid, $page_num++);//used by UPEI only will overwrite existing rels
-
     time_nanosleep(0, 200000000); //give the server some rest between calls
   }
 }
@@ -287,40 +283,6 @@ function islandora_update_book_get_relationships(&$item, $namespaces = array(REL
   }
 
   return $relationships;
-}
-
-/**
- * this function used by UPEI when we want to minimize jms events.  we update the relationships
- * in one call to modify datastream instead of many to add relationship. This shouldn't be used
- * in general use cases as users may have added other rels statements and this will wipe out the other
- * statements if they exist.
- * @param string $book_pid
- * @param string $pid
- * @param string $page_number
- */
-function islandora_update_book_create_rels($book_pid, $pid, $page_number) {
-  $rdf_string = <<<RDF
-  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-<rdf:Description rdf:about="info:fedora/$pid">
-	<hasModel xmlns="info:fedora/fedora-system:def/model#" rdf:resource="info:fedora/islandora:pageCModel"></hasModel>
-	<isSequenceNumber xmlns="http://islandora.ca/ontology/relsext#">$page_number</isSequenceNumber>
-	<isMemberOf xmlns="info:fedora/fedora-system:def/relations-external#" rdf:resource="info:fedora/$book_pid"></isMemberOf>
-	<isSection xmlns="http://islandora.ca/ontology/relsext#">1</isSection>
-	<isPageOf xmlns="http://islandora.ca/ontology/relsext#" rdf:resource="inf:fedora/$book_pid"></isPageOf>
-  <isPageNumber xmlns="http://islandora.ca/ontology/relsext#">$page_number</isPageNumber>
-</rdf:Description>
-</rdf:RDF>
-RDF;
-//drush_print($rdf_string);
-  $item = new Fedora_Item($pid);
-  $value = $item->modify_datastream_by_value($rdf_string, 'RELS-EXT', 'RELS-EXT', 'text/xml', $force = FALSE, $logMessage = 'Modified by Drush using Islandora API', $quiet = FALSE);
-  if (isset($value)) {
-    drush_print('successfully updated RELS-EXT for ' . $pid);
-  }
-  else {
-    drush_print('Error updating RELS-EXT for ' . $pid);
-  }
-  $item->forget();
 }
 
 /**
