@@ -33,4 +33,6 @@ script:
   - $ISLANDORA_DIR/tests/scripts/line_endings.sh sites/all/modules/islandora_solution_pack_book
   - drush coder-review --reviews=production,security,style,i18n,potx,sniffer islandora_book
   - phpcpd --names *.module,*.inc,*.test sites/all/modules/islandora_solution_pack_book
+  - drush vset islandora_ocr_tesseract 'which tesseract'
+  - drush vset islandora_book_tesseract 'which tesseract'
   - drush test-run --user=1 --uri=http://localhost:8081 "Islandora Book"
