@@ -28,11 +28,11 @@ before_install:
   - ln -s $HOME/islandora_solution_pack_large_image sites/all/modules/islandora_solution_pack_large_image
   - drush dl imagemagick
   - drush en --user=1 --yes islandora_ocr islandora_large_image imagemagick islandora_book islandora_basic_collection
+  - drush vset islandora_ocr_tesseract `which tesseract`
+  - drush vset islandora_book_tesseract `which tesseract`
 script:
   - ant -buildfile sites/all/modules/islandora_solution_pack_book/build.xml lint
   - $ISLANDORA_DIR/tests/scripts/line_endings.sh sites/all/modules/islandora_solution_pack_book
   - drush coder-review --reviews=production,security,style,i18n,potx,sniffer islandora_book
   - phpcpd --names *.module,*.inc,*.test sites/all/modules/islandora_solution_pack_book
-  - drush vset islandora_ocr_tesseract 'which tesseract'
-  - drush vset islandora_book_tesseract 'which tesseract'
   - drush test-run --user=1 --uri=http://localhost:8081 "Islandora Book"
