@@ -63,12 +63,12 @@ class IslandoraBookPageDerivativesIngestTestCase extends IslandoraCollectionWebT
     variable_set('image_toolkit', 'imagemagick');
     variable_set('imagemagick_convert', $this->imagemagick_convert);
     variable_set('islandora_book_ingest_derivatives', array(
-      'pdf',
-      'image',
-      'ocr',
+      'pdf' => TRUE,
+      'image' => TRUE,
+      'ocr' => TRUE,
     ));
     variable_set('islandora_ocr_tesseract', $this->islandora_ocr_tesseract);
-    variable_set('islandora_ocr_tesseract_enabled_languages', array('eng'));
+    variable_set('islandora_ocr_tesseract_enabled_languages', array('eng' => TRUE));
 
     // Attempts to create the book.
     $path = 'islandora/object/' . $collectionpid . '/manage/overview/ingest';
