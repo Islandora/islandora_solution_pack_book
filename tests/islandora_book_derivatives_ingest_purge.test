@@ -27,8 +27,8 @@ class IslandoraBookPageDerivativesIngestTestCase extends IslandoraCollectionWebT
    * @see IslandoraWebTestCase::setUp()
    */
   public function setUp() {
-    $this->imagemagick_convert = variable_get('imagemagick_convert');
-    $this->islandora_ocr_tesseract = variable_get('islandora_ocr_tesseract');
+    $this->imagemagick_convert = variable_get('imagemagick_convert', '/usr/bin/convert');
+    $this->islandora_ocr_tesseract = variable_get('islandora_ocr_tesseract', '/usr/local/bin/tesseract');
     parent::setUp(array(
       'islandora',
       'islandora_basic_collection',

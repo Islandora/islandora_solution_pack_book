@@ -22,6 +22,8 @@ before_install:
   - ln -s $TRAVIS_BUILD_DIR sites/all/modules/islandora_solution_pack_book
   - ln -s $HOME/islandora_paged_content sites/all/modules/islandora_paged_content
   - ln -s $HOME/islandora_solution_pack_collection sites/all/modules/islandora_solution_pack_collection
+  - ln -s $HOME/islandora_ocr sites/all/modules/islandora_ocr
+  - ln -s $HOME/islandora_solution_pack_large_image sites/all/modules/islandora_solution_pack_large_image
   - drush dl imagemagick
   - drush en --user=1 --yes islandora_ocr islandora_large_image imagemagick islandora_book islandora_basic_collection
 script:
