@@ -127,7 +127,8 @@ function islandora_book_islandora_required_objects(IslandoraTuque $connection) {
   $datastream = $page_content_model->constructDatastream('DS-COMPOSITE-MODEL', 'M');
   $datastream->label = 'DS-COMPOSITE-MODEL';
   $datastream->mimetype = 'text/xml';
-  $datastream->setContentFromFile("$datastreams_path/islandora_pageCModel_ds_composite_model.xml", FALSE);
+  $paged_content_path = drupal_get_path('module', 'islandora_paged_content');
+  $datastream->setContentFromFile("$paged_content_path/xml/islandora_pageCModel_ds_composite_model.xml", FALSE);
   $page_content_model->ingestDatastream($datastream);
   // ISLANDORA-CM Datastream.
   $datastream = $page_content_model->constructDatastream('ISLANDORACM', 'M');
