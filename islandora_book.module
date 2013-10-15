@@ -320,17 +320,19 @@ function islandora_book_form_islandora_delete_object_form_alter(array &$form, ar
 function islandora_book_islandora_delete_object_form_delete_pages_submit(array $form, array &$form_state) {
   module_load_include('inc', 'islandora_paged_content', 'includes/batch');
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+  module_load_include('inc', 'islandora', 'includes/utilities');
+
   $object = $form_state['object'];
   $get_pid = function($o) {
     return $o['pid'];
   };
   $pages = array_values(array_map($get_pid, islandora_paged_content_get_pages($object)));
-  batch_set(islandora_paged_content_delete_pages_batch($object, $pages));
-  // Called from within this submit handler rather than from the Drupal Form API
-  // as we need the object to exist to generate the pages and if we run this.
-  // batch operation from a submit handler any submit handlers to be called
-  // afterwards will not get called, which is a bug/feature of the Form API.
-  islandora_delete_object_form_submit($form, $form_state);
+  $batch_delete = islandora_paged_content_delete_pages_batch($object, $pages);
+  $batch_delete['operations'][] = array('islandora_paged_content_delete_parent_object_operation', array($object->id));
+  batch_set($batch_delete);
+  $parents = islandora_get_parents_from_rels_ext($object);
+  $parent = array_pop($parents);
+  $form_state['redirect'] = isset($parent) ? "islandora/object/{$parent->id}" : 'islandora';
 }
 
 /**
