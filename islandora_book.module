@@ -78,12 +78,12 @@ function islandora_book_theme() {
     'islandora_book_book' => array(
       'variables' => array('object' => NULL),
       'file' => 'theme/theme.inc',
-      'template' => 'theme/islandora-book',
+      'template' => 'theme/islandora-book-book',
     ),
     'islandora_book_page' => array(
       'arguments' => array('object' => NULL),
       'file' => 'theme/theme.inc',
-      'template' => 'theme/islandora-page',
+      'template' => 'theme/islandora-book-page',
     ),
   );
 }
