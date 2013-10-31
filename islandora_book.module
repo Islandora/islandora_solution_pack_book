@@ -230,8 +230,8 @@ function islandora_book_islandora_pageCModel_islandora_solr_object_result_alter(
 
       // XXX: Won't handle fielded searches nicely... then again, if our
       // highlighting field is not the one being search on, this makes sense?
-      if ($query_processor->solrDefType == 'dismax') {
-        $search_results['object_url_fragment'] = "page/$page_number/mode/1up/search/" . $query_processor->solrQuery;
+      if ($query_processor->solrDefType == 'dismax' || $query_processor->solrDefType == 'edismax') {
+        $search_results['object_url_fragment'] = "page/$page_number/mode/1up/search/" . rawurlencode($query_processor->solrQuery);
       }
       else {
         $search_results['object_url_fragment'] = "page/$page_number/mode/1up/search/";
