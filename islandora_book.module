@@ -78,12 +78,12 @@ function islandora_book_theme() {
     'islandora_book_book' => array(
       'variables' => array('object' => NULL),
       'file' => 'theme/theme.inc',
-      'template' => 'theme/islandora-book',
+      'template' => 'theme/islandora-book-book',
     ),
     'islandora_book_page' => array(
       'arguments' => array('object' => NULL),
       'file' => 'theme/theme.inc',
-      'template' => 'theme/islandora-page',
+      'template' => 'theme/islandora-book-page',
     ),
   );
 }
@@ -127,7 +127,8 @@ function islandora_book_islandora_required_objects(IslandoraTuque $connection) {
   $datastream = $page_content_model->constructDatastream('DS-COMPOSITE-MODEL', 'M');
   $datastream->label = 'DS-COMPOSITE-MODEL';
   $datastream->mimetype = 'text/xml';
-  $datastream->setContentFromFile("$datastreams_path/islandora_pageCModel_ds_composite_model.xml", FALSE);
+  $paged_content_path = drupal_get_path('module', 'islandora_paged_content');
+  $datastream->setContentFromFile("$paged_content_path/xml/islandora_pageCModel_ds_composite_model.xml", FALSE);
   $page_content_model->ingestDatastream($datastream);
   // ISLANDORA-CM Datastream.
   $datastream = $page_content_model->constructDatastream('ISLANDORACM', 'M');
@@ -229,7 +230,9 @@ function islandora_book_islandora_pageCModel_islandora_solr_object_result_alter(
 
       // XXX: Won't handle fielded searches nicely... then again, if our
       // highlighting field is not the one being search on, this makes sense?
-      $search_results['object_url_fragment'] = "page/$page_number/mode/1up/search/" . rawurlencode($query_processor->solrQuery);
+      if ($query_processor->solrDefType == 'dismax' || $query_processor->solrDefType == 'edismax') {
+        $search_results['object_url_fragment'] = "page/$page_number/mode/1up/search/" . rawurlencode($query_processor->solrQuery);
+      }
     }
   }
 }
