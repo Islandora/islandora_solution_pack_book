@@ -74,7 +74,7 @@ function islandora_book_zipped_upload_form(array $form, array &$form_state, $boo
   $extensions = array('zip');
   $form = array();
   $derivatives = variable_get('islandora_book_ingest_derivatives', array('ocr'));
-  $do_ocr = in_array('ocr', $derivatives);
+  $do_ocr = in_array('ocr', $derivatives) && module_exists('islandora_ocr');
   $message = t("This sequence currently has @count pages. Additional pages will be appended to the end of the sequence by default. !break", array("@count" => $last_page_number, '!break' => '<br />'));
   $message .= t("Choose a number lower than @count to insert page(s) at a specific location in the sequence.", array("@count" => $last_page_number, '!break' => '<br />'));
 
