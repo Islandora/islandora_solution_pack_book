@@ -272,7 +272,11 @@ function islandora_book_add_pages($repository, $config, $pages_directory, &$cont
 
   // Create object.
   $object = $repository->constructObject($config['namespace']);
-  $object->label = pathinfo($config['image'], PATHINFO_FILENAME);
+  $label = pathinfo($config['image'], PATHINFO_FILENAME);
+  if (variable_get('islandora_paged_content_page_label', FALSE)) {
+    $label = $config['page_number'];
+  }
+  $object->label = $label;
   $ds_label = pathinfo($config['image'], PATHINFO_BASENAME);
   islandora_paged_content_update_datastream($object, $config['image'], 'OBJ', $ds_label, NULL, 'M', FALSE);
   $rels_ext = $object->relationships;
