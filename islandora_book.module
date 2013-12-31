@@ -189,6 +189,24 @@ function islandora_book_islandora_required_objects(IslandoraTuque $connection) {
 }
 
 /**
+ * Implemenets hook_islandora_xacml_editor_child_query().
+ */
+function islandora_book_islandora_bookcmodel_islandora_xacml_editor_child_query($object) {
+  $collection_query = 'select $object from <#ri> where
+        ($object <fedora-rels-ext:isMemberOfCollection> <info:fedora/' . $object->id . '> or
+        $object <fedora-rels-ext:isMemberOf> <info:fedora/' . $object->id . '>)
+        and $object <fedora-model:state> <info:fedora/fedora-system:def/model#Active>';
+
+  return array(
+    'collectionchildren' => array(
+      'type' => 'itql',
+      'query' => $collection_query,
+      'description' => t('All pages of this book (existing and new).'),
+    ),
+  );
+}
+
+/**
  * Implements hook_CMODEL_PID_islandora_view_object().
  */
 function islandora_book_islandora_bookcmodel_islandora_view_object($object) {
