@@ -359,3 +359,23 @@ function islandora_book_pages_menu(AbstractObject $object) {
   $pages = islandora_paged_content_get_pages($object);
   return theme('islandora_objects', array('objects' => array_keys($pages)));
 }
+
+/**
+ * Implements hook_islandora_xacml_editor_child_query().
+ */
+function islandora_book_islandora_bookCModel_islandora_xacml_editor_child_query(AbstractObject $object) {
+  $pages_query = <<<EOQ
+SELECT ?object from <#ri> WHERE
+{
+  ?object <fedora-rels-ext:isMemberOf> <info:fedora/{$object->id}>
+}
+EOQ;
+
+  return array(
+    'book_pages' => array(
+      'type' => 'sparql',
+      'query' => $pages_query,
+      'description' => t('All pages of this book (existing and new).'),
+    ),
+  );
+}
