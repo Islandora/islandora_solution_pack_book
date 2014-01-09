@@ -370,12 +370,12 @@ SELECT ?object from <#ri> WHERE
   ?object <fedora-rels-ext:isMemberOf> <info:fedora/{$object->id}>
 }
 EOQ;
-
   return array(
     'book_pages' => array(
       'type' => 'sparql',
       'query' => $pages_query,
       'description' => t('All pages of this book (existing and new).'),
+      'recurse' => TRUE,
     ),
   );
 }
