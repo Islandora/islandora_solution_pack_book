@@ -90,6 +90,10 @@ function islandora_book_theme() {
       'file' => 'theme/theme.inc',
       'template' => 'theme/islandora-book-page',
     ),
+    'islandora_book_page_img_print' => array(
+      'template' => 'theme/islandora-book-page-img-print',
+      'variables' => array('islandora_content' => NULL),
+    ),
   );
 }
 
@@ -378,4 +382,20 @@ EOQ;
       'recurse' => TRUE,
     ),
   );
+}
+
+/**
+ * Implements hook_islandora_view_print_object().
+ */
+function islandora_book_islandora_view_print_object($object) {
+  if (in_array('islandora:pageCModel', $object->models)) {
+    // Theme image separately.
+    $islandora_content = theme('image', array(
+        'title' => $object->label,
+        'path' => url("islandora/object/{$object->id}/datastream/JPG/view"),
+    ));
+    return theme('islandora_book_page_img_print', array(
+        'islandora_content' => $islandora_content,
+    ));
+  }
 }
