@@ -50,12 +50,17 @@ function islandora_book_menu() {
     ),
     'islandora/object/%islandora_object/manage/book/ingest_zipped' => array(
       'title' => 'Add Zipped Pages',
-      'page callback' => 'islandora_book_ingest_zipped_pages',
-      'page arguments' => array(2),
+      'page callback' => 'islandora_paged_content_ingest_zipped_pages',
+      'page arguments' => array(2,
+        array('tif', 'tiff', 'jpg', 'jpeg', 'jp2'),
+        'islandora:pageCModel',
+        variable_get('islandora_book_ingest_derivatives', array('ocr')),
+      ),
       'type' => MENU_LOCAL_ACTION,
       'access callback' => 'islandora_object_access',
       'access arguments' => array(ISLANDORA_INGEST, 2),
-      'file' => 'includes/manage_book.inc',
+      'file path' => drupal_get_path('module', 'islandora_paged_content'),
+      'file' => 'includes/manage_pages.inc',
     ),
     'islandora/object/%islandora_object/manage/book_page' => array(
       'title' => 'Page',
@@ -78,12 +83,16 @@ function islandora_book_theme() {
     'islandora_book_book' => array(
       'variables' => array('object' => NULL),
       'file' => 'theme/theme.inc',
-      'template' => 'theme/islandora-book',
+      'template' => 'theme/islandora-book-book',
     ),
     'islandora_book_page' => array(
       'arguments' => array('object' => NULL),
       'file' => 'theme/theme.inc',
-      'template' => 'theme/islandora-page',
+      'template' => 'theme/islandora-book-page',
+    ),
+    'islandora_book_page_img_print' => array(
+      'template' => 'theme/islandora-book-page-img-print',
+      'variables' => array('islandora_content' => NULL),
     ),
   );
 }
@@ -127,7 +136,8 @@ function islandora_book_islandora_required_objects(IslandoraTuque $connection) {
   $datastream = $page_content_model->constructDatastream('DS-COMPOSITE-MODEL', 'M');
   $datastream->label = 'DS-COMPOSITE-MODEL';
   $datastream->mimetype = 'text/xml';
-  $datastream->setContentFromFile("$datastreams_path/islandora_pageCModel_ds_composite_model.xml", FALSE);
+  $paged_content_path = drupal_get_path('module', 'islandora_paged_content');
+  $datastream->setContentFromFile("$paged_content_path/xml/islandora_pageCModel_ds_composite_model.xml", FALSE);
   $page_content_model->ingestDatastream($datastream);
   // ISLANDORA-CM Datastream.
   $datastream = $page_content_model->constructDatastream('ISLANDORACM', 'M');
@@ -229,7 +239,9 @@ function islandora_book_islandora_pageCModel_islandora_solr_object_result_alter(
 
       // XXX: Won't handle fielded searches nicely... then again, if our
       // highlighting field is not the one being search on, this makes sense?
-      $search_results['object_url_fragment'] = "page/$page_number/mode/1up/search/" . rawurlencode($query_processor->solrQuery);
+      if ($query_processor->solrDefType == 'dismax' || $query_processor->solrDefType == 'edismax') {
+        $search_results['object_url_fragment'] = "page/$page_number/mode/1up/search/" . rawurlencode($query_processor->solrQuery);
+      }
     }
   }
 }
@@ -320,17 +332,19 @@ function islandora_book_form_islandora_delete_object_form_alter(array &$form, ar
 function islandora_book_islandora_delete_object_form_delete_pages_submit(array $form, array &$form_state) {
   module_load_include('inc', 'islandora_paged_content', 'includes/batch');
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+  module_load_include('inc', 'islandora', 'includes/utilities');
+
   $object = $form_state['object'];
   $get_pid = function($o) {
     return $o['pid'];
   };
   $pages = array_values(array_map($get_pid, islandora_paged_content_get_pages($object)));
-  batch_set(islandora_paged_content_delete_pages_batch($object, $pages));
-  // Called from within this submit handler rather than from the Drupal Form API
-  // as we need the object to exist to generate the pages and if we run this.
-  // batch operation from a submit handler any submit handlers to be called
-  // afterwards will not get called, which is a bug/feature of the Form API.
-  islandora_delete_object_form_submit($form, $form_state);
+  $batch_delete = islandora_paged_content_delete_pages_batch($object, $pages);
+  $batch_delete['operations'][] = array('islandora_paged_content_delete_parent_object_operation', array($object->id));
+  batch_set($batch_delete);
+  $parents = islandora_get_parents_from_rels_ext($object);
+  $parent = array_pop($parents);
+  $form_state['redirect'] = isset($parent) ? "islandora/object/{$parent->id}" : 'islandora';
 }
 
 /**
@@ -348,4 +362,40 @@ function islandora_book_pages_menu(AbstractObject $object) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   $pages = islandora_paged_content_get_pages($object);
   return theme('islandora_objects', array('objects' => array_keys($pages)));
+}
+
+/**
+ * Implements hook_islandora_xacml_editor_child_query().
+ */
+function islandora_book_islandora_bookCModel_islandora_xacml_editor_child_query(AbstractObject $object) {
+  $pages_query = <<<EOQ
+SELECT ?object from <#ri> WHERE
+{
+  ?object <fedora-rels-ext:isMemberOf> <info:fedora/{$object->id}>
+}
+EOQ;
+  return array(
+    'book_pages' => array(
+      'type' => 'sparql',
+      'query' => $pages_query,
+      'description' => t('All pages of this book (existing and new).'),
+      'recurse' => TRUE,
+    ),
+  );
+}
+
+/**
+ * Implements hook_islandora_view_print_object().
+ */
+function islandora_book_islandora_view_print_object($object) {
+  if (in_array('islandora:pageCModel', $object->models)) {
+    // Theme image separately.
+    $islandora_content = theme('image', array(
+        'title' => $object->label,
+        'path' => url("islandora/object/{$object->id}/datastream/JPG/view"),
+    ));
+    return theme('islandora_book_page_img_print', array(
+        'islandora_content' => $islandora_content,
+    ));
+  }
 }
