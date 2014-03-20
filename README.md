@@ -1,108 +1,45 @@
-BUILD STATUS
-------------
-Current build status:
-[![Build Status](https://travis-ci.org/Islandora/islandora_solution_pack_book.png?branch=7.x)](https://travis-ci.org/Islandora/islandora_solution_pack_book)
+# Book Solution Pack [![Build Status](https://travis-ci.org/Islandora/islandora_solution_pack_book.png?branch=7.x)](https://travis-ci.org/Islandora/islandora_solution_pack_book)
 
-CI Server:
-http://jenkins.discoverygarden.ca
+## Introduction
 
-Book Solution Pack
-=========================
+Allows for the creation of book and page object (islandora:bookCModel,islandora:pageCModel). Books are essentially a collection Pages, containing only metadata and optionally a PDF file of the book. A Book's PDF can be generated from each page. Pages are based on an uploaded tiff of the page. From the uploaded TIFF its possible to generate images for use in the "Islandora Internet Archive Bookreader". It is also possible to generate PDF files per page. OCR and OCR coordinate data can also be generated from the uploaded TIFF.
 
-CONTENTS OF THIS FILE
----------------------
+## Requirements
 
- * summary
- * requirements
- * installation
- * configuration
- * customization
- * troubleshooting
- * faq
- * contact
- * sponsors
+This module requires the following modules/libraries:
 
+* [Islandora](https://github.com/islandora/islandora)
+* [Tuque](https://github.com/islandora/tuque)
+* [Islandora Paged Content](https://github.com/Islandora/islandora_paged_content)
+* [Islandora Large Image Solution Pack](https://github.com/Islandora/islandora_solution_pack_large_image)
+* [Islandora OCR](https://github.com/Islandora/islandora_ocr)
 
-SUMMARY
--------
+## Installation
 
-Book Solution Pack
+Install as usual, see [this](https://drupal.org/documentation/install/modules-themes/modules-7) for further information.
 
-This allows for the creation of book and page object (islandora:bookCModel,
-islandora:pageCModel). Books are essentially a collection Pages, containing
-only metadata and optionally a PDF file of the book. A Book's PDF can be
-generated from each page. Pages are based on an uploaded tiff of the page.
-From the uploaded TIFF its possible to generate images for use in the
-"Islandora Internet Archive Bookreader". It is also possible to generate PDF
-files per page. OCR and OCR coordinate data can also be generated from the
-uploaded TIFF.
+## Configuration
 
-REQUIREMENTS
-------------
+Select configuration options for page derivatives, Parent Solr Field, and select a viewer for the book objec and page objects in Administration » Islandora » Book Collection (admin/islandora/book).
 
-  * Islandora
-  * Islandora Paged Content
+![Configuration](http://i.imgur.com/7ICJfeZ.png)
 
-INSTALLATION
-------------
+## Troubleshooting/Issues
 
-Tesseract:
+Having problems or solved a problem? Check out the Islandora google groups for a solution.
 
-Tesseract is an OCR engine that was developed at HP Labs between 1985 and 1995
-it is currently being developed at Google. Recognized as one of the most
-accurate open source OCR engines available, Tesseract will read binary, grey, or
-colour images and output text.
+* [Islandora Group](https://groups.google.com/forum/?hl=en&fromgroups#!forum/islandora)
+* [Islandora Dev Group](https://groups.google.com/forum/?hl=en&fromgroups#!forum/islandora-dev)
 
-A TIFF reader that will read uncompressed TIFF images is also included.
-Islandora Book Solution Pack currently uses Tesseract version 3.2, which can be
-obtained from the project home page. Lower versions are not supported.
+## Maintainers/Sponsors
+Current maintainers:
 
-http://code.google.com/p/tesseract-ocr/
+* [Alan Stanley](https://github.com/ajstanley)
 
-Installation will differ depending on your operating system; please see the
-README Wiki for detailed instructions.
+## Development
 
-http://code.google.com/p/tesseract-ocr/wiki/ReadMe
+If you would like to contribute to this module, please check out our helpful [Documentation for Developers](https://github.com/Islandora/islandora/wiki#wiki-documentation-for-developers) info, as well as our [Developers](http://islandora.ca/developers) section on the Islandora.ca site.
 
-Gimp:
+## License
 
-GIMP is the GNU Image Manipulation Program. It is a freely distributed piece of
-software for such tasks as photo retouching, image composition and image
-authoring. It works on many operating systems, in many languages.
-
-Islandora Book Solution Pack currently uses Gimp version 2.6, which can be
-obtained from the project home page.
-
-http://www.gimp.org/downloads/install_help.html
-
-Large Image Solution Pack:
-
-Please see the documentation included with the Large Image Solution Pack.
-
-Ghost Script:
-
-Typically comes with ImageMagick, which is a requirement of the Large Image
-Solution Pack. See the documentation include with it for more details.
-
-
-CONFIGURATION
--------------
-
-
-CUSTOMIZATION
--------------
-
-
-TROUBLESHOOTING
----------------
-
-
-F.A.Q.
-------
-
-CONTACT
--------
-
-
-SPONSORS
---------
+[GPLv3](http://www.gnu.org/licenses/gpl-3.0.txt)
