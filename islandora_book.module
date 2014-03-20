@@ -50,12 +50,17 @@ function islandora_book_menu() {
     ),
     'islandora/object/%islandora_object/manage/book/ingest_zipped' => array(
       'title' => 'Add Zipped Pages',
-      'page callback' => 'islandora_book_ingest_zipped_pages',
-      'page arguments' => array(2),
+      'page callback' => 'islandora_paged_content_ingest_zipped_pages',
+      'page arguments' => array(2,
+        array('tif', 'tiff', 'jpg', 'jpeg', 'jp2'),
+        'islandora:pageCModel',
+        variable_get('islandora_book_ingest_derivatives', array('ocr')),
+      ),
       'type' => MENU_LOCAL_ACTION,
       'access callback' => 'islandora_object_access',
       'access arguments' => array(ISLANDORA_INGEST, 2),
-      'file' => 'includes/manage_book.inc',
+      'file path' => drupal_get_path('module', 'islandora_paged_content'),
+      'file' => 'includes/manage_pages.inc',
     ),
     'islandora/object/%islandora_object/manage/book_page' => array(
       'title' => 'Page',
@@ -84,6 +89,10 @@ function islandora_book_theme() {
       'arguments' => array('object' => NULL),
       'file' => 'theme/theme.inc',
       'template' => 'theme/islandora-book-page',
+    ),
+    'islandora_book_page_img_print' => array(
+      'template' => 'theme/islandora-book-page-img-print',
+      'variables' => array('islandora_content' => NULL),
     ),
   );
 }
@@ -302,7 +311,7 @@ function islandora_book_form_islandora_object_properties_form_alter(array &$form
 }
 
 /**
- * Implements hook_form_islandora_object_properties_form_alter().
+ * Implements hook_form_islandora_delete_object_form_alter().
  */
 function islandora_book_form_islandora_delete_object_form_alter(array &$form, array &$form_state) {
   $object = $form_state['object'];
@@ -365,4 +374,40 @@ function islandora_book_islandora_bookCModel_islandora_update_related_objects_pr
   };
   $pages = array_values(array_map($get_pid, islandora_paged_content_get_pages($object)));
   return $pages;
+}
+
+ /**
+ * Implements hook_islandora_xacml_editor_child_query().
+ */
+function islandora_book_islandora_bookCModel_islandora_xacml_editor_child_query(AbstractObject $object) {
+  $pages_query = <<<EOQ
+SELECT ?object from <#ri> WHERE
+{
+  ?object <fedora-rels-ext:isMemberOf> <info:fedora/{$object->id}>
+}
+EOQ;
+  return array(
+    'book_pages' => array(
+      'type' => 'sparql',
+      'query' => $pages_query,
+      'description' => t('All pages of this book (existing and new).'),
+      'recurse' => TRUE,
+    ),
+  );
+}
+
+/**
+ * Implements hook_islandora_view_print_object().
+ */
+function islandora_book_islandora_view_print_object($object) {
+  if (in_array('islandora:pageCModel', $object->models)) {
+    // Theme image separately.
+    $islandora_content = theme('image', array(
+        'title' => $object->label,
+        'path' => url("islandora/object/{$object->id}/datastream/JPG/view"),
+    ));
+    return theme('islandora_book_page_img_print', array(
+        'islandora_content' => $islandora_content,
+    ));
+  }
 }
