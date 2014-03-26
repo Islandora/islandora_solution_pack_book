@@ -336,8 +336,8 @@ function islandora_book_islandora_delete_object_form_delete_pages_submit(array $
 
   $object = $form_state['object'];
   $get_pid = function($o) {
-    return $o['pid'];
-  };
+        return $o['pid'];
+      };
   $pages = array_values(array_map($get_pid, islandora_paged_content_get_pages($object)));
   $batch_delete = islandora_paged_content_delete_pages_batch($object, $pages);
   $batch_delete['operations'][] = array('islandora_paged_content_delete_parent_object_operation', array($object->id));
@@ -370,13 +370,13 @@ function islandora_book_pages_menu(AbstractObject $object) {
 function islandora_book_islandora_bookCModel_islandora_update_related_objects_properties($object) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   $get_pid = function($o) {
-    return $o['pid'];
-  };
+        return $o['pid'];
+      };
   $pages = array_values(array_map($get_pid, islandora_paged_content_get_pages($object)));
   return $pages;
 }
 
- /**
+/**
  * Implements hook_islandora_xacml_editor_child_query().
  */
 function islandora_book_islandora_bookCModel_islandora_xacml_editor_child_query(AbstractObject $object) {
@@ -403,11 +403,28 @@ function islandora_book_islandora_view_print_object($object) {
   if (in_array('islandora:pageCModel', $object->models)) {
     // Theme image separately.
     $islandora_content = theme('image', array(
-        'title' => $object->label,
-        'path' => url("islandora/object/{$object->id}/datastream/JPG/view"),
+      'title' => $object->label,
+      'path' => url("islandora/object/{$object->id}/datastream/JPG/view"),
     ));
     return theme('islandora_book_page_img_print', array(
-        'islandora_content' => $islandora_content,
+      'islandora_content' => $islandora_content,
     ));
+  }
+}
+
+/**
+ * hook_CMODEL_PID_DSID_islandora_datastream_ingested().
+ */
+function islandora_book_islandora_pagecmodel_techmd_islandora_datastream_ingested(AbstractObject $object, AbstractDatastream $datastream) {
+  module_load_include('module', 'islandora_fits');
+  $techmd = $datastream->content;
+  $xml = new SimpleXMLElement($techmd);
+  $fits_metadata = islandora_fits_child_xpath($xml);
+  $unit = isset($fits_metadata['Jhove']['Sampling Frequency Unit'][0]) ? $fits_metadata['Jhove']['Sampling Frequency Unit'][0] : 'ins.';
+  $xcount = isset($fits_metadata['Jhove']['X Sampling Frequency'][0]) ? $fits_metadata['Jhove']['X Sampling Frequency'][0] : '600';
+  $ycount = isset($fits_metadata['Jhove']['Y Sampling Frequency'][0]) ? $fits_metadata['Jhove']['Y Sampling Frequency'][0] : '600';
+  if ($xcount < 600 || $ycount < 600) {
+    $message = t("Ingested image has a sampling frequency of @x by @y per @unit For best results use images of at least 600 by 600 per in.", array('@x' => $xcount, '@y' => $ycount, '@unit' => $unit));
+    drupal_set_message($message, 'warning');
   }
 }
