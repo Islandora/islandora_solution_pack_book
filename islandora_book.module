@@ -282,10 +282,27 @@ function islandora_book_islandora_bookcmodel_islandora_derivative() {
 
   if ($derive['image']) {
     $derivatives[] = array(
-      'source_dsid' => NULL,
       'destination_dsid' => 'TN',
       'function' => array('islandora_paged_content_derive_thumbnail_of_parent'),
       'file' => "$pc_module_path/includes/derivatives.inc",
+    );
+  }
+  if ($derive['pdf']) {
+    $module_path = drupal_get_path('module', 'islandora_book');
+    $derivatives = array_merge(
+      $derivatives,
+      array(
+        array(
+          'function' => 'islandora_book_build_pdf',
+          'file' => "$module_path/includes/derivatives.inc",
+          'weight' => 49,
+        ),
+        array(
+          'function' => 'islandora_book_remove_pdf_flag',
+          'file' => "$module_path/includes/derivatives.inc",
+          'weight' => 50,
+        ),
+      )
     );
   }
 
