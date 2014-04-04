@@ -247,6 +247,24 @@ function islandora_book_islandora_pageCModel_islandora_solr_object_result_alter(
 }
 
 /**
+ * Implements hook_CMODEL_PID_islandora_solr_object_result_alter().
+ * 
+ * Add page viewing fragment and search term to show all search results within
+ * book on page load.
+ */
+function islandora_book_islandora_bookCModel_islandora_solr_object_result_alter(&$search_results, $query_processor) {
+  $view_types = array(
+    "1" => "1up",
+    "2" => "2up",
+    "3" => "thumb",
+  );
+  $ia_view = variable_get('islandora_internet_archive_bookreader_default_page_view', "1up");
+  $search_results['object_url_fragment'] = "page/1/mode/{$view_types[$ia_view]}/search/";
+  $search_results['object_url_fragment'] .= rawurlencode($query_processor->solrQuery);
+}
+
+
+/**
  * Implements hook_islandora_ingest_steps().
  */
 function islandora_book_islandora_pagecmodel_islandora_ingest_steps(array $form_state) {
