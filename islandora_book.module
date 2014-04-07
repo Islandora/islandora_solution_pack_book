@@ -298,7 +298,7 @@ function islandora_book_islandora_bookcmodel_islandora_derivative() {
           'weight' => 49,
         ),
         array(
-          'function' => 'islandora_book_remove_pdf_flag',
+          'function' => 'islandora_paged_content_remove_pdf_flag',
           'file' => "$module_path/includes/derivatives.inc",
           'weight' => 50,
         ),
