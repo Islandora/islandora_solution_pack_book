@@ -30,7 +30,8 @@ function islandora_book_preprocess_islandora_book_page(array &$variables) {
   module_load_include('inc', 'islandora', 'includes/solution_packs');
   $object = $variables['object'];
   $results = $object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
-  $variables['book_object_id'] = $results[0]['object']['value'];
+  $result = reset($results);
+  $variables['book_object_id'] = $result ? $result['object']['value'] : FALSE;
 
   $params = array();
   if (isset($object['JP2']) && islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $object['JP2'])) {

@@ -5,7 +5,7 @@
  */
 ?>
 <?php
-  print l(t('Return to Book View'), "islandora/object/{$book_object_id}");
+  print $book_object_id ? l(t('Return to Book View'), "islandora/object/{$book_object_id}") : t('Orphaned page (no associated book)');
 ?>
 <?php if (isset($viewer)): ?>
   <div id="book-page-viewer">
