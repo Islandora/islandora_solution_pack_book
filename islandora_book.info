@@ -1,6 +1,6 @@
 name = "Islandora Book Solution Pack"
 description = "Provides an interface for book objects."
-package = Islandora
+package = Islandora Solution Packs
 dependencies[] = islandora
 dependencies[] = file
 dependencies[] = islandora_paged_content
