@@ -29,7 +29,7 @@ function islandora_book_ingest_page(AbstractObject $object) {
   return drupal_get_form('islandora_ingest_form', array(
     'book' => $object,
     'models' => array('islandora:pageCModel'),
-    'object' => $page,
+    'objects' => array($page),
     'parent' => $object->id,
   ));
 }
