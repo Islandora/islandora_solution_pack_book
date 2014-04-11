@@ -10,9 +10,9 @@
  */
 function islandora_book_menu() {
   return array(
-    'admin/islandora/book' => array(
-      'title' => 'Book Collection',
-      'description' => 'Configuration the Book Solution Pack.',
+    'admin/islandora/solution_pack_config/book' => array(
+      'title' => 'Book Solution Pack',
+      'description' => 'Select viewers and configure ingest behavior.',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('islandora_book_admin_settings_form'),
       'access arguments' => array('administer site configuration'),
@@ -248,7 +248,7 @@ function islandora_book_islandora_pageCModel_islandora_solr_object_result_alter(
 
 /**
  * Implements hook_CMODEL_PID_islandora_solr_object_result_alter().
- * 
+ *
  * Add page viewing fragment and search term to show all search results within
  * book on page load.
  */
