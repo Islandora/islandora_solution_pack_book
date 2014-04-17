@@ -58,7 +58,7 @@ class IslandoraBookPageIngestTestCase extends IslandoraCollectionWebTestCase {
       'islandora_book_ingest_derivatives[image]' => FALSE,
       'islandora_book_ingest_derivatives[ocr]' => FALSE,
     );
-    $this->drupalPost('admin/islandora/book', $edit, 'Save configuration');
+    $this->drupalPost('admin/islandora/solution_pack_config/book', $edit, 'Save configuration');
 
     // Attempts to create the book.
     $path = 'islandora/object/' . $collectionpid . '/manage/overview/ingest';
