@@ -268,9 +268,6 @@ function islandora_book_islandora_pagecmodel_islandora_ingest_steps(array $form_
 
 /**
  * Implements hook_islandora_derivative().
- *
- * XXX: Should add in ability to regenerate PDFs as well... No reliable way to
- * kick off a batch though...
  */
 function islandora_book_islandora_bookcmodel_islandora_derivative() {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
