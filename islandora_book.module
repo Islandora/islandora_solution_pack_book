@@ -307,9 +307,9 @@ function islandora_book_islandora_bookcmodel_islandora_derivative() {
 /**
  * Implements hook_islandora_derivative().
  */
-function islandora_book_islandora_pagecmodel_islandora_derivative(AbstractObject $object = NULL) {
+function islandora_book_islandora_pagecmodel_islandora_derivative() {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
-  return islandora_paged_content_page_derivatives($object, 'islandora_book');
+  return islandora_paged_content_page_derivatives('islandora_book');
 }
 
 /**
