@@ -260,8 +260,8 @@ function islandora_book_islandora_bookCModel_islandora_solr_object_result_alter(
   );
   $field_search = FALSE;
   $fields = preg_split('/OR|AND|NOT/', $query_processor->solrQuery);
-  foreach($fields as $field) {
-    if(preg_match('/^(.*):\(.*\)/', $field)) {
+  foreach ($fields as $field) {
+    if (preg_match('/^(.*):\(.*\)/', $field)) {
       $field_search = TRUE;
       break;
     }
