@@ -18,8 +18,6 @@ before_install:
   - git clone -b 7.x git://github.com/Islandora/islandora_ocr.git
   - export ISLANDORA_DIR=$HOME/islandora
   - $HOME/islandora/tests/scripts/travis_setup.sh
-  - sudo sh $TRAVIS_BUILD_DIR/tests/scripts/adore.sh
-  - sudo sh $TRAVIS_BUILD_DIR/tests/scripts/tesseract.sh
   - cd $HOME/drupal-*
   - ln -s $TRAVIS_BUILD_DIR sites/all/modules/islandora_solution_pack_book
   - ln -s $HOME/islandora_paged_content sites/all/modules/islandora_paged_content
