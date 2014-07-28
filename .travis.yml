@@ -36,3 +36,5 @@ script:
   - drush coder-review --reviews=production,security,style,i18n,potx,sniffer islandora_book
   - phpcpd --names *.module,*.inc,*.test sites/all/modules/islandora_solution_pack_book
   - drush test-run --user=1 --uri=http://localhost:8081 "Islandora Book"
+notifications:
+  irc: "irc.freenode.org#islandora"
