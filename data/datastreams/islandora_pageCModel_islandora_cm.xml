@@ -1,6 +1,6 @@
 <content_model xmlns="http://www.islandora.ca" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="book" xsi:schemaLocation="http://www.islandora.ca http://137.149.200.50/sites/all/modules/islandora/islandoracm.xsd">
     <mimetypes>
-      <type>text/xml</type>
+      <type>application/xml</type>
       <type>image/tiff</type>
       <type>image/jp2</type>
       <type>image/jpg</type>
