@@ -1,0 +1,29 @@
+
+<content_model xmlns="http://www.islandora.ca" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="book" xsi:schemaLocation="http://www.islandora.ca http://137.149.200.50/sites/all/modules/islandora/islandoracm.xsd">
+  <mimetypes>
+    <type>application/pdf</type>
+  </mimetypes>
+  <ingest_rules>
+    <rule>
+      <applies_to>application/pdf</applies_to>
+      <ingest_methods>
+        <ingest_method class="ImageManipulation" dsid="TN" file="plugins/ImageManipulation.inc" method="createThumbnailFromPDF" modified_files_ext="jpg" module="">
+          <parameters>
+            <parameter name="width">100</parameter>
+            <parameter name="height">120</parameter>
+          </parameters>
+        </ingest_method>
+      </ingest_methods>
+    </rule>
+  </ingest_rules>
+  <datastreams>
+    <datastream dsid="MODS">
+      <display_method class="IslandoraBook" file="book.inc" method="showFieldSets" module="islandora_book"></display_method>
+    </datastream>
+    <datastream dsid="MODS"></datastream>
+    <datastream dsid="DC"></datastream>
+    <datastream dsid="RELS-EXT"></datastream>
+    <datastream dsid="PDF"></datastream>
+    <datastream dsid="TN"></datastream>
+  </datastreams>
+</content_model>
