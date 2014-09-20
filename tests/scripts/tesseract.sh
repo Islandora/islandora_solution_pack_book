@@ -1,24 +1,15 @@
-apt-get update
-apt-get install build-essential checkinstall 
+#!/bin/bash
+
 mkdir ~/tesseract
 cd ~/tesseract
-wget http://www.leptonica.org/source/leptonica-1.69.tar.gz
-tar xf leptonica-1.69.tar.gz && rm -rf leptonica-1.69.tar.gz
-cd leptonica-1.69
-./configure
-make && checkinstall --pkgname=libleptonica --pkgversion="1.69" --backup=no --deldoc=yes --fstrans=no --default
-cd ~/tesseract
-wget https://tesseract-ocr.googlecode.com/files/tesseract-ocr-3.02.02.tar.gz
-tar xf tesseract-ocr-3.02.02.tar.gz && rm -rf tesseract-ocr-3.02.02.tar.gz
-cd tesseract-ocr
-./autogen.sh
-./configure
-make && checkinstall --pkgname=tesseract-ocr --pkgversion="3.02.02" --backup=no --deldoc=yes --fstrans=no --default && ldconfig
-mkdir ~/tesseract/langs
-cd ~/tesseract/langs
-wget https://tesseract-ocr.googlecode.com/files/tesseract-ocr-3.02.eng.tar.gz
-echo "Extracting language files"
-for i in *.tar.gz; do echo -e "\nworking on $i\n"; tar xvzf $i ; done
-cp tesseract-ocr/tessdata/* /usr/local/share/tessdata/
+wget http://alpha.library.yorku.ca/tesseract.tar.gz
+wget http://alpha.library.yorku.ca/tessdata.tar.gz
+tar xf tesseract.tar.gz && rm -rf tesseract.tar.gz
+dpkg -i tesseract/libleptonica.deb
+dpkg -i tesseract/tesseract-ocr.deb
+tar xf tessdata.tar.gz && rm -rf tessdata.tar.gz
+cp tessdata/* /usr/local/share/tessdata/
+sudo ldconfig
 echo -e "\ntesseract output:"
+
 tesseract --version && tesseract --list-langs && cd ~ && rm -rf ~/tesseract

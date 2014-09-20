@@ -1,7 +1,8 @@
+#!/bin/bash
+
 # Download, install and configure adore-djatoka
 cd /opt
-wget http://sourceforge.net/projects/djatoka/files/djatoka/1.1/adore-djatoka-1.1.tar.gz/download
-mv download adore-djatoka-1.1.tar.gz
+wget http://alpha.library.yorku.ca/adore-djatoka-1.1.tar.gz
 tar xf adore-djatoka-1.1.tar.gz && rm -rf adore-djatoka-1.1.tar.gz
 ln -s adore-djatoka-1.1 adore-djatoka
 cp adore-djatoka/dist/adore-djatoka.war $CATALINA_HOME/webapps
