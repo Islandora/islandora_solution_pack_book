@@ -351,8 +351,8 @@ function islandora_book_islandora_delete_object_form_delete_pages_submit(array $
 
   $object = $form_state['object'];
   $get_pid = function($o) {
-        return $o['pid'];
-      };
+    return $o['pid'];
+  };
   $pages = array_values(array_map($get_pid, islandora_paged_content_get_pages($object)));
   $batch_delete = islandora_paged_content_delete_pages_batch($object, $pages);
   $batch_delete['operations'][] = array('islandora_paged_content_delete_parent_object_operation', array($object->id));
@@ -385,8 +385,8 @@ function islandora_book_pages_menu(AbstractObject $object) {
 function islandora_book_islandora_bookCModel_islandora_update_related_objects_properties($object) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   $get_pid = function($o) {
-        return $o['pid'];
-      };
+    return $o['pid'];
+  };
   $pages = array_values(array_map($get_pid, islandora_paged_content_get_pages($object)));
   return $pages;
 }
@@ -439,7 +439,12 @@ function islandora_book_islandora_pagecmodel_techmd_islandora_datastream_ingeste
   $xcount = isset($fits_metadata['Jhove']['X Sampling Frequency'][0]) ? $fits_metadata['Jhove']['X Sampling Frequency'][0] : '600';
   $ycount = isset($fits_metadata['Jhove']['Y Sampling Frequency'][0]) ? $fits_metadata['Jhove']['Y Sampling Frequency'][0] : '600';
   if ($xcount < 600 || $ycount < 600) {
-    $message = t("Ingested image has a sampling frequency of @x by @y per @unit For best results use images of at least 600 by 600 per in.", array('@x' => $xcount, '@y' => $ycount, '@unit' => $unit));
+    $message = t("Ingested image has a sampling frequency of @x by @y per @unit For best results use images of at least 600 by 600 per in.",
+        array(
+          '@x' => $xcount,
+          '@y' => $ycount,
+          '@unit' => $unit,
+        ));
     drupal_set_message($message, 'warning', FALSE);
   }
 }
