@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Allows for the creation of book and page object (islandora:bookCModel,islandora:pageCModel). Books are essentially a collection Pages, containing only metadata and optionally a PDF file of the book. A Book's PDF can be generated from each page. Pages are based on an uploaded tiff of the page. From the uploaded TIFF its possible to generate images for use in the "Islandora Internet Archive Bookreader". It is also possible to generate PDF files per page. OCR and OCR coordinate data can also be generated from the uploaded TIFF.
+Allows for the creation of book and page objects (islandora:bookCModel,islandora:pageCModel). Books are essentially a collection of pages, containing only metadata and optionally a PDF file of the book. A book's PDF can be generated from each page. Pages are based on an uploaded tiff of the page. From the uploaded TIFF its possible to generate images for use in the "Islandora Internet Archive Bookreader". It is also possible to generate PDF files per page. OCR and OCR coordinate data can also be generated from the uploaded TIFF.
 
 ## Requirements
 
@@ -20,7 +20,7 @@ Install as usual, see [this](https://drupal.org/documentation/install/modules-th
 
 ## Configuration
 
-Select configuration options for page derivatives, Parent Solr Field, and select a viewer for the book objec and page objects in Administration » Islandora » Book Collection (admin/islandora/book).
+Select configuration options for page derivatives, Parent Solr Field, and select a viewer for the book object and page objects in Administration » Islandora » Book Collection (admin/islandora/book).
 
 ![Configuration](http://i.imgur.com/7ICJfeZ.png)
 
