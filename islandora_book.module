@@ -257,11 +257,12 @@ function islandora_book_islandora_bookCModel_islandora_solr_object_result_alter(
 
   if ($query_processor->solrQuery != " " && $query_processor->solrQuery && !$field_search) {
     $ia_view = variable_get('islandora_internet_archive_bookreader_default_page_view', "1");
-    $search_results['object_url_fragment'] = "page/1/mode/{$view_types[$ia_view]}/search/";
-    $search_results['object_url_fragment'] .= rawurlencode($query_processor->solrQuery);
+    if ($query_processor->solrQuery != '*:*') {
+      $search_results['object_url_fragment'] = "page/1/mode/{$view_types[$ia_view]}/search/";
+      $search_results['object_url_fragment'] .= rawurlencode($query_processor->solrQuery);
+    }
   }
 }
-
 
 /**
  * Implements hook_islandora_ingest_steps().
@@ -316,7 +317,10 @@ function islandora_book_form_islandora_delete_object_form_alter(array &$form, ar
   $object = $form_state['object'];
   if (in_array('islandora:bookCModel', $object->models)) {
     $form['description']['#markup'] = t('This will remove the book object and all related page objects. This action cannot be undone.');
-    $form['#submit'] = array('islandora_book_islandora_delete_object_form_delete_pages_submit');
+    $form['#submit'][] = 'islandora_book_islandora_delete_object_form_delete_pages_submit';
+    if (($key = array_search('islandora_delete_object_form_submit', $form['#submit'])) !== FALSE) {
+      unset($form['#submit'][$key]);
+    }
   }
 }
 
@@ -424,7 +428,11 @@ function islandora_book_islandora_pagecmodel_techmd_islandora_datastream_ingeste
   $ycount = isset($fits_metadata['Jhove']['Y Sampling Frequency'][0]) ? $fits_metadata['Jhove']['Y Sampling Frequency'][0] : '600';
   if ($xcount < 600 || $ycount < 600) {
     $message = t("Ingested image has a sampling frequency of @x by @y per @unit For best results use images of at least 600 by 600 per in.",
-        array('@x' => $xcount, '@y' => $ycount, '@unit' => $unit));
+        array(
+          '@x' => $xcount,
+          '@y' => $ycount,
+          '@unit' => $unit,
+        ));
     drupal_set_message($message, 'warning', FALSE);
   }
 }
