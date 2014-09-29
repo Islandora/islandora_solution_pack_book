@@ -259,6 +259,7 @@ function islandora_book_islandora_bookCModel_islandora_solr_object_result_alter(
     $ia_view = variable_get('islandora_internet_archive_bookreader_default_page_view', "1");
     if ($query_processor->solrQuery != '*:*') {
       $search_results['object_url_fragment'] = "page/1/mode/{$view_types[$ia_view]}/search/";
+      $search_results['object_url_fragment'] .= rawurlencode($query_processor->solrQuery);
     }
   }
 }
