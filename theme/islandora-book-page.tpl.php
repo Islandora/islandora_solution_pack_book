@@ -7,6 +7,7 @@
 <?php
   print $book_object_id ? l(t('Return to Book View'), "islandora/object/{$book_object_id}") : t('Orphaned page (no associated book)');
 ?>
+<?php print theme('islandora_solr_search_return_link'); ?>
 <?php if (isset($viewer)): ?>
   <div id="book-page-viewer">
     <?php print $viewer; ?>
