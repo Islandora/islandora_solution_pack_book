@@ -286,7 +286,7 @@ function islandora_book_islandora_pagecmodel_islandora_ingest_steps(array $form_
 }
 
 /**
- * Implements hook_islandora_ingest_steps().
+ * Implements hook_CMODEL_PID_islandora_ingest_steps().
  */
 function islandora_book_islandora_bookCModel_islandora_ingest_steps(array $form_state) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
@@ -302,7 +302,6 @@ function islandora_book_islandora_bookCModel_islandora_ingest_steps(array $form_
       ),
     );
   }
-  return;
 }
 
 /**
