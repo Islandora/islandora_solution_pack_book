@@ -436,7 +436,7 @@ function islandora_book_islandora_view_print_object($object) {
 }
 
 /**
- * HOOK_CMODEL_PID_DSID_islandora_datastream_ingested().
+ * Implements hook_CMODEL_PID_DSID_islandora_datastream_ingested().
  */
 function islandora_book_islandora_pagecmodel_techmd_islandora_datastream_ingested(AbstractObject $object, AbstractDatastream $datastream) {
   module_load_include('module', 'islandora_fits');
@@ -455,4 +455,13 @@ function islandora_book_islandora_pagecmodel_techmd_islandora_datastream_ingeste
         ));
     drupal_set_message($message, 'warning', FALSE);
   }
+}
+
+/**
+ * Implements hook_islandora_paged_content_model_registry().
+ */
+function islandora_book_islandora_paged_content_content_model_registry() {
+  return array(
+    'islandora:bookCModel',
+  );
 }
