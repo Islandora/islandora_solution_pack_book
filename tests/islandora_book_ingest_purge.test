@@ -62,10 +62,7 @@ class IslandoraBookPageIngestTestCase extends IslandoraCollectionWebTestCase {
 
     // Attempts to create the book.
     $path = 'islandora/object/' . $collectionpid . '/manage/overview/ingest';
-    $edit = array(
-      'models' => 'islandora:bookCModel',
-    );
-    $this->drupalPost($path, $edit, t('Ingest'));
+    $this->drupalPost($path, array(), t('Ingest'));
     $this->assertText('New Object', 'Book was created', 'Islandora');
 
     // Checks for book datastream creation.
