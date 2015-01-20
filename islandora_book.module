@@ -286,6 +286,25 @@ function islandora_book_islandora_pagecmodel_islandora_ingest_steps(array $form_
 }
 
 /**
+ * Implements hook_CMODEL_PID_islandora_ingest_steps().
+ */
+function islandora_book_islandora_bookCModel_islandora_ingest_steps(array $form_state) {
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+  if (islandora_paged_content_can_extract_from_pdf()) {
+    return array(
+      'islandora_book_upload_pdf' => array(
+        'weight' => 10,
+        'type' => 'form',
+        'form_id' => 'islandora_paged_content_upload_pdf_form',
+        'args' => array('islandora:pageCModel'),
+        'module' => 'islandora_paged_content',
+        'file' => 'includes/upload_pdf.form.inc',
+      ),
+    );
+  }
+}
+
+/**
  * Implements hook_islandora_derivative().
  */
 function islandora_book_islandora_bookcmodel_islandora_derivative() {
@@ -417,7 +436,7 @@ function islandora_book_islandora_view_print_object($object) {
 }
 
 /**
- * HOOK_CMODEL_PID_DSID_islandora_datastream_ingested().
+ * Implements hook_CMODEL_PID_DSID_islandora_datastream_ingested().
  */
 function islandora_book_islandora_pagecmodel_techmd_islandora_datastream_ingested(AbstractObject $object, AbstractDatastream $datastream) {
   module_load_include('module', 'islandora_fits');
@@ -436,4 +455,13 @@ function islandora_book_islandora_pagecmodel_techmd_islandora_datastream_ingeste
         ));
     drupal_set_message($message, 'warning', FALSE);
   }
+}
+
+/**
+ * Implements hook_islandora_paged_content_model_registry().
+ */
+function islandora_book_islandora_paged_content_content_model_registry() {
+  return array(
+    'islandora:bookCModel',
+  );
 }
