@@ -6,27 +6,62 @@
  */
 
 /**
- * Implements hook_preprocess_theme().
+ * Prepares variables for islandora_book_book templates.
+ *
+ * Default template: islandora-book-book.tpl.php.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - object: An AbstractObject for which to generate the display.
  */
-function islandora_book_preprocess_islandora_book_book(array &$variables) {
+function template_preprocess_islandora_book_book(array &$variables) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+  module_load_include('inc', 'islandora', 'includes/solution_packs');
+
   $object = $variables['object'];
-  $params = array(
+
+  $variables['viewer_id'] = islandora_get_viewer_id('islandora_book_viewers');
+  $variables['viewer_params'] = array(
     'object' => $object,
     'pages' => islandora_paged_content_get_pages($object),
     'page_progression' => islandora_paged_content_get_page_progression($object),
   );
-  module_load_include('inc', 'islandora', 'includes/solution_packs');
-  $viewer = islandora_get_viewer($params, 'islandora_book_viewers');
-  if ($viewer) {
-    $variables['viewer'] = $viewer;
+}
+
+/**
+ * Processes variables for islandora_book_book templates.
+ *
+ * Default template: islandora-book-book.tpl.php.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - object: An AbstractObject for which to generate the display.
+ *   - viewer_id: The "ID" of the viewer to use.
+ *   - viewer_params: An (associative) array of parameters to pass to the
+ *     viewer.
+ */
+function template_process_islandora_book_book(array &$variables) {
+  if ($variables['viewer_id'] && $variables['viewer_id'] != 'none') {
+    $viewer_callback = islandora_get_viewer_callback($variables['viewer_id']);
+    if (function_exists($viewer_callback)) {
+      $viewer = $viewer_callback($variables['viewer_params'], $variables['object']);
+      if ($viewer) {
+        $variables['viewer'] = $viewer;
+      }
+    }
   }
 }
 
 /**
- * Implements hook_preprocess_theme().
+ * Prepares variables for islandora_book_page templates.
+ *
+ * Default template: islandora-book-page.tpl.php.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - object: An AbstractObject for which to generate the display.
  */
-function islandora_book_preprocess_islandora_book_page(array &$variables) {
+function template_preprocess_islandora_book_page(array &$variables) {
   module_load_include('inc', 'islandora', 'includes/solution_packs');
   $object = $variables['object'];
   $results = $object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
@@ -46,8 +81,30 @@ function islandora_book_preprocess_islandora_book_page(array &$variables) {
     $params['jp2_url'] = $jp2_url;
   }
 
-  $viewer = islandora_get_viewer($params, 'islandora_book_page_viewers');
-  if ($viewer) {
-    $variables['viewer'] = $viewer;
+  $variables['viewer_id'] = islandora_get_viewer_id('islandora_book_page_viewers');
+  $variables['viewer_params'] = $params;
+}
+
+/**
+ * Processes variables for islandora_book_page templates.
+ *
+ * Default template: islandora-book-page.tpl.php.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - object: An AbstractObject for which to generate the display.
+ *   - viewer_id: The "ID" of the viewer to use.
+ *   - viewer_params: An (associative) array of parameters to pass to the
+ *     viewer.
+ */
+function template_process_islandora_book_page(array &$variables) {
+  if ($variables['viewer_id'] && $variables['viewer_id'] != 'none') {
+    $viewer_callback = islandora_get_viewer_callback($variables['viewer_id']);
+    if (function_exists($viewer_callback)) {
+      $viewer = $viewer_callback($variables['viewer_params'], $variables['object']);
+      if ($viewer) {
+        $variables['viewer'] = $viewer;
+      }
+    }
   }
 }
