@@ -26,6 +26,9 @@ function template_preprocess_islandora_book_book(array &$variables) {
     'pages' => islandora_paged_content_get_pages($object),
     'page_progression' => islandora_paged_content_get_page_progression($object),
   );
+
+  // @todo: Remove after 7.x-1.5 release.
+  $variables['viewer'] = new IslandoraBookDeprecateString($variables, 'viewer', 'template_process_islandora_book_book');
 }
 
 /**
@@ -41,12 +44,19 @@ function template_preprocess_islandora_book_book(array &$variables) {
  *     viewer.
  */
 function template_process_islandora_book_book(array &$variables) {
-  if ($variables['viewer_id'] && $variables['viewer_id'] != 'none') {
-    $viewer_callback = islandora_get_viewer_callback($variables['viewer_id']);
-    if (function_exists($viewer_callback)) {
-      $viewer = $viewer_callback($variables['viewer_params'], $variables['object']);
-      if ($viewer) {
-        $variables['viewer'] = $viewer;
+  // @todo: Remove condition with "IslandoraBookDeprecateString" after
+  // 7.x-1.5 release.
+  if ($variables['viewer'] instanceof IslandoraBookDeprecateString) {
+    if ($variables['viewer_id'] && $variables['viewer_id'] != 'none') {
+      $viewer_callback = islandora_get_viewer_callback($variables['viewer_id']);
+      if (function_exists($viewer_callback)) {
+        $viewer = $viewer_callback($variables['viewer_params'], $variables['object']);
+        if ($viewer) {
+          $variables['viewer'] = $viewer;
+        }
+        else {
+          $variables['viewer'] = NULL;
+        }
       }
     }
   }
@@ -83,6 +93,9 @@ function template_preprocess_islandora_book_page(array &$variables) {
 
   $variables['viewer_id'] = islandora_get_viewer_id('islandora_book_page_viewers');
   $variables['viewer_params'] = $params;
+
+  // @todo: Remove after 7.x-1.5 release.
+  $variables['viewer'] = new IslandoraBookDeprecateString($variables, 'viewer', 'template_process_islandora_book_page');
 }
 
 /**
@@ -98,13 +111,50 @@ function template_preprocess_islandora_book_page(array &$variables) {
  *     viewer.
  */
 function template_process_islandora_book_page(array &$variables) {
-  if ($variables['viewer_id'] && $variables['viewer_id'] != 'none') {
-    $viewer_callback = islandora_get_viewer_callback($variables['viewer_id']);
-    if (function_exists($viewer_callback)) {
-      $viewer = $viewer_callback($variables['viewer_params'], $variables['object']);
-      if ($viewer) {
-        $variables['viewer'] = $viewer;
+  // @todo: Remove condition with "IslandoraBookDeprecateString" after
+  // 7.x-1.5 release.
+  if ($variables['viewer'] instanceof IslandoraBookDeprecateString) {
+    if ($variables['viewer_id'] && $variables['viewer_id'] != 'none') {
+      $viewer_callback = islandora_get_viewer_callback($variables['viewer_id']);
+      if (function_exists($viewer_callback)) {
+        $viewer = $viewer_callback($variables['viewer_params'], $variables['object']);
+        if ($viewer) {
+          $variables['viewer'] = $viewer;
+        }
+        else {
+          $variables['viewer'] = NULL;
+        }
       }
     }
+  }
+}
+
+/**
+ * Helper to deprecate the text variables.
+ *
+ * @todo: Remove after 7.x-1.5 release.
+ */
+class IslandoraBookDeprecateString {
+  /**
+   * Constructor; stash parameters.
+   */
+  public function __construct(&$variables, $variable_name, $process_function) {
+    $this->variables =& $variables;
+    $this->variable_name = $variable_name;
+    $this->process_function = $process_function;
+  }
+
+  /**
+   * Coerce into a string.
+   */
+  public function __toString() {
+    $message = t('The "@variable" variable has been deprecated in the preprocessing phase as of 7.x-1.5. Please update your theme code to interact with "@variable" during/after the processing phase.', array(
+      '@variable' => $this->variable_name,
+    ));
+    trigger_error(filter_xss($message), E_USER_DEPRECATED);
+
+    $process = $this->process_function;
+    $process($this->variables);
+    return strval($this->variables[$this->variable_name]);
   }
 }
