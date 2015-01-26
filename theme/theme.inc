@@ -47,15 +47,13 @@ function template_process_islandora_book_book(array &$variables) {
   // @todo: Remove condition with "IslandoraBookDeprecateString" after
   // 7.x-1.5 release.
   if ($variables['viewer'] instanceof IslandoraBookDeprecateString) {
+    $variables['viewer'] = NULL;
     if ($variables['viewer_id'] && $variables['viewer_id'] != 'none') {
       $viewer_callback = islandora_get_viewer_callback($variables['viewer_id']);
       if (function_exists($viewer_callback)) {
         $viewer = $viewer_callback($variables['viewer_params'], $variables['object']);
         if ($viewer) {
           $variables['viewer'] = $viewer;
-        }
-        else {
-          $variables['viewer'] = NULL;
         }
       }
     }
@@ -114,15 +112,13 @@ function template_process_islandora_book_page(array &$variables) {
   // @todo: Remove condition with "IslandoraBookDeprecateString" after
   // 7.x-1.5 release.
   if ($variables['viewer'] instanceof IslandoraBookDeprecateString) {
+    $variables['viewer'] = NULL;
     if ($variables['viewer_id'] && $variables['viewer_id'] != 'none') {
       $viewer_callback = islandora_get_viewer_callback($variables['viewer_id']);
       if (function_exists($viewer_callback)) {
         $viewer = $viewer_callback($variables['viewer_params'], $variables['object']);
         if ($viewer) {
           $variables['viewer'] = $viewer;
-        }
-        else {
-          $variables['viewer'] = NULL;
         }
       }
     }
