@@ -10,6 +10,7 @@
  */
 function islandora_book_preprocess_islandora_book_book(array &$variables) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+  module_load_include('inc', 'islandora', 'includes/metadata');
   $object = $variables['object'];
   $params = array(
     'object' => $object,
@@ -21,6 +22,8 @@ function islandora_book_preprocess_islandora_book_book(array &$variables) {
   if ($viewer) {
     $variables['viewer'] = $viewer;
   }
+  $variables['parent_collections'] = islandora_get_parents_from_rels_ext($object);
+  $variables['metadata'] = islandora_retrieve_metadata_markup($object);
 }
 
 /**
