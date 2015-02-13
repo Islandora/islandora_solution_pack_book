@@ -51,6 +51,19 @@ function islandora_book_admin_settings_form(array $form, array &$form_state) {
     '#size' => 30,
   );
 
+  // Metadata display
+  $form['metadata_display_fieldset'] = array (
+    '#type' => 'fieldset',
+    '#title' => t('Metadata display'),
+  );
+
+  $form['metadata_display_fieldset']['islandora_book_metadata_display'] = array(
+    '#type' => 'checkbox',
+    '#title' => t("Display object metadata"),
+    '#description' => t("Display object metadata below object viewer, as well as with the IA viewer."),
+    '#default_value' => variable_get('islandora_book_metadata_display', FALSE),
+  );
+
   module_load_include('inc', 'islandora', 'includes/solution_packs');
   $form += islandora_viewers_form('islandora_book_viewers', NULL, 'islandora:bookCModel');
   $form['book_viewers'] = $form['viewers'];
