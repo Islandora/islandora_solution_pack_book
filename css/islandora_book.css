@@ -42,3 +42,32 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.islandora-book-metadata {
+display: block;
+clear: both;
+}
+/* This is kept for legacy reasons. */
+dl.islandora-book-fields {
+width:100%;
+}
+dl.islandora-metadata-fields {
+width:100%;
+}
+.islandora-book-metadata dt {
+font-weight: normal;
+text-align: right;
+font-weight: bold;
+padding-right: 0;
+}
+.islandora-book-metadata dd {
+padding-left: 40px;
+}
+.islandora-book-metadata dt,
+.islandora-book-metadata dd {
+border-top:1px solid #e5e5e5;
+}
+.islandora-book-metadata dt.first,
+.islandora-book-metadata dd.first {
+border-top:0;
+}

@@ -17,16 +17,16 @@
 function template_preprocess_islandora_book_book(array &$variables) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   module_load_include('inc', 'islandora', 'includes/solution_packs');
-
+  module_load_include('inc', 'islandora', 'includes/metadata');
   $object = $variables['object'];
-
   $variables['viewer_id'] = islandora_get_viewer_id('islandora_book_viewers');
   $variables['viewer_params'] = array(
     'object' => $object,
     'pages' => islandora_paged_content_get_pages($object),
     'page_progression' => islandora_paged_content_get_page_progression($object),
   );
-
+  $variables['parent_collections'] = islandora_get_parents_from_rels_ext($object);
+  $variables['metadata'] = islandora_retrieve_metadata_markup($object);
   // @todo: Remove after 7.x-1.5 release.
   $variables['viewer'] = new IslandoraBookDeprecateString($variables, 'viewer', 'template_process_islandora_book_book');
 }
@@ -58,6 +58,8 @@ function template_process_islandora_book_book(array &$variables) {
       }
     }
   }
+  $variables['parent_collections'] = islandora_get_parents_from_rels_ext($object);
+  $variables['metadata'] = islandora_retrieve_metadata_markup($object);
 }
 
 /**
