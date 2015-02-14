@@ -51,8 +51,8 @@ function islandora_book_admin_settings_form(array $form, array &$form_state) {
     '#size' => 30,
   );
 
-  // Metadata display
-  $form['metadata_display_fieldset'] = array (
+  // Metadata display.
+  $form['metadata_display_fieldset'] = array(
     '#type' => 'fieldset',
     '#title' => t('Metadata display'),
   );
