@@ -17,6 +17,8 @@
 function template_preprocess_islandora_book_book(array &$variables) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   module_load_include('inc', 'islandora', 'includes/solution_packs');
+  module_load_include('inc', 'islandora', 'includes/metadata');
+  module_load_include('inc', 'islandora', 'includes/datastream');
 
   $object = $variables['object'];
 
@@ -27,6 +29,10 @@ function template_preprocess_islandora_book_book(array &$variables) {
     'page_progression' => islandora_paged_content_get_page_progression($object),
   );
 
+  $variables['display_metadata'] = variable_get('islandora_book_metadata_display', FALSE);
+  $variables['parent_collections'] = islandora_get_parents_from_rels_ext($object);
+  $variables['metadata'] = islandora_retrieve_metadata_markup($object);
+  $variables['description'] = islandora_retrieve_description_markup($object);
   // @todo: Remove after 7.x-1.5 release.
   $variables['viewer'] = new IslandoraBookDeprecateString($variables, 'viewer', 'template_process_islandora_book_book');
 }
