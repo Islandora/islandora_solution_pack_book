@@ -463,7 +463,9 @@ function islandora_book_islandora_pagecmodel_techmd_islandora_datastream_ingeste
 function islandora_book_islandora_paged_content_content_model_registry() {
   return array(
     'islandora:bookCModel' => array(
-      'predicate' => 'isMemberOfCollection',
+      'parents' => array(
+        'islandora:collectionCModel' => 'isMemberOfCollection',
+      ),
       'children' => array(
         'islandora:pageCModel' => array(),
       ),
