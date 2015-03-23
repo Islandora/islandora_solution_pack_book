@@ -58,14 +58,11 @@ class IslandoraBookPageIngestTestCase extends IslandoraCollectionWebTestCase {
       'islandora_book_ingest_derivatives[image]' => FALSE,
       'islandora_book_ingest_derivatives[ocr]' => FALSE,
     );
-    $this->drupalPost('admin/islandora/book', $edit, 'Save configuration');
+    $this->drupalPost('admin/islandora/solution_pack_config/book', $edit, 'Save configuration');
 
     // Attempts to create the book.
     $path = 'islandora/object/' . $collectionpid . '/manage/overview/ingest';
-    $edit = array(
-      'models' => 'islandora:bookCModel',
-    );
-    $this->drupalPost($path, $edit, t('Ingest'));
+    $this->drupalPost($path, array(), t('Ingest'));
     $this->assertText('New Object', 'Book was created', 'Islandora');
 
     // Checks for book datastream creation.
@@ -94,6 +91,11 @@ class IslandoraBookPageIngestTestCase extends IslandoraCollectionWebTestCase {
     $this->assertDatastreams($page_object, $datastreams);
 
     $this->deleteObject($book_object, 'Delete Book');
+    // XXX: The standard admin user should have $connection, not just
+    // $connection->repository, so that we have access to the cache, api, etc.
+    $connection = islandora_get_tuque_connection($this->admin, $this->configuration['fedora_url']);
+    $connection->cache->resetCache();
+    $this->assertFalse(islandora_object_load($page_object->id), "Book page successfully automatically deleted from book object during book purge.", 'Islandora');
     $this->deleteTestCollection($collectionpid);
   }
 }

@@ -10,9 +10,9 @@
  */
 function islandora_book_menu() {
   return array(
-    'admin/islandora/book' => array(
-      'title' => 'Book Collection',
-      'description' => 'Configuration the Book Solution Pack.',
+    'admin/islandora/solution_pack_config/book' => array(
+      'title' => 'Book Solution Pack',
+      'description' => 'Select viewers and configure ingest behavior.',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('islandora_book_admin_settings_form'),
       'access arguments' => array('administer site configuration'),
@@ -135,15 +135,9 @@ function islandora_book_islandora_required_objects(IslandoraTuque $connection) {
   // DS-COMPOSITE-MODEL Datastream.
   $datastream = $page_content_model->constructDatastream('DS-COMPOSITE-MODEL', 'M');
   $datastream->label = 'DS-COMPOSITE-MODEL';
-  $datastream->mimetype = 'text/xml';
+  $datastream->mimetype = 'application/xml';
   $paged_content_path = drupal_get_path('module', 'islandora_paged_content');
   $datastream->setContentFromFile("$paged_content_path/xml/islandora_pageCModel_ds_composite_model.xml", FALSE);
-  $page_content_model->ingestDatastream($datastream);
-  // ISLANDORA-CM Datastream.
-  $datastream = $page_content_model->constructDatastream('ISLANDORACM', 'M');
-  $datastream->label = 'Islandora content model information';
-  $datastream->mimetype = 'text/xml';
-  $datastream->setContentFromFile("$datastreams_path/islandora_pageCModel_islandora_cm.xml", FALSE);
   $page_content_model->ingestDatastream($datastream);
   // Book Content Model.
   $book_content_model = $connection->repository->constructObject('islandora:bookCModel');
@@ -153,14 +147,8 @@ function islandora_book_islandora_required_objects(IslandoraTuque $connection) {
   // DS-COMPOSITE-MODEL Datastream.
   $datastream = $book_content_model->constructDatastream('DS-COMPOSITE-MODEL', 'M');
   $datastream->label = 'DS-COMPOSITE-MODEL';
-  $datastream->mimetype = 'text/xml';
+  $datastream->mimetype = 'application/xml';
   $datastream->setContentFromFile("$datastreams_path/islandora_bookCModel_ds_composite_model.xml", FALSE);
-  $book_content_model->ingestDatastream($datastream);
-  // ISLANDORA-CM Datastream.
-  $datastream = $book_content_model->constructDatastream('ISLANDORACM', 'M');
-  $datastream->label = 'Islandora content model information';
-  $datastream->mimetype = 'text/xml';
-  $datastream->setContentFromFile("$datastreams_path/islandora_book_cm.xml", FALSE);
   $book_content_model->ingestDatastream($datastream);
   // Book Collection.
   $book_collection = $connection->repository->constructObject('islandora:bookCollection');
@@ -171,7 +159,7 @@ function islandora_book_islandora_required_objects(IslandoraTuque $connection) {
   // Collection Policy Datastream.
   $datastream = $book_collection->constructDatastream('COLLECTION_POLICY', 'M');
   $datastream->label = 'COLLECTION_POLICY';
-  $datastream->mimetype = 'text/xml';
+  $datastream->mimetype = 'application/xml';
   $datastream->setContentFromFile("$datastreams_path/islandora_book_collection_policy.xml", FALSE);
   $book_collection->ingestDatastream($datastream);
   // TN Datastream.
@@ -236,12 +224,43 @@ function islandora_book_islandora_pageCModel_islandora_solr_object_result_alter(
 
     if (islandora_object_access(ISLANDORA_VIEW_OBJECTS, islandora_object_load($book_pid))) {
       $search_results['object_url'] = "islandora/object/$book_pid";
+      $search_results['object_url_fragment'] = "page/$page_number/mode/1up";
 
       // XXX: Won't handle fielded searches nicely... then again, if our
       // highlighting field is not the one being search on, this makes sense?
       if ($query_processor->solrDefType == 'dismax' || $query_processor->solrDefType == 'edismax') {
-        $search_results['object_url_fragment'] = "page/$page_number/mode/1up/search/" . rawurlencode($query_processor->solrQuery);
+        $search_results['object_url_fragment'] .= "/search/" . rawurlencode($query_processor->solrQuery);
       }
+    }
+  }
+}
+
+/**
+ * Implements hook_CMODEL_PID_islandora_solr_object_result_alter().
+ *
+ * Add page viewing fragment and search term to show all search results within
+ * book on page load.
+ */
+function islandora_book_islandora_bookCModel_islandora_solr_object_result_alter(&$search_results, $query_processor) {
+  $view_types = array(
+    "1" => "1up",
+    "2" => "2up",
+    "3" => "thumb",
+  );
+  $field_search = FALSE;
+  $fields = preg_split('/OR|AND|NOT/', $query_processor->solrQuery);
+  foreach ($fields as $field) {
+    if (preg_match('/^(.*):\(.*\)/', $field)) {
+      $field_search = TRUE;
+      break;
+    }
+  }
+
+  if ($query_processor->solrQuery != " " && $query_processor->solrQuery && !$field_search) {
+    $ia_view = variable_get('islandora_internet_archive_bookreader_default_page_view', "1");
+    if ($query_processor->solrQuery != '*:*') {
+      $search_results['object_url_fragment'] = "page/1/mode/{$view_types[$ia_view]}/search/";
+      $search_results['object_url_fragment'] .= rawurlencode($query_processor->solrQuery);
     }
   }
 }
@@ -267,37 +286,38 @@ function islandora_book_islandora_pagecmodel_islandora_ingest_steps(array $form_
 }
 
 /**
- * Implements hook_islandora_derivative().
- *
- * XXX: Should add in ability to regenerate PDFs as well... No reliable way to
- * kick off a batch though...
+ * Implements hook_CMODEL_PID_islandora_ingest_steps().
  */
-function islandora_book_islandora_bookcmodel_islandora_derivative() {
-  $pc_module_path = drupal_get_path('module', 'islandora_paged_content');
-
-  $derivatives = array();
-
+function islandora_book_islandora_bookCModel_islandora_ingest_steps(array $form_state) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
-  $derive = islandora_paged_content_get_enabled_ingest_derivatives('islandora_book');
-
-  if ($derive['image']) {
-    $derivatives[] = array(
-      'source_dsid' => NULL,
-      'destination_dsid' => 'TN',
-      'function' => array('islandora_paged_content_derive_thumbnail_of_parent'),
-      'file' => "$pc_module_path/includes/derivatives.inc",
+  if (islandora_paged_content_can_extract_from_pdf()) {
+    return array(
+      'islandora_book_upload_pdf' => array(
+        'weight' => 10,
+        'type' => 'form',
+        'form_id' => 'islandora_paged_content_upload_pdf_form',
+        'args' => array('islandora:pageCModel'),
+        'module' => 'islandora_paged_content',
+        'file' => 'includes/upload_pdf.form.inc',
+      ),
     );
   }
-
-  return $derivatives;
 }
 
 /**
  * Implements hook_islandora_derivative().
  */
-function islandora_book_islandora_pagecmodel_islandora_derivative(AbstractObject $object = NULL) {
+function islandora_book_islandora_bookcmodel_islandora_derivative() {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
-  return islandora_paged_content_page_derivatives($object, 'islandora_book');
+  return islandora_paged_content_paged_object_derivatives('islandora_book');
+}
+
+/**
+ * Implements hook_islandora_derivative().
+ */
+function islandora_book_islandora_pagecmodel_islandora_derivative() {
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+  return islandora_paged_content_page_derivatives('islandora_book');
 }
 
 /**
@@ -311,13 +331,16 @@ function islandora_book_form_islandora_object_properties_form_alter(array &$form
 }
 
 /**
- * Implements hook_form_islandora_object_properties_form_alter().
+ * Implements hook_form_islandora_delete_object_form_alter().
  */
 function islandora_book_form_islandora_delete_object_form_alter(array &$form, array &$form_state) {
   $object = $form_state['object'];
   if (in_array('islandora:bookCModel', $object->models)) {
     $form['description']['#markup'] = t('This will remove the book object and all related page objects. This action cannot be undone.');
-    $form['#submit'] = array('islandora_book_islandora_delete_object_form_delete_pages_submit');
+    $form['#submit'][] = 'islandora_book_islandora_delete_object_form_delete_pages_submit';
+    if (($key = array_search('islandora_delete_object_form_submit', $form['#submit'])) !== FALSE) {
+      unset($form['#submit'][$key]);
+    }
   }
 }
 
@@ -365,6 +388,18 @@ function islandora_book_pages_menu(AbstractObject $object) {
 }
 
 /**
+ * Implements hook_islandora_update_related_objects_properties().
+ */
+function islandora_book_islandora_bookCModel_islandora_update_related_objects_properties($object) {
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+  $get_pid = function($o) {
+    return $o['pid'];
+  };
+  $pages = array_values(array_map($get_pid, islandora_paged_content_get_pages($object)));
+  return $pages;
+}
+
+/**
  * Implements hook_islandora_xacml_editor_child_query().
  */
 function islandora_book_islandora_bookCModel_islandora_xacml_editor_child_query(AbstractObject $object) {
@@ -391,11 +426,49 @@ function islandora_book_islandora_view_print_object($object) {
   if (in_array('islandora:pageCModel', $object->models)) {
     // Theme image separately.
     $islandora_content = theme('image', array(
-        'title' => $object->label,
-        'path' => url("islandora/object/{$object->id}/datastream/JPG/view"),
+      'title' => $object->label,
+      'path' => url("islandora/object/{$object->id}/datastream/JPG/view"),
     ));
     return theme('islandora_book_page_img_print', array(
-        'islandora_content' => $islandora_content,
+      'islandora_content' => $islandora_content,
     ));
   }
+}
+
+/**
+ * Implements hook_CMODEL_PID_DSID_islandora_datastream_ingested().
+ */
+function islandora_book_islandora_pagecmodel_techmd_islandora_datastream_ingested(AbstractObject $object, AbstractDatastream $datastream) {
+  module_load_include('module', 'islandora_fits');
+  $techmd = $datastream->content;
+  $xml = new SimpleXMLElement($techmd);
+  $fits_metadata = islandora_fits_child_xpath($xml);
+  $unit = isset($fits_metadata['Jhove']['Sampling Frequency Unit'][0]) ? $fits_metadata['Jhove']['Sampling Frequency Unit'][0] : 'ins.';
+  $xcount = isset($fits_metadata['Jhove']['X Sampling Frequency'][0]) ? $fits_metadata['Jhove']['X Sampling Frequency'][0] : '600';
+  $ycount = isset($fits_metadata['Jhove']['Y Sampling Frequency'][0]) ? $fits_metadata['Jhove']['Y Sampling Frequency'][0] : '600';
+  if ($xcount < 600 || $ycount < 600) {
+    $message = t("Ingested image has a sampling frequency of @x by @y per @unit For best results use images of at least 600 by 600 per in.",
+        array(
+          '@x' => $xcount,
+          '@y' => $ycount,
+          '@unit' => $unit,
+        ));
+    drupal_set_message($message, 'warning', FALSE);
+  }
+}
+
+/**
+ * Implements hook_islandora_paged_content_model_registry().
+ */
+function islandora_book_islandora_paged_content_content_model_registry() {
+  return array(
+    'islandora:bookCModel' => array(
+      'parents' => array(
+        'islandora:collectionCModel' => 'isMemberOfCollection',
+      ),
+      'children' => array(
+        'islandora:pageCModel' => array(),
+      ),
+    ),
+  );
 }

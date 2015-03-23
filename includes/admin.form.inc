@@ -23,8 +23,11 @@ function islandora_book_admin_settings_form(array $form, array &$form_state) {
   $form = array(
     'local_derivative_settings' => array(
       '#type' => 'fieldset',
-      '#title' => t('Create Page Derivatives Locally'),
-      '#description' => t('These options allow you to create derivatives automatically when ingesting pages, using this server. If you intend to only use microservices to generate derivatives, you should not have any of these settings enabled.'),
+      '#title' => t('Create Page/Book Derivatives Locally'),
+      '#description' => t('These options allow you to create derivatives
+        automatically when ingesting pages or issues, using this server. If you
+        intend to only use microservices to generate derivatives, you should
+        not have any of these settings enabled.'),
       'islandora_book_ingest_derivatives' => array(
         '#type' => 'checkboxes',
         '#element_validate' => array('islandora_book_admin_settings_form_ingest_derivatives_validate'),
@@ -48,12 +51,25 @@ function islandora_book_admin_settings_form(array $form, array &$form_state) {
     '#size' => 30,
   );
 
+  // Metadata display.
+  $form['metadata_display_fieldset'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Metadata display'),
+  );
+
+  $form['metadata_display_fieldset']['islandora_book_metadata_display'] = array(
+    '#type' => 'checkbox',
+    '#title' => t("Display object metadata"),
+    '#description' => t("Display object metadata below object viewer."),
+    '#default_value' => variable_get('islandora_book_metadata_display', FALSE),
+  );
+
   module_load_include('inc', 'islandora', 'includes/solution_packs');
   $form += islandora_viewers_form('islandora_book_viewers', NULL, 'islandora:bookCModel');
   $form['book_viewers'] = $form['viewers'];
   $form['book_viewers']['#title'] = t('Book Viewers');
   unset($form['viewers']);
-  $form += islandora_viewers_form('islandora_book_page_viewers', 'image/jp2');
+  $form += islandora_viewers_form('islandora_book_page_viewers', 'image/jp2', 'islandora:pageCModel');
   $form['page_viewers'] = $form['viewers'];
   $form['page_viewers']['#title'] = t('Page Viewers');
   unset($form['viewers']);
