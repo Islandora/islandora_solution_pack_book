@@ -442,6 +442,7 @@ function islandora_book_islandora_pagecmodel_techmd_islandora_datastream_ingeste
   module_load_include('module', 'islandora_fits');
   $techmd = $datastream->content;
   $xml = new SimpleXMLElement($techmd);
+  $xml->registerXPathNamespace('fits', 'http://hul.harvard.edu/ois/xml/ns/fits/fits_output');
   $fits_metadata = islandora_fits_child_xpath($xml);
   $unit = isset($fits_metadata['Jhove']['Sampling Frequency Unit'][0]) ? $fits_metadata['Jhove']['Sampling Frequency Unit'][0] : 'ins.';
   $xcount = isset($fits_metadata['Jhove']['X Sampling Frequency'][0]) ? $fits_metadata['Jhove']['X Sampling Frequency'][0] : '600';
