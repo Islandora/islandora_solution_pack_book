@@ -19,6 +19,8 @@ function template_preprocess_islandora_book_book(array &$variables) {
   module_load_include('inc', 'islandora', 'includes/solution_packs');
   module_load_include('inc', 'islandora', 'includes/metadata');
   module_load_include('inc', 'islandora', 'includes/datastream');
+  drupal_add_js('misc/form.js');
+  drupal_add_js('misc/collapse.js');
 
   $object = $variables['object'];
 
