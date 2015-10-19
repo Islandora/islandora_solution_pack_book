@@ -33,8 +33,6 @@ function template_preprocess_islandora_book_book(array &$variables) {
   $variables['parent_collections'] = islandora_get_parents_from_rels_ext($object);
   $variables['metadata'] = islandora_retrieve_metadata_markup($object);
   $variables['description'] = islandora_retrieve_description_markup($object);
-  // @todo: Remove after 7.x-1.5 release.
-  $variables['viewer'] = new IslandoraBookDeprecateString($variables, 'viewer', 'template_process_islandora_book_book');
 }
 
 /**
