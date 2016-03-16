@@ -101,7 +101,7 @@ function islandora_book_theme() {
  * Implements hook_islandora_xml_form_builder_form_associations().
  */
 function islandora_book_islandora_xml_form_builder_form_associations() {
-  $message = islandora_deprecated('7.x-1.8', t('Use xml_form_builder_forms instead.') );
+  $message = islandora_deprecated('7.x-1.8', t('Use xml_form_builder_forms instead.'));
   trigger_error(filter_xss($message), E_USER_DEPRECATED);
   return array(
     'islandora_book_mods_form' => array(
@@ -119,7 +119,7 @@ function islandora_book_islandora_xml_form_builder_form_associations() {
  * Implements hook_islandora_xml_form_builder_forms().
  */
 function islandora_book_islandora_xml_form_builder_forms() {
-  $message = islandora_deprecated('7.x-1.8', t('Use xml_form_builder_forms instead.') );
+  $message = islandora_deprecated('7.x-1.8', t('Use xml_form_builder_forms instead.'));
   trigger_error(filter_xss($message), E_USER_DEPRECATED);
   $module_path = drupal_get_path('module', 'islandora_book');
   return array('Islandora Book MODS Form' => array('form_file' => "$module_path/data/forms/book_form_mods.xml"));
