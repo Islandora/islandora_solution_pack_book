@@ -1,3 +1,4 @@
+sudo: required
 language: php
 php:
   - 5.3.3
@@ -35,11 +36,14 @@ before_install:
   - drush en --user=1 --yes islandora_ocr islandora_large_image imagemagick islandora_book islandora_basic_collection
   - drush vset islandora_ocr_tesseract `which tesseract`
   - drush vset islandora_book_tesseract `which tesseract`
+before_script:
+  # Mysql might time out for long tests, increase the wait timeout.
+  - mysql -e 'SET @@GLOBAL.wait_timeout=1200'
 script:
   - ant -buildfile sites/all/modules/islandora_solution_pack_book/build.xml lint
   - $ISLANDORA_DIR/tests/scripts/line_endings.sh sites/all/modules/islandora_solution_pack_book
   - drush coder-review --reviews=production,security,style,i18n,potx,sniffer islandora_book
   - phpcpd --names *.module,*.inc,*.test sites/all/modules/islandora_solution_pack_book
-  - drush test-run --user=1 --uri=http://localhost:8081 "Islandora Book"
+  - php scripts/run-tests.sh --php `phpenv which php` --url http://localhost:8081 --verbose "Islandora Book"
 notifications:
   irc: "irc.freenode.org#islandora"
