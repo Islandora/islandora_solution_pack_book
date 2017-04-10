@@ -25,4 +25,3 @@
 <div class="islandora-book-metadata">
   <?php print $metadata; ?>
 </div>
-<!-- @todo Add table of metadata values -->
