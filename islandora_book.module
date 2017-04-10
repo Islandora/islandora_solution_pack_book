@@ -192,7 +192,9 @@ function islandora_book_islandora_bookcmodel_islandora_view_object($object) {
  * Implements hook_CMODEL_PID_islandora_view_object().
  */
 function islandora_book_islandora_pagecmodel_islandora_view_object($object, $page_number, $page_size) {
-  $output = theme('islandora_book_page', array('object' => $object));
+  module_load_include('inc', 'islandora', 'includes/metadata');
+  $metadata = islandora_retrieve_metadata_markup($object, TRUE);
+  $output = theme('islandora_book_page', array('object' => $object, 'metadata' => $metadata));
   return array('islandora_book' => $output);
 }
 
