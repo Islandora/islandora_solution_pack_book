@@ -64,28 +64,29 @@ function islandora_book_ingest_zipped_pages(AbstractObject $object) {
  *   Drupal form definition.
  */
 function islandora_book_zipped_upload_form(array $form, array &$form_state, $book_pid) {
-  module_load_include('inc', 'islandora_ocr', 'includes/utilities');
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   $book_object = islandora_object_load($book_pid);
   $current_pages = islandora_paged_content_get_pages($book_object);
   $last_page_number = count($current_pages);
-  $languages = module_exists('islandora_ocr') ? islandora_ocr_get_enabled_tesseract_languages() : array();
   $upload_size = min((int) ini_get('post_max_size'), (int) ini_get('upload_max_filesize'));
   $extensions = array('zip');
   $form = array();
   $derivatives = variable_get('islandora_book_ingest_derivatives', array('ocr'));
-  $do_ocr = in_array('ocr', $derivatives);
   $message = t("This sequence currently has @count pages. Additional pages will be appended to the end of the sequence by default. !break", array("@count" => $last_page_number, '!break' => '<br />'));
   $message .= t("Choose a number lower than @count to insert page(s) at a specific location in the sequence.", array("@count" => $last_page_number, '!break' => '<br />'));
 
-  $form['language'] = array(
-    '#access' => module_exists('islandora_ocr') && $do_ocr,
-    '#title' => t('Language'),
-    '#type' => 'select',
-    '#description' => t('Please select the language the page is written in.'),
-    '#options' => $languages,
-    '#default_value' => 'English',
-  );
+  if (module_exists('islandora_ocr') && in_array('ocr', $derivatives)) {
+    module_load_include('inc', 'islandora_ocr', 'includes/utilities');
+    $form['language'] = array(
+      '#access' => module_exists('islandora_ocr') && $do_ocr,
+      '#title' => t('Language'),
+      '#type' => 'select',
+      '#description' => t('Please select the language the page is written in.'),
+      '#options' => islandora_ocr_get_enabled_tesseract_languages(),
+      '#default_value' => 'English',
+    );
+    $form['ignored_ocr_derivatives'] = islandora_ocr_get_ignored_derivatives_fieldset();
+  }
 
   if ($current_pages) {
     $form['insertion_point'] = array(
@@ -226,6 +227,10 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
       'destination_dir' => $destination_dir,
       'namespace' => $namespace,
       'language' => $form_state['values']['language'],
+      'ignored_derivs' => array(
+        'ocr' => $form_state['values']['ignore_ocr'],
+        'hocr' => $form_state['values']['ignore_hocr'],
+      ),
     );
     $offset = count($files_to_add);
     if (isset($pages_to_renumber[0])) {
@@ -276,6 +281,12 @@ function islandora_book_add_pages($repository, $config, $pages_directory, &$cont
   $rels_ext = $object->relationships;
   $parent = $config['book_pid'];
   $object->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'islandora:pageCModel');
+  if ($config['ignored_derivs']['ocr']) {
+    islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'generate_ocr', 'FALSE', TRUE);
+  }
+  if ($config['ignored_derivs']['hocr']) {
+    islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'generate_hocr', 'FALSE', TRUE);
+  }
   islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isPageOf', $parent);
   islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isSequenceNumber', (string) $config['page_number'], TRUE);
   islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isPageNumber', (string) $config['page_number'], TRUE);
