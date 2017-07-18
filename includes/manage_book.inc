@@ -226,10 +226,10 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
       'book_pid' => $book_pid,
       'destination_dir' => $destination_dir,
       'namespace' => $namespace,
-      'language' => $form_state['values']['language'],
+      'language' => isset($form_state['values']['language']) ? $form_state['values']['language'] : 'English',
       'ignored_derivs' => array(
-        'ocr' => $form_state['values']['ignore_ocr'],
-        'hocr' => $form_state['values']['ignore_hocr'],
+        'ocr' => isset($form_state['values']['ignore_ocr']) ? $form_state['values']['ignore_ocr'] : FALSE,
+        'hocr' => isset($form_state['values']['ignore_hocr']) ? $form_state['values']['ignore_hocr'] : FALSE,
       ),
     );
     $offset = count($files_to_add);
