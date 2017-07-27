@@ -281,11 +281,9 @@ function islandora_book_add_pages($repository, $config, $pages_directory, &$cont
   $rels_ext = $object->relationships;
   $parent = $config['book_pid'];
   $object->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'islandora:pageCModel');
-  if ($config['ignored_derivs']['ocr']) {
-    islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'generate_ocr', 'FALSE', TRUE);
-  }
-  if ($config['ignored_derivs']['hocr']) {
-    islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'generate_hocr', 'FALSE', TRUE);
+  if (module_exists('islandora_ocr')) {
+    module_load_include('inc', 'islandora_ocr', 'includes/derivatives');
+    islandora_ocr_set_generating_rels_ext_statements($object, !$config['ignored_derivs']['ocr'], !$config['ignored_derivs']['hocr']);
   }
   islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isPageOf', $parent);
   islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isSequenceNumber', (string) $config['page_number'], TRUE);
