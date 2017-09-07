@@ -16,4 +16,4 @@ else
   sudo apt-get -y install tesseract-ocr tesseract-ocr-eng tesseract-ocr-fra
 fi
 
-tesseract --version && tesseract --list-langs && cd ~ && rm -rf ~/tesseract
+tesseract --version && tesseract --list-langs
