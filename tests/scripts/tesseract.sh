@@ -11,9 +11,8 @@ if [[ $TRAVIS_PHP_VERSION == '5.3.3' ]]; then
   tar xf tessdata.tar.gz && rm -rf tessdata.tar.gz
   cp tessdata/* /usr/local/share/tessdata/
   sudo ldconfig
-  echo -e "\ntesseract output:"
 else
   sudo apt-get -y install tesseract-ocr tesseract-ocr-eng tesseract-ocr-fra
 fi
-
+echo -e "\ntesseract output:"
 tesseract --version && tesseract --list-langs
