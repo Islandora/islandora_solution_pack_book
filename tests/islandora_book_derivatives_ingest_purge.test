@@ -122,9 +122,9 @@ class IslandoraBookPageDerivativesIngestTestCase extends IslandoraCollectionWebT
       array('JP2', 'jp2'),
       array('JPG', 'image'),
       array('TN', 'image'),
-      array('OCR', 'text', array('HAPPY DOG', 6)),
-      array('HOCR', 'text', array('HAPPY', 12)),
-      array('HOCR', 'text', array('CAT', 6)),
+      array('OCR', 'text', array('HAPPY DOG', 3)),
+      array('HOCR', 'text', array('HAPPY', 6)),
+      array('HOCR', 'text', array('CAT', 3)),
     );
     $this->validateDatastreams($page_object, $datastreams);
 
