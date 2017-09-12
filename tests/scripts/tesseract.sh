@@ -9,7 +9,7 @@ echo "Installing Tesseract OCR using Ubuntu Packages"
 apt-get --yes install tesseract-ocr tesseract-ocr-eng
 
 # Check if installation worked or was already there
-$(command -v tesseract --version >/dev/null 2>&1 || exit 1)
+$(command -v tesseract -v >/dev/null 2>&1 || exit 1)
 CANRUN="$?"
 if [ "$CANRUN" -eq "1" ]; then
   apt-get --yes --force-yes install build-essential checkinstall automake libtool
@@ -42,5 +42,5 @@ if [ "$CANRUN" -eq "1" ]; then
 fi
 # If this fails, then we are out of luck
 printf "\n"
-echo "tesseract output:"
-tesseract --version && tesseract --list-langs
+echo "tesseract version:"
+tesseract -v
