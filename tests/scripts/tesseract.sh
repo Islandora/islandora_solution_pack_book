@@ -1,18 +1,18 @@
 #!/bin/sh
 
 apt-get --yes --force-yes update
-
-# Go for Ubuntu's packages first, will be 3.03 or less
+apt-get --yes --force-yes install build-essential checkinstall automake libtool
+# Go for Ubuntu's packages first
 UBUNTUDIST="`lsb_release -sc`" # precise means from source
 CANRUN="1"
-echo "Installing Tesseract OCR using Ubuntu Packages"
-apt-get --yes install tesseract-ocr tesseract-ocr-eng
-
+if [ "$UBUNTUDIST" != "precise" ]; then
+  echo "Installing Tesseract OCR using Ubuntu Packages"
+  apt-get --yes install tesseract-ocr tesseract-ocr-eng
+fi
 # Check if installation worked or was already there
-$(command -v tesseract -v >/dev/null 2>&1 || exit 1)
+$(command -v tesseract --version >/dev/null 2>&1 || exit 1)
 CANRUN="$?"
 if [ "$CANRUN" -eq "1" ]; then
-  apt-get --yes --force-yes install build-essential checkinstall automake libtool
   printf "\n"
   echo "Tesseract could not be installed via apt-get"
   printf "\n"
@@ -42,5 +42,5 @@ if [ "$CANRUN" -eq "1" ]; then
 fi
 # If this fails, then we are out of luck
 printf "\n"
-echo "tesseract version:"
-tesseract -v
+echo "tesseract output:"
+tesseract --version && tesseract --list-langs
