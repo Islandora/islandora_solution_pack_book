@@ -78,7 +78,6 @@ function islandora_book_zipped_upload_form(array $form, array &$form_state, $boo
   if (module_exists('islandora_ocr') && in_array('ocr', $derivatives)) {
     module_load_include('inc', 'islandora_ocr', 'includes/utilities');
     $form['language'] = array(
-      '#access' => module_exists('islandora_ocr') && $do_ocr,
       '#title' => t('Language'),
       '#type' => 'select',
       '#description' => t('Please select the language the page is written in.'),
