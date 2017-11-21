@@ -82,7 +82,7 @@ function islandora_book_zipped_upload_form(array $form, array &$form_state, $boo
       '#type' => 'select',
       '#description' => t('Please select the language the page is written in.'),
       '#options' => islandora_ocr_get_enabled_tesseract_languages(),
-      '#default_value' => 'English',
+      '#default_value' => 'eng',
     );
     $form['ignored_ocr_derivatives'] = islandora_ocr_get_ignored_derivatives_fieldset();
   }
@@ -225,7 +225,7 @@ function islandora_book_zipped_upload_form_submit(array $form, array &$form_stat
       'book_pid' => $book_pid,
       'destination_dir' => $destination_dir,
       'namespace' => $namespace,
-      'language' => isset($form_state['values']['language']) ? $form_state['values']['language'] : 'English',
+      'language' => isset($form_state['values']['language']) ? $form_state['values']['language'] : 'eng',
       'ignored_derivs' => array(
         'ocr' => isset($form_state['values']['ignore_ocr']) ? $form_state['values']['ignore_ocr'] : FALSE,
         'hocr' => isset($form_state['values']['ignore_hocr']) ? $form_state['values']['ignore_hocr'] : FALSE,
