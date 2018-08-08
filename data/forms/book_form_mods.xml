@@ -632,7 +632,7 @@
               <value>&lt;identifier type="isbn"&gt;%value%&lt;/identifier&gt;</value>
             </create>
             <read>
-              <path>mods:identifier</path>
+              <path>mods:identifier[@type='isbn']</path>
               <context>parent</context>
             </read>
             <update>
