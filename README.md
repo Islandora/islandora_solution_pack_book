@@ -28,6 +28,13 @@ Select configuration options for page derivatives, Parent Solr Field, and select
 
 Further documentation for this module is available at [our wiki](https://wiki.duraspace.org/display/ISLANDORA/Book+Solution+Pack).
 
+## Known Issues
+
+In August 2018, a bug in the Book MODS ingest form was identified and fixed. The form was set to READ all instances of any MODS identifier element,
+but to CREATE and UPDATE identifiers with the 'type="isbn"' attribute. When editing an object with this form, the form would create a new copy
+of every identifier element regardless of attributes, and save it with the 'type="isbn"' attribute. Any objects edited using this form before the 
+August 2018 fix should be reviewed to ensure their metadata is correct.
+
 ## Troubleshooting/Issues
 
 Having problems or solved a problem? Check out the Islandora google groups for a solution.
