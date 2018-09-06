@@ -434,3 +434,13 @@ function islandora_book_islandora_paged_content_content_model_registry() {
     ),
   );
 }
+
+/**
+ * Implements hook_islandora_solution_pack_child_relationships().
+ */
+function islandora_book_islandora_solution_pack_child_relationships() {
+  return array(
+    'prefix' => array('PREFIX islandora: <http://islandora.ca/ontology/relsext#>'),
+    'predicate' => array('<islandora:isPageOf>'),
+  );
+}
