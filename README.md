@@ -45,7 +45,7 @@ Any objects edited using this form before the August 2018 fix should be reviewed
 ## Maintainers/Sponsors
 Current maintainers:
 
-* [Diego Pino](https://github.com/DiegoPino)
+* [Alan Stanley](https://github.com/ajstanley)
 
 ## Development
 
